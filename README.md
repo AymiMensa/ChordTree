@@ -1,0 +1,95 @@
+# 互動式樂理和弦進行心智圖
+
+**D3.js 樂理解析版**
+*基於屬七和弦 (Dominant 7th) 與主音 (Tonic) 解決關係的無限遞迴樂理視覺化演繹。*
+
+---
+
+## 📖 專案簡介
+
+這是一個純前端的單頁應用程式，透過 D3.js 動態渲染和弦分支結構，讓學習者能直觀地探索與試聽和弦進行（Chord Progressions）。系統內建 Web Audio API 硬體加速的高品質合成器與節拍器，並支援「自訂自由編輯模式」來編寫個人專屬的和弦進行軌跡。
+
+---
+
+## 🏗 架構圖 (Architecture Diagram)
+
+```mermaid
+graph TD
+    A[App.tsx<br>主要狀態管理] -->|屬性傳遞| B(ChordMindMap<br>D3.js 和弦樹狀圖)
+    A -->|屬性傳遞| C(PianoVisualizer<br>鋼琴可視化與和弦細節)
+    A -->|屬性傳遞| D(MetronomeControls<br>控制面板)
+    A -->|掛載/卸載| E(FreeModeEditor<br>自由編輯模式)
+    
+    B -->|觸發事件| F[Audio Engine<br>Web Audio API 合成器]
+    D -->|控制播放/音量| F
+    E -->|JSON 匯出/讀取| G[(本機檔案系統)]
+    E -->|確認套用| A
+    
+    subgraph 工具與資料模組
+        H[chordsData.ts<br>和弦資料結構]
+        I[chordParser.ts<br>和弦公式解析]
+        J[audioNotes.ts<br>頻率對應表]
+    end
+    
+    F -->|調用| J
+    B -->|讀取| H
+    C -->|讀取| I
+```
+
+---
+
+## 📂 專案結構
+
+```text
+C:\USERS\USER\DESKTOP\ANTIGRAVITY\CHORD-TREE-METRONOME\
+│  index.html
+│  package.json
+│  vite.config.ts
+│
+└─src\
+    │  App.tsx
+    │  chordsData.ts
+    │  chordTreeData.ts
+    │  index.css
+    │  main.tsx
+    │  types.ts
+    │
+    ├─components\
+    │      ChordMindMap.tsx
+    │      ChordTreeSvg.tsx
+    │      CustomProgressionFlow.tsx
+    │      FreeModeEditor.tsx
+    │      InteractiveGuides.tsx
+    │      MetronomeControls.tsx
+    │      PianoVisualizer.tsx
+    │
+    └─utils\
+            audioEngine.ts
+            audioNotes.ts
+            chordParser.ts
+```
+
+---
+
+## 🚀 使用說明
+
+1. **基本操作**：
+   - 使用滑鼠拖曳或觸控可移動 D3.js 樹狀圖視角，滾輪可放大縮小。
+   - 單擊任一和弦節點即可即時試聽和弦。
+   - 雙擊和弦節點可摺疊或展開該節點底下的所有分支。
+2. **播放與節拍器控制**：
+   - 點擊「開始/停止」依序播放當前的路徑軌跡。
+   - 支援自由調整 BPM (40 - 168)。
+   - 提供多種音色（合成器 Pad、電鋼琴、柔和 Strings）與播放模式（和弦齊奏、琶音）。
+3. **自由編輯模式**：
+   - 點擊「自由編輯模式」進入自訂和弦進行編輯器。
+   - 支援即時加入、刪除、拖曳排序各式和弦（大調、小調、屬七、增減等...）。
+   - **JSON 讀取與儲存**：可將自己精心設計的進行軌跡儲存到本機的 JSON 檔案中，或隨時讀取回來。
+4. **鋼琴可視化**：
+   - 面板下方會同步顯示當前播放和弦在鋼琴鍵盤上的具體按壓位置、和弦組成音與樂理公式。
+
+---
+
+## 📅 更新歷史 (Date Sorted)
+
+- **2026-07-07**: 初始化專案 `互動式樂理和弦進行心智圖`。完成 D3.js 遞迴視覺化、Web Audio 引擎整合、鋼琴鍵盤可視化、以及自由編輯模式的 JSON 本機儲存/讀取功能。

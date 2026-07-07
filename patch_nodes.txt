@@ -1,0 +1,54 @@
+            const isCurrent =
+              activeNodeId === node.id && currentStep?.type === "node";
+            const isPath = visitedNodes.has(node.id);
+            const isPlanned = plannedNodes.has(node.id);
+
+            // Determine chord style based on active state and type
+            let strokeColor = "#1e1b4b"; // default
+            let fillColor = "#020210";
+            let textColor = "#4b5563";
+
+            if (node.level === 0) {
+              // Center starting node (C)
+              strokeColor = isCurrent
+                ? "#ec4899"
+                : isPath
+                  ? "#d946ef"
+                  : "#9333ea";
+              fillColor = isCurrent ? "#7e22ce" : "#3b0764";
+              textColor = "#ffffff";
+            } else if (node.type === "major") {
+              // Major chords (pinkish/rose accents)
+              strokeColor = isCurrent
+                ? "#fbbf24"
+                : isPath
+                  ? "#f43f5e"
+                  : isPlanned
+                    ? "#6366f1"
+                    : "#9f1239";
+              textColor = isCurrent
+                ? "#ffffff"
+                : isPath
+                  ? "#ffffff"
+                  : isPlanned
+                    ? "#a5b4fc"
+                    : "#fb7185";
+              fillColor = isCurrent ? "#e11d48" : isPath ? "#881337" : isPlanned ? "#1e1b4b" : "#2a0416";
+            } else {
+              // Minor chords (blue/cyan accents)
+              strokeColor = isCurrent
+                ? "#fbbf24"
+                : isPath
+                  ? "#0ea5e9"
+                  : isPlanned
+                    ? "#6366f1"
+                    : "#0369a1";
+              textColor = isCurrent
+                ? "#ffffff"
+                : isPath
+                  ? "#ffffff"
+                  : isPlanned
+                    ? "#a5b4fc"
+                    : "#38bdf8";
+              fillColor = isCurrent ? "#0284c7" : isPath ? "#0c4a6e" : isPlanned ? "#1e1b4b" : "#041428";
+            }

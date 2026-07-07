@@ -1,0 +1,57 @@
+            return (
+              <g key={link.id}>
+                {/* Highlight Glow line when active */}
+                {isCurrentLink && (
+                  <line
+                    x1={start.x}
+                    y1={start.y}
+                    x2={end.x}
+                    y2={end.y}
+                    stroke="#fbbf24"
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                    opacity="0.8"
+                    filter="url(#neon-glow)"
+                    className="animate-pulse"
+                  />
+                )}
+                {/* Base connection line */}
+                <line
+                  x1={start.x}
+                  y1={start.y}
+                  x2={end.x}
+                  y2={end.y}
+                  stroke={
+                    isCurrentLink
+                      ? "#fbbf24"
+                      : isVisitedLink
+                        ? "#a855f7"
+                        : isPlannedLink
+                          ? "#6366f1"
+                          : "#1e1b4b"
+                  }
+                  strokeWidth={
+                    isCurrentLink ? "4" : isVisitedLink ? "2.5" : isPlannedLink ? "2" : "1.5"
+                  }
+                  strokeLinecap="round"
+                  strokeDasharray={isPlannedLink && !isVisitedLink ? "4,6" : "none"}
+                  className={`transition-all duration-700 ${isPlannedLink && !isVisitedLink ? "animate-flow-path" : ""}`}
+                />
+                
+                {/* Transition Label */}
+                {link.label && (
+                  <g transform={`translate(${(start.x + end.x) / 2}, ${(start.y + end.y) / 2})`}>
+                    <circle r={9 * baseScale} fill="#02000f" stroke={isCurrentLink ? "#fbbf24" : isVisitedLink ? "#a855f7" : "#1e1b4b"} strokeWidth={1} />
+                    <text 
+                      textAnchor="middle" 
+                      y={3 * baseScale} 
+                      fill={isCurrentLink ? "#fbbf24" : isVisitedLink ? "#d8b4fe" : "#6b7280"} 
+                      fontSize={8 * baseScale} 
+                      fontWeight="bold"
+                    >
+                      {link.label}
+                    </text>
+                  </g>
+                )}
+              </g>
+            );
