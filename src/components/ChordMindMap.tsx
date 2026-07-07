@@ -368,7 +368,7 @@ export const ChordMindMap: React.FC<ChordMindMapProps> = ({
       />
 
       {/* Top Right Guide */}
-      <div className="absolute top-4 right-4 z-20 bg-[#060a1f]/90 backdrop-blur-md border border-indigo-900/50 rounded-xl p-3 shadow-2xl pointer-events-none select-none">
+      <div className="absolute top-4 right-4 z-20 w-[240px] md:w-[260px] bg-[#060a1f]/90 backdrop-blur-md border border-indigo-900/50 rounded-xl p-3 shadow-2xl pointer-events-none select-none">
         <div className="flex items-center gap-1.5 text-slate-200 font-bold text-[13px] mb-2 border-b border-indigo-900/50 pb-1.5">
           <HelpCircle className="w-4 h-4 text-sky-400" />
           探索指南 (Tree Mode)
@@ -389,14 +389,6 @@ export const ChordMindMap: React.FC<ChordMindMapProps> = ({
         <button onClick={() => handleZoom(0.7)} className="p-2 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 rounded-lg border border-indigo-900 backdrop-blur transition-all active:scale-95" title="縮小"><ZoomOut className="w-4 h-4" /></button>
         <button onClick={handleResetZoom} className="p-2 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 rounded-lg border border-indigo-900 backdrop-blur transition-all active:scale-95" title="重設視角"><RotateCcw className="w-4 h-4" /></button>
         <button onClick={() => { onToggleFold("EXPAND_ALL"); }} className="p-2 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 rounded-lg border border-indigo-900 backdrop-blur transition-all active:scale-95" title="展開所有節點"><Maximize2 className="w-4 h-4" /></button>
-        
-        {/* Bottom Rules */}
-        <div className="ml-2 hidden md:flex items-center gap-1.5 bg-[#0a0a14]/60 backdrop-blur-md border border-indigo-900/30 px-3 py-1.5 rounded-lg text-[11px] text-slate-400 leading-relaxed pointer-events-none max-w-[650px] shadow-lg">
-          <Info className="w-4 h-4 text-indigo-400 shrink-0 self-start mt-0.5" />
-          <p>
-            <span className="text-indigo-300 font-semibold mr-1">遞迴演繹規則:</span>每一層的<span className="text-sky-400">小和弦 (藍色)</span>會延伸出 3 個<span className="text-pink-400">大和弦 (粉色)</span> : 同名大和弦、關係大和弦、以及 VI 級大和弦 ; 而每個<span className="text-pink-400">大和弦</span>又會延伸出 2 個<span className="text-sky-400">小和弦</span> : 同名小和弦、以及關係小和弦。所有過渡連線皆由其<span className="text-amber-500 font-medium">屬七和弦 (黃褐色)</span>作為橋樑進行強烈解決。
-          </p>
-        </div>
       </div>
     </div>
   );

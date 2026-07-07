@@ -55,10 +55,10 @@ export const InteractiveGuides: React.FC = () => {
         </div>
 
         {/* Music Theory Rules */}
-        <div className="bg-black/30 p-3 rounded-xl border border-indigo-950/50 flex flex-col gap-1.5">
+        <div className="bg-black/30 p-3 rounded-xl border border-indigo-950/50 flex flex-col gap-1.5 md:col-span-2">
           <span className="font-semibold text-indigo-300 flex items-center gap-1.5">
             <Music className="w-4 h-4 text-emerald-400" />
-            樂理與亮燈特效
+            遞迴演繹規則與亮燈特效
           </span>
           <ul className="list-disc pl-4 space-y-1 text-slate-400">
             <li>
@@ -78,6 +78,10 @@ export const InteractiveGuides: React.FC = () => {
                 金黃色環線（過渡七和弦 Connector）：
               </strong>
               樹狀連結線上的小圓點代表關鍵的導音過渡。
+            </li>
+            <li className="pt-2 mt-2 border-t border-indigo-900/40">
+              <strong className="text-indigo-300">遞迴演繹關係：</strong>
+              每一層的<span className="text-sky-400">小和弦</span>會延伸出 3 個<span className="text-pink-400">大和弦</span> (同名大和弦、關係大和弦、以及 VI 級大和弦)；而每個<span className="text-pink-400">大和弦</span>又會延伸出 2 個<span className="text-sky-400">小和弦</span> (同名小和弦、以及關係小和弦)。所有過渡連線皆由其<span className="text-amber-500 font-medium">屬七和弦</span>作為橋樑進行強烈解決。
             </li>
           </ul>
         </div>
