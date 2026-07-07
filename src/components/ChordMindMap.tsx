@@ -354,7 +354,7 @@ export const ChordMindMap: React.FC<ChordMindMapProps> = ({
   };
 
   return (
-    <div ref={containerRef} className="relative w-full h-full min-h-[300px] bg-[#0a0a0d] rounded-2xl border border-indigo-950/40 overflow-hidden select-none shadow-[inset_0_0_80px_rgba(0,0,0,0.8)]">
+    <div ref={containerRef} className="relative w-full h-full min-h-[200px] bg-[#0a0a0d] rounded-2xl border border-indigo-950/40 overflow-hidden select-none shadow-[inset_0_0_80px_rgba(0,0,0,0.8)]">
       
       {/* Background ambient radial glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.05)_0%,rgba(0,0,0,0.5)_100%)] pointer-events-none" />
@@ -367,8 +367,8 @@ export const ChordMindMap: React.FC<ChordMindMapProps> = ({
         className="block relative z-10 w-full h-full touch-none cursor-grab active:cursor-grabbing"
       />
 
-      {/* Top Right Guide (Hidden on mobile to prevent overlapping) */}
-      <div className="hidden lg:block absolute top-4 right-0 z-20 w-[240px] md:w-[260px] bg-[#060a1f]/90 backdrop-blur-md border border-indigo-900/50 border-r-0 rounded-l-xl p-3 shadow-2xl pointer-events-none select-none">
+      {/* Top Right Guide (Scaled down on md/lg to prevent clipping) */}
+      <div className="hidden md:block absolute top-2 right-0 z-20 w-[240px] md:w-[260px] bg-[#060a1f]/90 backdrop-blur-md border border-indigo-900/50 border-r-0 rounded-l-xl p-3 shadow-2xl pointer-events-none select-none origin-top-right transform scale-75 xl:scale-100">
         <div className="flex items-center gap-1.5 text-slate-200 font-bold text-[13px] mb-2 border-b border-indigo-900/50 pb-1.5">
           <HelpCircle className="w-4 h-4 text-sky-400" />
           探索指南 (Tree Mode)
@@ -384,7 +384,7 @@ export const ChordMindMap: React.FC<ChordMindMapProps> = ({
       </div>
 
       {/* Controls: Zoom and Expand */}
-      <div className="absolute bottom-4 left-4 z-20 flex flex-wrap gap-2 items-center">
+      <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 z-20 flex flex-wrap gap-2 items-center">
         <button onClick={() => handleZoom(1.3)} className="p-2 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 rounded-lg border border-indigo-900 backdrop-blur transition-all active:scale-95" title="放大"><ZoomIn className="w-4 h-4" /></button>
         <button onClick={() => handleZoom(0.7)} className="p-2 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 rounded-lg border border-indigo-900 backdrop-blur transition-all active:scale-95" title="縮小"><ZoomOut className="w-4 h-4" /></button>
         <button onClick={handleResetZoom} className="p-2 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 rounded-lg border border-indigo-900 backdrop-blur transition-all active:scale-95" title="重設視角"><RotateCcw className="w-4 h-4" /></button>

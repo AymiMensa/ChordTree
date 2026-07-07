@@ -112,29 +112,33 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
         </div>
 
         {/* Card 2: Formula */}
-        <div className="bg-black/40 border border-indigo-950/80 rounded-lg p-2.5 md:p-3 shadow-lg flex flex-col justify-center">
+        <div className="bg-black/40 border border-indigo-950/80 rounded-lg p-2.5 md:p-3 shadow-lg flex flex-col justify-center min-w-0 overflow-hidden">
           <span className="text-[10px] md:text-xs text-slate-400 font-bold mb-1">和弦公式 (Formula)</span>
-          <div className="flex items-center justify-between text-[10px] md:text-xs font-mono">
-            <span className="text-slate-500 truncate mr-2">{activeChordFullName || "Unknown"}</span>
-            <span className="text-indigo-300 font-bold tracking-widest whitespace-nowrap">{activeChordFormula || "N/A"}</span>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-[10px] md:text-xs font-mono min-w-0 gap-1">
+            <span className="text-slate-500 truncate min-w-0 mr-2">{activeChordFullName || "Unknown"}</span>
+            <span className="text-indigo-300 font-bold tracking-widest whitespace-nowrap shrink-0">{activeChordFormula || "N/A"}</span>
           </div>
         </div>
 
       </div>
 
       {/* Right Area: Keyboard Visualizer */}
-      <div className="shrink-0 flex flex-col items-center bg-indigo-950/20 p-2 md:p-3 rounded-lg border border-indigo-900/40">
-        <div className="text-[9px] md:text-[10px] font-mono text-slate-500 mb-2 flex items-center justify-between w-full">
+      <div className="shrink-0 flex flex-col items-center bg-indigo-950/20 p-2 md:p-3 rounded-lg border border-indigo-900/40 w-full xl:w-auto min-w-0">
+        <div className="text-[9px] md:text-[10px] font-mono text-slate-500 mb-2 flex flex-wrap items-center justify-between w-full gap-1">
           <span>鍵盤可視化</span>
-          <span className="bg-indigo-950 px-1 py-0.5 rounded text-indigo-400 border border-indigo-900">MIDI C3 - C5</span>
+          <span className="bg-indigo-950 px-1 py-0.5 rounded text-indigo-400 border border-indigo-900 text-[8px] md:text-[9px]">MIDI C3 - C5</span>
         </div>
 
-        <div className="relative overflow-visible" style={{ width: `${totalWidth}px`, height: '90px' }}>
+        <div className="relative overflow-visible w-full max-w-[360px]" style={{ aspectRatio: '360/120' }}>
           <svg 
             width="100%" 
-            height="100%" 
+            height="100%"
             viewBox={`0 0 ${totalWidth} 120`}
-            className="select-none overflow-visible"
+            preserveAspectRatio="xMidYMid meet"
+            className="absolute inset-0 select-none overflow-visible"
+            style={{ 
+              filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.5))' 
+            }}
           >
             {/* White Keys */}
             {WHITE_KEYS.map((key) => {

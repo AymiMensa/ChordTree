@@ -171,7 +171,7 @@ export const FreeModeEditor: React.FC<FreeModeEditorProps> = ({ initialChords, o
         </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto custom-scrollbar bg-black/20 rounded-2xl border border-indigo-950/50 p-4">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y custom-scrollbar bg-black/20 rounded-2xl border border-indigo-950/50 p-4">
         <div className="flex flex-wrap gap-3 items-start content-start">
           {chords.map((chord, index) => (
             <div key={chord.id} className="relative group flex items-center gap-2 bg-[#090524] border border-indigo-900/40 p-3 rounded-xl shadow-lg hover:border-indigo-500/50 transition-colors">

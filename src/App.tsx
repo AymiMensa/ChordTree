@@ -537,7 +537,7 @@ export default function App() {
           </div>
 
           {/* RIGHT COLUMN (Controls) */}
-          <div className="flex flex-col flex-1 landscape:flex-none landscape:w-[48%] lg:flex-none lg:w-[400px] xl:w-[450px] shrink-0 gap-1.5 sm:gap-2 min-h-0 overflow-y-auto custom-scrollbar pb-2 pr-1">
+          <div className={`flex flex-col flex-1 landscape:flex-none landscape:w-[48%] lg:flex-none lg:w-[400px] xl:w-[450px] shrink-0 gap-1.5 sm:gap-2 min-h-0 overflow-y-auto custom-scrollbar pb-2 pr-1 ${isFreeModeEditing ? 'max-lg:landscape:hidden' : ''}`}>
             
             {/* Global Controls Card (Moved from header) */}
             <div className="flex flex-col gap-1.5 shrink-0 bg-[#03001e]/80 backdrop-blur-xl border border-indigo-950/50 rounded-xl p-1.5 sm:p-2 shadow-2xl">
