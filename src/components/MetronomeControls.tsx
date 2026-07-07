@@ -62,7 +62,7 @@ export const MetronomeControls: React.FC<MetronomeControlsProps> = ({
   const isTransition = currentStep?.type === "transition";
 
   return (
-    <div className="w-full bg-[#03001e]/80 backdrop-blur-xl border border-indigo-950/50 rounded-2xl p-2 sm:p-3 md:p-4 flex flex-col gap-2 md:gap-3 shadow-2xl h-full overflow-y-auto custom-scrollbar">
+    <div className="w-full bg-[#03001e]/80 backdrop-blur-xl border border-indigo-950/50 rounded-2xl p-2 sm:p-3 md:p-4 flex flex-col gap-2 md:gap-3 shadow-2xl">
       {/* 1. Playback & Tempo Accordion */}
       <div className="flex flex-col gap-2">
         <button 

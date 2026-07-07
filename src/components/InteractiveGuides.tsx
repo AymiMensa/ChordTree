@@ -13,7 +13,7 @@ export const InteractiveGuides: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="w-full bg-[#040117]/60 border border-indigo-950/30 rounded-2xl p-4 sm:p-5 flex flex-col gap-4 text-xs text-slate-300 leading-relaxed shadow-xl h-full overflow-y-auto custom-scrollbar">
+    <div className="w-full bg-[#040117]/60 border border-indigo-950/30 rounded-2xl p-4 sm:p-5 flex flex-col gap-4 text-xs text-slate-300 leading-relaxed shadow-xl">
       {/* Quick Intro */}
       <div className="flex items-center gap-2 mb-1">
         <HelpCircle className="w-5 h-5 text-indigo-400 shrink-0" />

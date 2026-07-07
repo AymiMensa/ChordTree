@@ -537,7 +537,7 @@ export default function App() {
           </div>
 
           {/* RIGHT COLUMN (Controls) */}
-          <div className="flex flex-col flex-1 landscape:flex-none landscape:w-[48%] lg:flex-none lg:w-[400px] xl:w-[450px] shrink-0 gap-1.5 sm:gap-2 min-h-0">
+          <div className="flex flex-col flex-1 landscape:flex-none landscape:w-[48%] lg:flex-none lg:w-[400px] xl:w-[450px] shrink-0 gap-1.5 sm:gap-2 min-h-0 overflow-y-auto custom-scrollbar pb-2 pr-1">
             
             {/* Global Controls Card (Moved from header) */}
             <div className="flex flex-col gap-1.5 shrink-0 bg-[#03001e]/80 backdrop-blur-xl border border-indigo-950/50 rounded-xl p-1.5 sm:p-2 shadow-2xl">
@@ -654,10 +654,10 @@ export default function App() {
             </div>
 
             {/* Tab Content Container */}
-            <div className="flex-1 overflow-hidden relative flex flex-col gap-2 min-h-0">
-              <div className="flex-1 overflow-y-auto custom-scrollbar">
+            <div className="flex-none relative flex flex-col gap-2">
+              <div className="flex-none">
                   {activeTab === "controls" && (
-                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 h-full">
+                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                       <MetronomeControls
                         playbackState={playbackState}
                         onTogglePlay={handleTogglePlay}
@@ -690,7 +690,7 @@ export default function App() {
                   )}
 
                   {activeTab === "path" && (
-                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 bg-[#030018]/80 border border-indigo-950/40 rounded-xl p-3 flex flex-col gap-2 h-full">
+                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 bg-[#030018]/80 border border-indigo-950/40 rounded-xl p-3 flex flex-col gap-2">
                       <div className="flex items-center justify-between text-[9px] font-mono uppercase tracking-wider text-slate-400 shrink-0">
                         <span className="flex items-center gap-1 font-semibold text-pink-400">
                           <Sparkles className="w-2.5 h-2.5" />
@@ -743,7 +743,7 @@ export default function App() {
                   )}
 
                   {activeTab === "guide" && (
-                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 h-full">
+                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                       <InteractiveGuides />
                     </div>
                   )}
