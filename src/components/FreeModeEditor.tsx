@@ -5,50 +5,50 @@ import { ProgressionStep } from '../types';
 
 export const CHORD_ROOTS = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"];
 
-export const CHORD_QUALITIES = [
-  // Major Group
-  { value: "M", label: "Major (M)" },
-  { value: "M7", label: "Major 7 (M7)" },
-  { value: "7", label: "Dominant 7 (7)" },
-  { value: "6", label: "Major 6 (6)" },
-  { value: "sus2", label: "Sus 2 (sus2)" },
-  { value: "sus4", label: "Sus 4 (sus4)" },
-  { value: "7sus4", label: "7 Sus 4 (7sus4)" },
-  { value: "aug", label: "Augmented (aug)" },
-  { value: "M7+5", label: "Major 7 #5 (M7+5)" },
-  { value: "7+5", label: "Dominant 7 #5 (7+5)" },
-  { value: "-5", label: "Major b5 (-5)" },
-  { value: "7-5", label: "Dominant 7 b5 (7-5)" },
-  { value: "power", label: "Power Chord (power)" },
-  { value: "M9", label: "Major 9 (M9)" },
-  { value: "9", label: "Dominant 9 (9)" },
-  { value: "69", label: "6/9 (69)" },
-  { value: "11", label: "Dominant 11 (11)" },
-  { value: "13", label: "Dominant 13 (13)" },
-  { value: "add9", label: "Add 9 (add9)" },
-  { value: "7-9", label: "Dominant 7 b9 (7-9)" },
-  { value: "7-9+5", label: "Dominant 7 b9 #5 (7-9+5)" },
-  { value: "7+9", label: "Dominant 7 #9 (7+9)" },
-  { value: "9+5", label: "Dominant 9 #5 (9+5)" },
-  { value: "9-5", label: "Dominant 9 b5 (9-5)" },
-  { value: "9+11", label: "Dominant 9 #11 (9+11)" },
-  { value: "13-9", label: "Dominant 13 b9 (13-9)" },
-  { value: "13-9-5", label: "Dominant 13 b9 b5 (13-9-5)" },
+export const CHORD_QUALITIES_MAJOR = [
+  { value: "M", label: "M (Major)" },
+  { value: "M7", label: "M7" },
+  { value: "7", label: "7" },
+  { value: "6", label: "6" },
+  { value: "sus2", label: "sus2" },
+  { value: "sus4", label: "sus4" },
+  { value: "7sus4", label: "7sus4" },
+  { value: "aug", label: "aug" },
+  { value: "M7+5", label: "M7+5" },
+  { value: "7+5", label: "7+5" },
+  { value: "-5", label: "-5" },
+  { value: "7-5", label: "7-5" },
+  { value: "power", label: "power" },
+  { value: "M9", label: "M9" },
+  { value: "9", label: "9" },
+  { value: "69", label: "69" },
+  { value: "11", label: "11" },
+  { value: "13", label: "13" },
+  { value: "add9", label: "add9" },
+  { value: "7-9", label: "7-9" },
+  { value: "7-9+5", label: "7-9+5" },
+  { value: "7+9", label: "7+9" },
+  { value: "9+5", label: "9+5" },
+  { value: "9-5", label: "9-5" },
+  { value: "9+11", label: "9+11" },
+  { value: "13-9", label: "13-9" },
+  { value: "13-9-5", label: "13-9-5" }
+];
 
-  // Minor Group
-  { value: "m", label: "Minor (m)" },
-  { value: "mM7", label: "Minor Major 7 (mM7)" },
-  { value: "m7", label: "Minor 7 (m7)" },
-  { value: "m6", label: "Minor 6 (m6)" },
-  { value: "m-5", label: "Minor b5 (m-5 / dim)" },
-  { value: "m7-5", label: "Minor 7 b5 (m7-5 / m7b5)" },
-  { value: "dim7", label: "Diminished 7 (dim7)" },
-  { value: "mM9", label: "Minor Major 9 (mM9)" },
-  { value: "m9", label: "Minor 9 (m9)" },
-  { value: "m69", label: "Minor 6/9 (m69)" },
-  { value: "m11", label: "Minor 11 (m11)" },
-  { value: "madd9", label: "Minor Add 9 (madd9)" },
-  { value: "madd11", label: "Minor Add 11 (madd11)" },
+export const CHORD_QUALITIES_MINOR = [
+  { value: "m", label: "m (Minor)" },
+  { value: "mM7", label: "mM7" },
+  { value: "m7", label: "m7" },
+  { value: "m6", label: "m6" },
+  { value: "m-5", label: "m-5" },
+  { value: "m7-5", label: "m7-5" },
+  { value: "dim7", label: "dim7" },
+  { value: "mM9", label: "mM9" },
+  { value: "m9", label: "m9" },
+  { value: "m69", label: "m69" },
+  { value: "m11", label: "m11" },
+  { value: "madd9", label: "madd9" },
+  { value: "madd11", label: "madd11" }
 ];
 
 export interface CustomChord {
@@ -193,9 +193,14 @@ export const FreeModeEditor: React.FC<FreeModeEditorProps> = ({ initialChords, o
                 <select 
                   value={chord.quality} 
                   onChange={(e) => handleUpdateChord(chord.id, 'quality', e.target.value)}
-                  className="bg-[#0f172a] border border-indigo-500/50 rounded-lg text-emerald-400 font-bold font-mono text-sm px-2 py-1.5 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 cursor-pointer min-w-[8.5rem] shadow-sm"
+                  className="bg-[#0f172a] border border-indigo-500/50 rounded-lg text-emerald-400 font-bold font-mono text-sm px-2 py-1.5 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 cursor-pointer min-w-[5.5rem] shadow-sm text-center"
                 >
-                  {CHORD_QUALITIES.map(q => <option key={q.value} value={q.value} className="bg-slate-900 text-emerald-400">{q.label}</option>)}
+                  <optgroup label="M 大調類 (Major)" className="bg-slate-800 text-pink-400 font-sans">
+                    {CHORD_QUALITIES_MAJOR.map(q => <option key={q.value} value={q.value} className="bg-slate-900 text-emerald-400">{q.label}</option>)}
+                  </optgroup>
+                  <optgroup label="m 小調類 (Minor)" className="bg-slate-800 text-sky-400 font-sans">
+                    {CHORD_QUALITIES_MINOR.map(q => <option key={q.value} value={q.value} className="bg-slate-900 text-emerald-400">{q.label}</option>)}
+                  </optgroup>
                 </select>
               </div>
               
