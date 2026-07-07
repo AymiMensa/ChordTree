@@ -93,3 +93,4 @@ C:\USERS\USER\DESKTOP\ANTIGRAVITY\CHORD-TREE-METRONOME\
 ## 📅 更新歷史 (Date Sorted)
 
 - **2026-07-07**: 初始化專案 `互動式樂理和弦進行心智圖`。完成 D3.js 遞迴視覺化、Web Audio 引擎整合、鋼琴鍵盤可視化、以及自由編輯模式的 JSON 本機儲存/讀取功能。
+- **2026-07-08**: 修正直式與橫式手機與平板介面重疊、破版與超出邊界的問題，完整自適應所有行動裝置與瀏覽器 (Brave, Safari, Edge, Chrome, Firefox 等)。

@@ -559,7 +559,7 @@ export default function App() {
         {/* Desktop Layout: 2 Columns | Mobile Layout: Stacks vertically but uses remaining space */}
         <div className="flex flex-col lg:grid lg:grid-cols-12 gap-3 flex-1 items-stretch min-h-0">
           {/* Column 1: Interactive Chord Tree */}
-          <div className="relative lg:col-span-7 h-[60vh] lg:h-full bg-slate-950/80 backdrop-blur-3xl border border-indigo-900/50 rounded-2xl overflow-hidden shadow-2xl flex flex-col shrink-0 min-h-[350px]">
+          <div className="relative lg:col-span-7 h-[50vh] min-h-[300px] lg:min-h-0 lg:h-full bg-slate-950/80 backdrop-blur-3xl border border-indigo-900/50 rounded-2xl overflow-hidden shadow-2xl flex flex-col shrink-0">
             {isFreeModeEditing ? (
               <FreeModeEditor 
                 initialChords={customProgressionList}
