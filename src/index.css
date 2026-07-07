@@ -51,3 +51,64 @@ body {
 .animate-flow-path {
   animation: flowPath 1s linear infinite;
 }
+
+/* Mobile Portrait Fixes */
+@media (max-width: 639px) and (orientation: portrait) {
+  .mobile-guide {
+    display: block !important;
+    width: 200px !important;
+    transform: scale(0.65) !important;
+    right: 0 !important;
+    transform-origin: top right !important;
+  }
+}
+
+/* Mobile Landscape Fixes */
+@media (max-height: 500px) and (orientation: landscape) {
+  .mobile-landscape-title {
+    font-size: 0.5rem !important; 
+    line-height: 1 !important;
+  }
+  .mobile-landscape-subtitle {
+    font-size: 0.45rem !important;
+    line-height: 1 !important;
+    white-space: normal !important;
+  }
+  .mobile-landscape-zoom-btns {
+    transform: scale(0.66) !important;
+    transform-origin: bottom left !important;
+  }
+  
+  .mobile-guide {
+    display: block !important;
+    width: 200px !important;
+    transform: scale(0.5) !important; 
+    transform-origin: top right !important;
+    right: 0 !important;
+  }
+  
+  /* Fix content window deforming when dominant 7th */
+  .mobile-landscape-card {
+    padding: 0.35rem !important;
+    min-height: 40px !important;
+    height: auto !important;
+  }
+  .mobile-landscape-chord-name {
+    font-size: 0.55rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+  }
+  .mobile-landscape-chord-formula {
+    font-size: 0.55rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .mobile-landscape-play-btn {
+    padding: 0.2rem !important;
+    font-size: 0.55rem !important;
+    margin-top: 0.2rem !important;
+  }
+}

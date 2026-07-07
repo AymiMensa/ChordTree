@@ -368,7 +368,7 @@ export const ChordMindMap: React.FC<ChordMindMapProps> = ({
       />
 
       {/* Top Right Guide (Scaled down on md/lg to prevent clipping) */}
-      <div className="hidden md:block absolute top-2 right-0 z-20 w-[240px] md:w-[260px] bg-[#060a1f]/90 backdrop-blur-md border border-indigo-900/50 border-r-0 rounded-l-xl p-3 shadow-2xl pointer-events-none select-none origin-top-right transform scale-75 xl:scale-100">
+      <div className="absolute top-2 right-0 z-20 w-[240px] md:w-[260px] bg-[#060a1f]/90 backdrop-blur-md border border-indigo-900/50 border-r-0 rounded-l-xl p-3 shadow-2xl pointer-events-none select-none origin-top-right transform scale-75 xl:scale-100 mobile-guide">
         <div className="flex items-center gap-1.5 text-slate-200 font-bold text-[13px] mb-2 border-b border-indigo-900/50 pb-1.5">
           <HelpCircle className="w-4 h-4 text-sky-400" />
           探索指南 (Tree Mode)
@@ -384,7 +384,7 @@ export const ChordMindMap: React.FC<ChordMindMapProps> = ({
       </div>
 
       {/* Controls: Zoom and Expand */}
-      <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 z-20 flex flex-wrap gap-2 items-center">
+      <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 z-20 flex flex-wrap gap-2 items-center mobile-landscape-zoom-btns">
         <button onClick={() => handleZoom(1.3)} className="p-2 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 rounded-lg border border-indigo-900 backdrop-blur transition-all active:scale-95" title="放大"><ZoomIn className="w-4 h-4" /></button>
         <button onClick={() => handleZoom(0.7)} className="p-2 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 rounded-lg border border-indigo-900 backdrop-blur transition-all active:scale-95" title="縮小"><ZoomOut className="w-4 h-4" /></button>
         <button onClick={handleResetZoom} className="p-2 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 rounded-lg border border-indigo-900 backdrop-blur transition-all active:scale-95" title="重設視角"><RotateCcw className="w-4 h-4" /></button>

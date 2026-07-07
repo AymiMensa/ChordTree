@@ -471,7 +471,7 @@ export default function App() {
                 
                 <div className="flex flex-col min-w-0">
                   <div className="flex items-center gap-1.5 sm:gap-2">
-                    <h1 className="text-sm sm:text-lg md:text-xl font-extrabold font-display text-white tracking-wide truncate">
+                    <h1 className="text-sm sm:text-lg md:text-xl font-extrabold font-display text-white tracking-wide truncate mobile-landscape-title">
                       互動式樂理和弦進行心智圖
                     </h1>
                     <div className="hidden sm:flex items-center px-1.5 py-0.5 rounded-full bg-indigo-900/60 border border-indigo-700/50 text-[9px] sm:text-[10px] text-indigo-200 shrink-0">
@@ -479,7 +479,7 @@ export default function App() {
                       樂理解析版
                     </div>
                   </div>
-                  <div className="text-[9px] sm:text-[11px] md:text-xs text-slate-400 mt-0.5 font-medium tracking-wide truncate hidden landscape:block sm:block">
+                  <div className="text-[9px] sm:text-[11px] md:text-xs text-slate-400 mt-0.5 font-medium tracking-wide truncate hidden landscape:block sm:block mobile-landscape-subtitle">
                     基於屬七和弦 (Dominant 7th) 與主音 (Tonic) 解決關係的無限遞迴樂理視覺化演繹。
                   </div>
                 </div>

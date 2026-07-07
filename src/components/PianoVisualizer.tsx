@@ -74,7 +74,7 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
       <div className="flex-1 w-full flex flex-col md:flex-row xl:flex-col gap-2 min-w-0">
         
         {/* Card 1: Main details */}
-        <div className="flex-1 bg-black/40 border border-indigo-950/80 rounded-lg p-2.5 md:p-3 flex flex-col justify-center shadow-lg relative overflow-hidden group">
+        <div className="flex-1 bg-black/40 border border-indigo-950/80 rounded-lg p-2.5 md:p-3 flex flex-col justify-center shadow-lg relative overflow-hidden group mobile-landscape-card">
            <div className="flex items-center justify-between mb-1">
              <span className="text-[10px] md:text-xs text-slate-500 font-medium flex items-center gap-1">
                <Sparkles className="w-3 h-3 text-pink-500" />
@@ -91,10 +91,10 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
              </div>
              
              <div className="flex flex-col gap-1 mt-0.5">
-               <span className="text-[9px] md:text-[10px] font-bold text-[#f59e0b] border border-[#b45309] bg-[#451a03]/50 px-2 py-0.5 rounded-full whitespace-nowrap self-start">
+               <span className="text-[9px] md:text-[10px] font-bold text-[#f59e0b] border border-[#b45309] bg-[#451a03]/50 px-2 py-0.5 rounded-full whitespace-nowrap self-start mobile-landscape-chord-name">
                  {activeChordFullName || "Unknown"}
                </span>
-               <span className="text-[9px] md:text-[10px] font-medium text-slate-300 bg-slate-800/80 border border-slate-700 px-2 py-0.5 rounded-full whitespace-nowrap self-start">
+               <span className="text-[9px] md:text-[10px] font-medium text-slate-300 bg-slate-800/80 border border-slate-700 px-2 py-0.5 rounded-full whitespace-nowrap self-start mobile-landscape-chord-name">
                  組成音: {activeChordNotes.join(", ")}
                </span>
              </div>
@@ -103,7 +103,7 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
            {onPlayChordDirectly && (
              <button 
                onClick={onPlayChordDirectly} 
-               className="w-full bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-slate-600 text-slate-200 font-medium py-1.5 rounded-md flex items-center justify-center gap-1.5 transition-all shadow text-xs mt-auto"
+               className="w-full bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-slate-600 text-slate-200 font-medium py-1.5 rounded-md flex items-center justify-center gap-1.5 transition-all shadow text-xs mt-auto mobile-landscape-play-btn"
              >
                <Play className="w-3.5 h-3.5 fill-current text-slate-300" />
                播放和弦
@@ -112,11 +112,11 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
         </div>
 
         {/* Card 2: Formula */}
-        <div className="bg-black/40 border border-indigo-950/80 rounded-lg p-2.5 md:p-3 shadow-lg flex flex-col justify-center min-w-0 overflow-hidden">
+        <div className="bg-black/40 border border-indigo-950/80 rounded-lg p-2.5 md:p-3 shadow-lg flex flex-col justify-center min-w-0 overflow-hidden mobile-landscape-card">
           <span className="text-[10px] md:text-xs text-slate-400 font-bold mb-1">和弦公式 (Formula)</span>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-[10px] md:text-xs font-mono min-w-0 gap-1">
-            <span className="text-slate-500 truncate min-w-0 mr-2">{activeChordFullName || "Unknown"}</span>
-            <span className="text-indigo-300 font-bold tracking-widest whitespace-nowrap shrink-0">{activeChordFormula || "N/A"}</span>
+            <span className="text-slate-500 truncate min-w-0 mr-2 mobile-landscape-chord-formula">{activeChordFullName || "Unknown"}</span>
+            <span className="text-indigo-300 font-bold tracking-widest whitespace-nowrap shrink-0 mobile-landscape-chord-formula">{activeChordFormula || "N/A"}</span>
           </div>
         </div>
 
