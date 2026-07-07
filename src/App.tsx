@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { Play, Square, Settings2, Share2, Volume2, Waves, Repeat, RefreshCw, FolderTree, FileCode, CheckSquare, Settings, Compass, Activity, Layers, Sparkles, Search } from "lucide-react";
+import { Play, Square, Settings2, Share2, Volume2, Waves, Repeat, RefreshCw, FolderTree, FileCode, CheckSquare, Settings, Compass, Activity, Layers, Sparkles, Search, Music } from "lucide-react";
 import { AudioEngine } from "./utils/audioEngine";
 import { ChordTreeNode, buildChordTree, flattenTree, getChordSpelling, getChordMidiNotes, getChordDetails, getDominant } from "./chordsData";
 import { PlaybackState, ProgressionStep } from "./types";
