@@ -137,35 +137,35 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Main Content Area */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center p-4">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center p-2 sm:p-4 min-h-0 overflow-hidden">
         
         {/* Chord Flow Display */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 w-full max-w-5xl h-full md:h-auto">
+        <div className="flex flex-row items-center justify-center gap-2 sm:gap-6 md:gap-12 w-full max-w-5xl flex-1 min-h-0">
           
           {/* Previous Chord */}
-          <div className="flex-1 flex justify-center md:justify-end opacity-40 md:scale-90 transition-all duration-300 blur-[1px]">
+          <div className="flex-1 flex justify-end opacity-40 scale-75 md:scale-90 transition-all duration-300 blur-[1px]">
             {prevChord && (
-              <div className="text-4xl md:text-6xl font-bold text-slate-500">
+              <div className="text-2xl sm:text-4xl md:text-6xl font-bold text-slate-500 whitespace-nowrap">
                 {prevChord}
               </div>
             )}
           </div>
 
           {/* Current Chord */}
-          <div className="flex-none flex flex-col items-center justify-center min-w-[200px] md:min-w-[250px] my-4 md:my-0">
-            <div className={`text-7xl md:text-[10rem] font-black transition-all duration-300 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]
+          <div className="flex-none flex flex-col items-center justify-center min-w-[120px] sm:min-w-[180px] md:min-w-[250px] shrink-0">
+            <div className={`text-5xl sm:text-7xl md:text-[9rem] lg:text-[10rem] font-black transition-all duration-300 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]
                 ${isPlaying ? 'text-white scale-110' : 'text-slate-200'}`}>
               {currentChord}
             </div>
-            <div className="mt-2 md:mt-4 px-4 py-1 rounded-full bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 text-sm md:text-base font-bold tracking-widest">
+            <div className="mt-1 md:mt-4 px-2 sm:px-4 py-0.5 sm:py-1 rounded-full bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 text-[10px] sm:text-sm md:text-base font-bold tracking-widest whitespace-nowrap">
               目前和弦
             </div>
           </div>
 
           {/* Next Chord */}
-          <div className="flex-1 flex justify-center md:justify-start opacity-80 md:scale-100 transition-all duration-300">
+          <div className="flex-1 flex justify-start opacity-80 scale-90 md:scale-100 transition-all duration-300">
             {nextChord && (
-              <div className="text-5xl md:text-7xl font-bold text-pink-500 drop-shadow-[0_0_15px_rgba(236,72,153,0.4)]">
+              <div className="text-3xl sm:text-5xl md:text-7xl font-bold text-pink-500 drop-shadow-[0_0_15px_rgba(236,72,153,0.4)] whitespace-nowrap">
                 {nextChord}
               </div>
             )}
@@ -174,48 +174,48 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Controls */}
-        <div className="mt-8 md:mt-24 flex flex-col items-center gap-6 md:gap-8 bg-slate-900/60 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-white/10 shadow-2xl w-full max-w-xl">
+        <div className="mt-4 md:mt-12 flex flex-col items-center gap-4 md:gap-8 bg-slate-900/60 backdrop-blur-xl p-4 md:p-8 rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl w-full max-w-xl shrink-0">
           
           {/* Play/Pause Button */}
           <button
             onClick={togglePlay}
-            className={`flex items-center justify-center gap-3 w-full md:w-auto px-12 py-4 rounded-full text-xl font-bold transition-all transform hover:scale-105 active:scale-95 shadow-xl
+            className={`flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto px-6 sm:px-12 py-3 sm:py-4 rounded-full text-base sm:text-xl font-bold transition-all transform hover:scale-105 active:scale-95 shadow-xl
               ${isPlaying 
                 ? 'bg-red-500 hover:bg-red-400 text-white shadow-red-500/30' 
                 : 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-emerald-500/30'}`}
           >
             {isPlaying ? (
               <>
-                <Square className="w-6 h-6 fill-current" />
+                <Square className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />
                 暫停考試
               </>
             ) : (
               <>
-                <Play className="w-6 h-6 fill-current" />
+                <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />
                 開始考試
               </>
             )}
           </button>
 
           {/* BPM Slider */}
-          <div className="w-full flex items-center gap-4 px-4">
-            <span className="text-slate-400 font-mono font-bold w-12 text-right">BPM</span>
+          <div className="w-full flex items-center gap-2 sm:gap-4 px-2 sm:px-4">
+            <span className="text-slate-400 font-mono font-bold text-xs sm:text-base w-8 sm:w-12 text-right">BPM</span>
             <input
               type="range"
               min="40"
               max="168"
               value={bpm}
               onChange={(e) => setBpm(parseInt(e.target.value))}
-              className="flex-1 h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+              className="flex-1 h-1.5 sm:h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
             />
-            <span className="text-white font-mono font-bold w-12">{bpm}</span>
+            <span className="text-white font-mono font-bold text-xs sm:text-base w-8 sm:w-12">{bpm}</span>
           </div>
 
           <button
             onClick={() => setShowPiano(!showPiano)}
-            className="flex items-center gap-2 text-sm text-indigo-300 hover:text-white transition-colors mt-2"
+            className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm text-indigo-300 hover:text-white transition-colors mt-1 sm:mt-2"
           >
-            <Piano className="w-4 h-4" />
+            <Piano className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             {showPiano ? "隱藏鋼琴提示" : "顯示鋼琴提示"}
           </button>
 
