@@ -93,6 +93,7 @@ export default function App() {
     metronomeVolume: 0.6,
     soundMode: "pad",
     synthStyle: "pad",
+    activeGroove: "None",
   });
 
   // Mutable reference state for Audio Engine synchronous access
@@ -229,6 +230,7 @@ export default function App() {
       soundMode: playbackState.soundMode,
       synthStyle: playbackState.synthStyle,
       notes: currentStep?.notes || ["C", "E", "G"],
+      activeGroove: playbackState.activeGroove,
     });
   }, [
     playbackState.bpm,
@@ -237,6 +239,7 @@ export default function App() {
     playbackState.soundMode,
     playbackState.synthStyle,
     currentStep?.notes,
+    playbackState.activeGroove,
   ]);
 
   // Cleanup on unmount
@@ -333,9 +336,13 @@ export default function App() {
     setPlaybackState((prev) => ({ ...prev, soundMode: mode }));
   };
 
-  const handleSynthStyleChange = (style: "epiano" | "pad" | "strings") => {
+  const handleSynthStyleChange = useCallback((style: any) => {
     setPlaybackState((prev) => ({ ...prev, synthStyle: style }));
-  };
+  }, []);
+
+  const handleGrooveChange = useCallback((groove: any) => {
+    setPlaybackState((prev) => ({ ...prev, activeGroove: groove }));
+  }, []);
 
   // Click handler for node interaction (direct trial listen / path focus)
   const handleNodeClick = (nodeId: string, chordName: string, path: string[]) => {
@@ -565,6 +572,7 @@ export default function App() {
                 <button
                   onClick={() => setIsFreeModeEditing(true)}
                   className="flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 transition-colors text-[9px] sm:text-[11px] font-semibold whitespace-nowrap active:scale-95 shrink-0"
+                  title="開啟自由編輯模式"
                 >
                   <FileCode className="w-2.5 h-2.5 sm:w-3 sm:h-3 hidden sm:block" />
                   自由編輯
@@ -611,6 +619,7 @@ export default function App() {
                         handleReset();
                       }}
                       className={`px-1 sm:px-1.5 py-0.5 rounded transition-all ${layers === d ? "bg-indigo-500 text-white shadow-sm" : "hover:bg-indigo-900/60"}`}
+                      title={`切換顯示層數至 ${d}`}
                     >
                       {d}
                     </button>
@@ -628,6 +637,7 @@ export default function App() {
                     ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
                     : "text-slate-400 hover:text-slate-200"
                 }`}
+                title="切換至控制面板"
               >
                 控制面板
               </button>
@@ -638,6 +648,7 @@ export default function App() {
                     ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
                     : "text-slate-400 hover:text-slate-200"
                 }`}
+                title="切換至進行軌跡"
               >
                 進行軌跡
               </button>
@@ -648,6 +659,7 @@ export default function App() {
                     ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
                     : "text-slate-400 hover:text-slate-200"
                 }`}
+                title="切換至互動指南"
               >
                 互動指南
               </button>
@@ -667,6 +679,7 @@ export default function App() {
                         onVolumeChange={handleVolumeChange}
                         onSoundModeChange={handleSoundModeChange}
                         onSynthStyleChange={handleSynthStyleChange}
+                        onGrooveChange={handleGrooveChange}
                         activeChordLabel={currentStep ? currentStep.label : "C"}
                         activeChordNotes={
                           currentStep ? currentStep.notes : ["C", "E", "G"]

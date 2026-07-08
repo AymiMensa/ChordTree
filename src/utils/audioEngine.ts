@@ -1,5 +1,6 @@
 import { NOTE_BASE_FREQS } from "./audioNotes";
-
+import { GrooveType } from "../types";
+import { GROOVES } from "./drumGrooves";
 export class AudioEngine {
   private ctx: AudioContext | null = null;
   private schedulerTimerId: number | null = null;
@@ -15,6 +16,8 @@ export class AudioEngine {
   private soundMode: "pad" | "arpeggio" | "silent" = "pad";
   private synthStyle: "epiano" | "pad" | "strings" = "pad";
   private currentNotes: string[] = ["C", "E", "G"];
+  private activeGroove: GrooveType = "None";
+  private current16thStep = 0; // 0 to 15
 
   // Callback to synchronize visual state with exact AudioContext trigger time
   private onScheduleBeat?: (beat: number) => string[] | null;
@@ -48,6 +51,7 @@ export class AudioEngine {
     soundMode?: "pad" | "arpeggio" | "silent";
     synthStyle?: "epiano" | "pad" | "strings";
     notes?: string[];
+    activeGroove?: GrooveType;
   }) {
     if (params.bpm !== undefined) this.bpm = params.bpm;
     if (params.metronomeVolume !== undefined)
@@ -56,11 +60,13 @@ export class AudioEngine {
     if (params.soundMode !== undefined) this.soundMode = params.soundMode;
     if (params.synthStyle !== undefined) this.synthStyle = params.synthStyle;
     if (params.notes !== undefined) this.currentNotes = params.notes;
+    if (params.activeGroove !== undefined) this.activeGroove = params.activeGroove;
   }
 
   public start() {
     const context = this.initContext();
     this.currentBeatInMeasure = 1;
+    this.current16thStep = 0;
     this.nextNoteTime = context.currentTime + 0.05;
 
     // Start lookahead scheduler loop
@@ -84,27 +90,31 @@ export class AudioEngine {
 
     // While there are notes to play before the next interval, schedule them
     while (this.nextNoteTime < this.ctx.currentTime + this.scheduleAheadTime) {
-      this.scheduleNote(this.currentBeatInMeasure, this.nextNoteTime);
+      this.scheduleNote(this.current16thStep, this.nextNoteTime);
       this.advanceNote();
     }
   }
 
   private advanceNote() {
-    const secondsPerBeat = 60.0 / this.bpm;
-    this.nextNoteTime += secondsPerBeat;
+    const secondsPer16th = (60.0 / this.bpm) / 4;
+    this.nextNoteTime += secondsPer16th;
 
-    this.currentBeatInMeasure++;
-    if (this.currentBeatInMeasure > this.beatsPerMeasure) {
-      this.currentBeatInMeasure = 1;
+    this.current16thStep++;
+    if (this.current16thStep > 15) {
+      this.current16thStep = 0;
     }
+    this.currentBeatInMeasure = Math.floor(this.current16thStep / 4) + 1;
   }
 
-  private scheduleNote(beatNumber: number, time: number) {
+  private scheduleNote(step16: number, time: number) {
     if (!this.ctx) return;
 
-    // 1. Fetch exact notes for this upcoming beat
+    const isQuarterBeat = step16 % 4 === 0;
+    const beatNumber = Math.floor(step16 / 4) + 1;
+
+    // 1. Fetch exact notes for this upcoming beat (only on quarter notes)
     let notesToPlay = this.currentNotes;
-    if (this.onScheduleBeat) {
+    if (isQuarterBeat && this.onScheduleBeat) {
       const upcomingNotes = this.onScheduleBeat(beatNumber);
       if (upcomingNotes === null) {
         return; // Abort scheduling this beat entirely
@@ -115,21 +125,36 @@ export class AudioEngine {
       }
     }
 
-    // 2. Trigger visual callback via setTimeout or requestAnimationFrame timed to audio clock
-    const delayMs = Math.max(0, (time - this.ctx.currentTime) * 1000);
-    setTimeout(() => {
-      if (this.onPlayBeat) {
-        this.onPlayBeat(beatNumber);
-      }
-    }, delayMs);
-
-    // 3. Play Metronome sound
-    if (this.metronomeVolume > 0) {
-      this.playMetronomeTick(beatNumber, time);
+    // 2. Trigger visual callback via setTimeout timed to audio clock
+    if (isQuarterBeat) {
+      const delayMs = Math.max(0, (time - this.ctx.currentTime) * 1000);
+      setTimeout(() => {
+        if (this.onPlayBeat) {
+          this.onPlayBeat(beatNumber);
+        }
+      }, delayMs);
     }
 
-    // 4. Play Synthesizer based on sound mode
+    // 3. Play Metronome sound / Drums
+    if (this.metronomeVolume > 0) {
+      if (this.activeGroove === "None") {
+        if (isQuarterBeat) {
+          this.playMetronomeTick(beatNumber, time);
+        }
+      } else {
+        const pattern = GROOVES[this.activeGroove];
+        if (pattern) {
+          if (pattern.kick[step16] > 0) this.playKick(time);
+          if (pattern.snare[step16] > 0) this.playSnare(time);
+          if (pattern.hihat[step16] === 1) this.playHiHat(time, true);
+          else if (pattern.hihat[step16] === 2) this.playHiHat(time, false);
+        }
+      }
+    }
+
+    // 4. Play Synthesizer based on sound mode (Only on quarter beats for now)
     if (
+      isQuarterBeat &&
       this.synthVolume > 0 &&
       this.soundMode !== "silent" &&
       notesToPlay.length > 0
@@ -214,6 +239,100 @@ export class AudioEngine {
 
     osc.start(time);
     osc.stop(time + 0.1);
+  }
+
+  // Synthesized Drum Sounds
+  private playKick(time: number) {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gainNode = this.ctx.createGain();
+
+    osc.connect(gainNode);
+    gainNode.connect(this.ctx.destination);
+
+    osc.frequency.setValueAtTime(150, time);
+    osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.5);
+
+    const vol = this.metronomeVolume * 1.5; 
+    gainNode.gain.setValueAtTime(vol, time);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.5);
+
+    osc.start(time);
+    osc.stop(time + 0.5);
+  }
+
+  private playSnare(time: number) {
+    if (!this.ctx) return;
+    
+    // Snare Body
+    const osc = this.ctx.createOscillator();
+    const oscGain = this.ctx.createGain();
+    osc.type = "triangle";
+    osc.connect(oscGain);
+    oscGain.connect(this.ctx.destination);
+    
+    osc.frequency.setValueAtTime(250, time);
+    oscGain.gain.setValueAtTime(this.metronomeVolume * 0.7, time);
+    oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+    osc.start(time);
+    osc.stop(time + 0.2);
+
+    // Snare Wires (Noise)
+    const bufferSize = this.ctx.sampleRate * 0.2;
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buffer;
+    
+    const noiseFilter = this.ctx.createBiquadFilter();
+    noiseFilter.type = "highpass";
+    noiseFilter.frequency.value = 1000;
+    
+    const noiseGain = this.ctx.createGain();
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(this.ctx.destination);
+    
+    noiseGain.gain.setValueAtTime(this.metronomeVolume * 1.2, time);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+    
+    noise.start(time);
+  }
+
+  private playHiHat(time: number, closed: boolean) {
+    if (!this.ctx) return;
+    const dur = closed ? 0.1 : 0.4;
+    const bufferSize = this.ctx.sampleRate * dur;
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buffer;
+    
+    const bandpass = this.ctx.createBiquadFilter();
+    bandpass.type = "bandpass";
+    bandpass.frequency.value = 10000;
+    
+    const highpass = this.ctx.createBiquadFilter();
+    highpass.type = "highpass";
+    highpass.frequency.value = 7000;
+    
+    const gainNode = this.ctx.createGain();
+    noise.connect(bandpass);
+    bandpass.connect(highpass);
+    highpass.connect(gainNode);
+    gainNode.connect(this.ctx.destination);
+    
+    gainNode.gain.setValueAtTime(this.metronomeVolume * (closed ? 0.6 : 0.8), time);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, time + dur);
+    
+    noise.start(time);
   }
 
   // Lush polyphonic synthesizer pad for chord accompaniment

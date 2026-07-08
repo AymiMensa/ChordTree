@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { ChordTreeNode, buildChordTree, getDominant } from '../chordsData';
 import { ProgressionStep } from '../types';
-import { ZoomIn, ZoomOut, Maximize2, RotateCcw, HelpCircle, Info } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, RotateCcw, HelpCircle, Info, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface ChordMindMapProps {
   rootTree: ChordTreeNode;
@@ -35,6 +35,7 @@ export const ChordMindMap: React.FC<ChordMindMapProps> = ({
   const svgRef = useRef<SVGSVGElement>(null);
 
   const [dimensions, setDimensions] = useState({ width: 800, height: 800 });
+  const [isGuideExpanded, setIsGuideExpanded] = useState(false);
   const zoomBehaviorRef = useRef<any>(null);
   const timeRef = useRef<number>(0);
   const requestRef = useRef<number>();
@@ -368,19 +369,29 @@ export const ChordMindMap: React.FC<ChordMindMapProps> = ({
       />
 
       {/* Top Right Guide (Scaled down on md/lg to prevent clipping) */}
-      <div className="absolute top-2 right-0 z-20 w-[240px] md:w-[260px] bg-[#060a1f]/90 backdrop-blur-md border border-indigo-900/50 border-r-0 rounded-l-xl p-3 shadow-2xl pointer-events-none select-none origin-top-right transform scale-75 xl:scale-100 mobile-guide">
-        <div className="flex items-center gap-1.5 text-slate-200 font-bold text-[13px] mb-2 border-b border-indigo-900/50 pb-1.5">
-          <HelpCircle className="w-4 h-4 text-sky-400" />
-          探索指南 (Tree Mode)
-        </div>
-        <ul className="text-[11px] font-medium tracking-wide flex flex-col gap-1.5 list-disc pl-4 marker:text-slate-500">
-          <li className="text-slate-300">完美對齊原圖的碎形結構</li>
-          <li>
-            <span className="text-pink-400">粉色大調</span> <span className="text-slate-500">/</span> <span className="text-sky-400">藍色小調</span>
-          </li>
-          <li className="text-amber-500">黃褐色為過渡屬七和弦</li>
-          <li className="text-slate-400">單擊選取播放，雙擊折疊子樹</li>
-        </ul>
+      <div className="absolute top-2 right-0 z-20 w-max max-w-[240px] md:max-w-[280px] bg-[#060a1f]/90 backdrop-blur-md border border-indigo-900/50 border-r-0 rounded-l-xl pl-3 pr-1 py-2 md:pl-4 md:pr-2 md:py-3 shadow-2xl select-none origin-top-right transform scale-75 xl:scale-100 mobile-guide transition-all duration-300">
+        <button 
+          onClick={() => setIsGuideExpanded(!isGuideExpanded)}
+          className={`flex items-center justify-between w-full gap-1.5 text-slate-200 font-bold text-[13px] ${isGuideExpanded ? 'mb-2 border-b border-indigo-900/50 pb-1.5' : ''} pr-2 cursor-pointer hover:text-sky-300 transition-colors`}
+          title={isGuideExpanded ? "收合探索指南" : "展開探索指南"}
+        >
+          <div className="flex items-center gap-1.5">
+            <HelpCircle className="w-4 h-4 text-sky-400 shrink-0" />
+            <span className="whitespace-nowrap">探索指南 (Tree Mode)</span>
+          </div>
+          {isGuideExpanded ? <ChevronUp className="w-4 h-4 text-indigo-400 shrink-0" /> : <ChevronDown className="w-4 h-4 text-indigo-400 shrink-0" />}
+        </button>
+        
+        {isGuideExpanded && (
+          <ul className="text-[11px] font-medium tracking-wide flex flex-col gap-1.5 list-disc pl-4 pr-1 marker:text-slate-500 animate-in fade-in slide-in-from-top-2 duration-200">
+            <li className="text-slate-300">完美對齊原圖的碎形結構</li>
+            <li>
+              <span className="text-pink-400">粉色大調</span> <span className="text-slate-500">/</span> <span className="text-sky-400">藍色小調</span>
+            </li>
+            <li className="text-amber-500">黃褐色為過渡屬七和弦</li>
+            <li className="text-slate-400">單擊選取播放，雙擊折疊子樹</li>
+          </ul>
+        )}
       </div>
 
       {/* Controls: Zoom and Expand */}

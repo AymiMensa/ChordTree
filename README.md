@@ -20,8 +20,8 @@ graph TD
     A -->|屬性傳遞| D(MetronomeControls<br>控制面板)
     A -->|掛載/卸載| E(FreeModeEditor<br>自由編輯模式)
     
-    B -->|觸發事件| F[Audio Engine<br>Web Audio API 合成器]
-    D -->|控制播放/音量| F
+    B -->|觸發事件| F[Audio Engine<br>Web Audio API 合成器 / 16步進編曲機]
+    D -->|控制播放/音量/Groove| F
     E -->|JSON 匯出/讀取| G[(本機檔案系統)]
     E -->|確認套用| A
     
@@ -29,9 +29,11 @@ graph TD
         H[chordsData.ts<br>和弦資料結構]
         I[chordParser.ts<br>和弦公式解析]
         J[audioNotes.ts<br>頻率對應表]
+        K[drumGrooves.ts<br>22種爵士鼓點律動]
     end
     
-    F -->|調用| J
+    F -->|讀取| J
+    F -->|讀取| K
     B -->|讀取| H
     C -->|讀取| I
 ```
@@ -67,6 +69,7 @@ C:\USERS\USER\DESKTOP\ANTIGRAVITY\CHORD-TREE-METRONOME\
             audioEngine.ts
             audioNotes.ts
             chordParser.ts
+            drumGrooves.ts
 ```
 
 ---
@@ -81,6 +84,7 @@ C:\USERS\USER\DESKTOP\ANTIGRAVITY\CHORD-TREE-METRONOME\
    - 點擊「開始/停止」依序播放當前的路徑軌跡。
    - 支援自由調整 BPM (40 - 168)。
    - 提供多種音色（合成器 Pad、電鋼琴、柔和 Strings）與播放模式（和弦齊奏、琶音）。
+   - **(NEW)** 提供 22 種現代 Drum Groove (鼓組律動)，涵蓋四拍直踏、後拍律動、搖擺律動、放克切分音與拉丁複節奏等 5 大類別，透過 Web Audio API 純手工合成出大鼓、小鼓與雙鈸音效。
 3. **自由編輯模式**：
    - 點擊「自由編輯模式」進入自訂和弦進行編輯器。
    - 支援即時加入、刪除、拖曳排序各式和弦（大調、小調、屬七、增減等...）。
@@ -94,3 +98,4 @@ C:\USERS\USER\DESKTOP\ANTIGRAVITY\CHORD-TREE-METRONOME\
 
 - **2026-07-07**: 初始化專案 `互動式樂理和弦進行心智圖`。完成 D3.js 遞迴視覺化、Web Audio 引擎整合、鋼琴鍵盤可視化、以及自由編輯模式的 JSON 本機儲存/讀取功能。
 - **2026-07-08**: 修正直式與橫式手機與平板介面重疊、破版與超出邊界的問題，完整自適應所有行動裝置與瀏覽器 (Brave, Safari, Edge, Chrome, Firefox 等)。
+- **2026-07-09**: 節拍器核心引擎全面升級為 16-Step Sequencer，並實作 Web Audio API 鼓組合成引擎，新增 22 種現代伴奏鼓點律動 (Drum Groove) 以及完整的說明互動視窗。

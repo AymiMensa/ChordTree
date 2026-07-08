@@ -23,6 +23,13 @@ export interface ProgressionStep {
   notes: string[];
 }
 
+export type GrooveType = 
+  | "None"
+  | "Samba" | "Rumba" | "Rock" | "Bossa Nova" | "Soul" | "Slow Soul" 
+  | "Swing" | "Blues" | "Cha-Cha" | "Hip-Hop" | "Ballad" | "Folk" 
+  | "Disco" | "EDM" | "Pop" | "R&B" | "Jazz" | "Shuffle Rock" 
+  | "Funk" | "Neo-Soul" | "Salsa" | "Afrobeat";
+
 export interface PlaybackState {
   isPlaying: boolean;
   isRepeat: boolean;
@@ -37,4 +44,5 @@ export interface PlaybackState {
   metronomeVolume: number; // 0 to 1
   soundMode: "pad" | "arpeggio" | "silent";
   synthStyle: "epiano" | "pad" | "strings";
+  activeGroove: GrooveType;
 }
