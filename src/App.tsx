@@ -10,6 +10,7 @@ import { FreeModeEditor } from "./components/FreeModeEditor";
 import { InteractiveGuides } from "./components/InteractiveGuides";
 import { MetronomeControls } from "./components/MetronomeControls";
 import { PianoVisualizer } from "./components/PianoVisualizer";
+import { PopQuiz } from "./components/PopQuiz";
 
 // Generate a random path starting at a specified node
 function generateRandomProgression(
@@ -62,6 +63,7 @@ export default function App() {
   const [isFreeModeEditing, setIsFreeModeEditing] = useState(false);
   const [customProgressionList, setCustomProgressionList] = useState<CustomChord[]>([]);
   const [isCustomPlayback, setIsCustomPlayback] = useState(false);
+  const [isPopQuizActive, setIsPopQuizActive] = useState(false);
   
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFeedback, setSearchFeedback] = useState<string | null>(null);
@@ -577,6 +579,19 @@ export default function App() {
                   <FileCode className="w-2.5 h-2.5 sm:w-3 sm:h-3 hidden sm:block" />
                   自由編輯
                 </button>
+
+                <button
+                  onClick={() => {
+                    audioEngineRef.current?.stop();
+                    setPlaybackState(prev => ({ ...prev, isPlaying: false }));
+                    setIsPopQuizActive(true);
+                  }}
+                  className="flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1 rounded bg-pink-500/10 border border-pink-500/30 text-pink-400 hover:bg-pink-500/20 transition-colors text-[9px] sm:text-[11px] font-semibold whitespace-nowrap active:scale-95 shrink-0"
+                  title="開啟隨堂考試"
+                >
+                  <Music className="w-2.5 h-2.5 sm:w-3 sm:h-3 hidden sm:block" />
+                  隨堂考試
+                </button>
                 
                 <button
                   onClick={handleReset}
@@ -790,6 +805,10 @@ export default function App() {
       <footer className="shrink-0 w-full text-center py-1 border-t border-indigo-950/30 text-[9px] font-mono text-slate-600 select-none bg-black/20">
         韶韻音樂學院 馬老師設計 專門給 秀玲姊練習用 App
       </footer>
+
+      {isPopQuizActive && (
+        <PopQuiz onClose={() => setIsPopQuizActive(false)} />
+      )}
     </div>
   );
 }

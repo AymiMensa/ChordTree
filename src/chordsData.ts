@@ -23,6 +23,28 @@ export const NOTE_OFFSETS: Record<string, number> = {
 
 export const CHROMATIC_SCALE = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
+export const QUIZ_CHORDS = [
+  "Cm(maj7)", "Dm7b5", "Eaug", "Bdim",
+  "C", "Dm", "Ebmaj7", "Fm", "Abmaj7", "B7",
+  "Cm", "Em", "F", "G7", "Am", "Bm7b5",
+  "Dbmaj7", "F7", "Gm", "Am7b5", "Bbmaj7",
+  "C#dim", "D7", "Eb7", "Gm7b5", "Bbm",
+  "C7", "Em7b5", "F#m7b5", "Gmaj7", "Bm",
+  "Cdim", "Ebm", "Gb"
+];
+
+function parseChordType(chordName: string) {
+  if (chordName.endsWith("m(maj7)")) return { type: "m(maj7)", root: chordName.slice(0, -7), name: "Minor Major 7th", formula: "1 - ♭3 - 5 - 7", intervals: [0, 3, 7, 11] };
+  if (chordName.endsWith("maj7")) return { type: "maj7", root: chordName.slice(0, -4), name: "Major 7th", formula: "1 - 3 - 5 - 7", intervals: [0, 4, 7, 11] };
+  if (chordName.endsWith("m7b5")) return { type: "m7b5", root: chordName.slice(0, -4), name: "Half-Diminished 7th", formula: "1 - ♭3 - ♭5 - ♭7", intervals: [0, 3, 6, 10] };
+  if (chordName.endsWith("dim7")) return { type: "dim7", root: chordName.slice(0, -4), name: "Diminished 7th", formula: "1 - ♭3 - ♭5 - 𝄫7", intervals: [0, 3, 6, 9] };
+  if (chordName.endsWith("dim")) return { type: "dim", root: chordName.slice(0, -3), name: "Diminished", formula: "1 - ♭3 - ♭5", intervals: [0, 3, 6] };
+  if (chordName.endsWith("aug")) return { type: "aug", root: chordName.slice(0, -3), name: "Augmented", formula: "1 - 3 - ♯5", intervals: [0, 4, 8] };
+  if (chordName.endsWith("m7")) return { type: "m7", root: chordName.slice(0, -2), name: "Minor 7th", formula: "1 - ♭3 - 5 - ♭7", intervals: [0, 3, 7, 10] };
+  if (chordName.endsWith("7")) return { type: "7", root: chordName.slice(0, -1), name: "Dominant 7th", formula: "1 - 3 - 5 - ♭7", intervals: [0, 4, 7, 10] };
+  if (chordName.endsWith("m")) return { type: "m", root: chordName.slice(0, -1), name: "Minor", formula: "1 - ♭3 - 5", intervals: [0, 3, 7] };
+  return { type: "M", root: chordName, name: "Major", formula: "1 - 3 - 5", intervals: [0, 4, 7] };
+}
 const MINOR_TO_MAJOR: Record<string, { parallel: string; relative: string; vi: string }> = {
   "Cm": { parallel: "C", relative: "Eb", vi: "Ab" },
   "Am": { parallel: "A", relative: "C", vi: "F" },
@@ -88,31 +110,11 @@ export function getDominant(target: string): string {
  * Get MIDI notes for a chord in standard voicings
  */
 export function getChordMidiNotes(chordName: string): number[] {
-  let isMinor = false;
-  let isDominant = false;
-  let root = chordName;
-
-  if (chordName.endsWith('7')) {
-    isDominant = true;
-    root = chordName.slice(0, -1);
-  } else if (chordName.endsWith('m')) {
-    isMinor = true;
-    root = chordName.slice(0, -1);
-  }
-
-  const offset = NOTE_OFFSETS[root] ?? 0;
+  const parsed = parseChordType(chordName);
+  const offset = NOTE_OFFSETS[parsed.root] ?? 0;
   const baseRoot = 48 + offset; // Guaranteed to be in C3 (48) - B3 (59) range
   
-  if (isMinor) {
-    // Standard Minor root position: 1, b3, 5
-    return [baseRoot, baseRoot + 3, baseRoot + 7];
-  } else if (isDominant) {
-    // Standard Dominant 7th root position: 1, 3, 5, b7
-    return [baseRoot, baseRoot + 4, baseRoot + 7, baseRoot + 10];
-  } else {
-    // Standard Major root position: 1, 3, 5
-    return [baseRoot, baseRoot + 4, baseRoot + 7];
-  }
+  return parsed.intervals.map(interval => baseRoot + interval);
 }
 
 /**
@@ -138,39 +140,14 @@ export function getChordDetails(chordName: string): {
   formula: string;
   notes: string[];
 } {
-  let isMinor = false;
-  let isDominant = false;
-  let root = chordName;
-
-  if (chordName.endsWith('7')) {
-    isDominant = true;
-    root = chordName.slice(0, -1);
-  } else if (chordName.endsWith('m')) {
-    isMinor = true;
-    root = chordName.slice(0, -1);
-  }
-
+  const parsed = parseChordType(chordName);
   const uniqueNotes = getChordSpelling(chordName);
 
-  if (isMinor) {
-    return {
-      fullName: `${root} Minor`,
-      formula: "1 - ♭3 - 5",
-      notes: uniqueNotes
-    };
-  } else if (isDominant) {
-    return {
-      fullName: `${root} Dominant 7th`,
-      formula: "1 - 3 - 5 - ♭7",
-      notes: uniqueNotes
-    };
-  } else {
-    return {
-      fullName: `${root} Major`,
-      formula: "1 - 3 - 5",
-      notes: uniqueNotes
-    };
-  }
+  return {
+    fullName: `${parsed.root} ${parsed.name}`,
+    formula: parsed.formula,
+    notes: uniqueNotes
+  };
 }
 
 /**
