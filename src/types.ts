@@ -28,7 +28,9 @@ export type GrooveType =
   | "Samba" | "Rumba" | "Rock" | "Bossa Nova" | "Soul" | "Slow Soul" 
   | "Swing" | "Blues" | "Cha-Cha" | "Hip-Hop" | "Ballad" | "Folk" 
   | "Disco" | "EDM" | "Pop" | "R&B" | "Jazz" | "Shuffle Rock" 
-  | "Funk" | "Neo-Soul" | "Salsa" | "Afrobeat";
+  | "Funk" | "Neo-Soul" | "Salsa" | "Afrobeat"
+  | "Heavy Metal" | "Trance" | "Country" | "Pop Ballad" | "Soft Swing" 
+  | "Mambo" | "Drum & Bass" | "Classic Rock" | "Jazz Ballad";
 
 export interface PlaybackState {
   isPlaying: boolean;

@@ -109,3 +109,4 @@ C:\USERS\USER\DESKTOP\ANTIGRAVITY\CHORD-TREE-METRONOME\
 - **2026-07-08**: 修正直式與橫式手機與平板介面重疊、破版與超出邊界的問題，完整自適應所有行動裝置與瀏覽器 (Brave, Safari, Edge, Chrome, Firefox 等)。
 - **2026-07-09**: 節拍器核心引擎全面升級為 16-Step Sequencer，並實作 Web Audio API 鼓組合成引擎，新增 22 種現代伴奏鼓點律動 (Drum Groove) 以及完整的說明互動視窗。
 - **2026-07-09**: 新增「隨堂考試」全螢幕測驗功能與 34 種進階和弦推算支援 (maj7, m7b5, dim, aug, m(maj7) 等)。
+- **2026-07-10**: 優化「隨堂考試」手機橫式排版，加入控制按鈕懸停提示。擴增 9 種全新節奏型態 (如 EDM, Heavy Metal, Soft Swing, Trance 等)，並深度改寫 Audio Engine，使不同節奏具備專屬合成音色 (如拉丁節奏之 Conga/沙鈴、Soft Swing 之鼓刷、EDM/Heavy Metal 之專屬大鼓與破音小鼓)。

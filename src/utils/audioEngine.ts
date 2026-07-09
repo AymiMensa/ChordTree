@@ -241,7 +241,6 @@ export class AudioEngine {
     osc.stop(time + 0.1);
   }
 
-  // Synthesized Drum Sounds
   private playKick(time: number) {
     if (!this.ctx) return;
     const osc = this.ctx.createOscillator();
@@ -250,20 +249,97 @@ export class AudioEngine {
     osc.connect(gainNode);
     gainNode.connect(this.ctx.destination);
 
-    osc.frequency.setValueAtTime(150, time);
-    osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.5);
+    let startFreq = 150;
+    let endFreq = 0.01;
+    let decay = 0.5;
+    let volMult = 1.5;
 
-    const vol = this.metronomeVolume * 1.5; 
+    if (this.activeGroove === "Heavy Metal") {
+      startFreq = 200;
+      decay = 0.6;
+      volMult = 2.0; 
+    } else if (this.activeGroove === "EDM" || this.activeGroove === "Trance" || this.activeGroove === "Disco") {
+      startFreq = 250; 
+      decay = 0.4;
+      volMult = 1.8;
+    } else if (this.activeGroove === "Soft Swing" || this.activeGroove === "Jazz Ballad") {
+      startFreq = 100;
+      decay = 0.3;
+      volMult = 1.0;
+    }
+
+    osc.frequency.setValueAtTime(startFreq, time);
+    osc.frequency.exponentialRampToValueAtTime(endFreq, time + decay);
+
+    const vol = this.metronomeVolume * volMult; 
     gainNode.gain.setValueAtTime(vol, time);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.5);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, time + decay);
 
     osc.start(time);
-    osc.stop(time + 0.5);
+    osc.stop(time + decay);
   }
 
   private playSnare(time: number) {
     if (!this.ctx) return;
     
+    if (["Salsa", "Bossa Nova", "Samba", "Rumba", "Cha-Cha", "Mambo", "Afrobeat"].includes(this.activeGroove)) {
+      // Conga / Timbale sound
+      const osc = this.ctx.createOscillator();
+      const oscGain = this.ctx.createGain();
+      osc.type = "sine";
+      osc.connect(oscGain);
+      oscGain.connect(this.ctx.destination);
+      osc.frequency.setValueAtTime(280, time); 
+      osc.frequency.exponentialRampToValueAtTime(220, time + 0.1);
+      oscGain.gain.setValueAtTime(this.metronomeVolume * 1.5, time);
+      oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.25);
+      osc.start(time);
+      osc.stop(time + 0.25);
+      return;
+    }
+
+    if (this.activeGroove === "Soft Swing" || this.activeGroove === "Jazz Ballad") {
+      // Brush sound (pure noise, long decay)
+      const bufferSize = this.ctx.sampleRate * 0.4;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      const noiseFilter = this.ctx.createBiquadFilter();
+      noiseFilter.type = "bandpass";
+      noiseFilter.frequency.value = 3000;
+      const noiseGain = this.ctx.createGain();
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(this.ctx.destination);
+      noiseGain.gain.setValueAtTime(0, time);
+      noiseGain.gain.linearRampToValueAtTime(this.metronomeVolume * 0.8, time + 0.05);
+      noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.4);
+      noise.start(time);
+      return;
+    }
+
+    // Default Snare
+    let bodyFreq = 250;
+    let bodyDecay = 0.2;
+    let noiseFilterFreq = 1000;
+    let noiseDecay = 0.2;
+    let bodyVol = 0.7;
+    let noiseVol = 1.2;
+
+    if (this.activeGroove === "Heavy Metal") {
+      bodyFreq = 200; 
+      bodyDecay = 0.25;
+      noiseVol = 1.8; 
+      noiseDecay = 0.3;
+    } else if (this.activeGroove === "EDM" || this.activeGroove === "Trance") {
+      bodyFreq = 300; 
+      bodyVol = 1.0;
+      noiseFilterFreq = 3000; 
+      noiseDecay = 0.15; 
+    }
+
     // Snare Body
     const osc = this.ctx.createOscillator();
     const oscGain = this.ctx.createGain();
@@ -271,14 +347,14 @@ export class AudioEngine {
     osc.connect(oscGain);
     oscGain.connect(this.ctx.destination);
     
-    osc.frequency.setValueAtTime(250, time);
-    oscGain.gain.setValueAtTime(this.metronomeVolume * 0.7, time);
-    oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+    osc.frequency.setValueAtTime(bodyFreq, time);
+    oscGain.gain.setValueAtTime(this.metronomeVolume * bodyVol, time);
+    oscGain.gain.exponentialRampToValueAtTime(0.01, time + bodyDecay);
     osc.start(time);
-    osc.stop(time + 0.2);
+    osc.stop(time + bodyDecay);
 
     // Snare Wires (Noise)
-    const bufferSize = this.ctx.sampleRate * 0.2;
+    const bufferSize = this.ctx.sampleRate * noiseDecay;
     const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
     const data = buffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) {
@@ -289,22 +365,63 @@ export class AudioEngine {
     
     const noiseFilter = this.ctx.createBiquadFilter();
     noiseFilter.type = "highpass";
-    noiseFilter.frequency.value = 1000;
+    noiseFilter.frequency.value = noiseFilterFreq;
     
     const noiseGain = this.ctx.createGain();
     noise.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
     noiseGain.connect(this.ctx.destination);
     
-    noiseGain.gain.setValueAtTime(this.metronomeVolume * 1.2, time);
-    noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+    noiseGain.gain.setValueAtTime(this.metronomeVolume * noiseVol, time);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, time + noiseDecay);
     
     noise.start(time);
   }
 
   private playHiHat(time: number, closed: boolean) {
     if (!this.ctx) return;
-    const dur = closed ? 0.1 : 0.4;
+
+    if (["Salsa", "Bossa Nova", "Samba", "Rumba", "Cha-Cha", "Mambo", "Afrobeat"].includes(this.activeGroove)) {
+      // Maracas / Shaker sound
+      const dur = closed ? 0.08 : 0.15;
+      const bufferSize = this.ctx.sampleRate * dur;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      
+      const bandpass = this.ctx.createBiquadFilter();
+      bandpass.type = "bandpass";
+      bandpass.frequency.value = 6000;
+      
+      const gainNode = this.ctx.createGain();
+      noise.connect(bandpass);
+      bandpass.connect(gainNode);
+      gainNode.connect(this.ctx.destination);
+      
+      gainNode.gain.setValueAtTime(0, time);
+      gainNode.gain.linearRampToValueAtTime(this.metronomeVolume * 0.7, time + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, time + dur);
+      
+      noise.start(time);
+      return;
+    }
+
+    let dur = closed ? 0.1 : 0.4;
+    let noiseFilterFreq = 7000;
+    
+    if (this.activeGroove === "EDM" || this.activeGroove === "Trance") {
+      dur = closed ? 0.05 : 0.25; 
+      noiseFilterFreq = 9000; 
+    } else if (this.activeGroove === "Heavy Metal") {
+      dur = closed ? 0.12 : 0.5; 
+      noiseFilterFreq = 6000;
+    } else if (this.activeGroove === "Soft Swing" || this.activeGroove === "Jazz Ballad") {
+      dur = closed ? 0.1 : 0.3;
+      noiseFilterFreq = 4000; 
+    }
+
     const bufferSize = this.ctx.sampleRate * dur;
     const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
     const data = buffer.getChannelData(0);
@@ -321,7 +438,7 @@ export class AudioEngine {
     
     const highpass = this.ctx.createBiquadFilter();
     highpass.type = "highpass";
-    highpass.frequency.value = 7000;
+    highpass.frequency.value = noiseFilterFreq;
     
     const gainNode = this.ctx.createGain();
     noise.connect(bandpass);

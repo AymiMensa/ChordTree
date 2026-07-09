@@ -211,6 +211,7 @@ export const MetronomeControls: React.FC<MetronomeControlsProps> = ({
                   <option value="Disco">Disco</option>
                   <option value="EDM">EDM</option>
                   <option value="Pop">Pop</option>
+                  <option value="Trance">Trance</option>
                 </optgroup>
                 <optgroup label="Backbeat Groove (後拍律動)">
                   <option value="Rock">Rock</option>
@@ -219,17 +220,24 @@ export const MetronomeControls: React.FC<MetronomeControlsProps> = ({
                   <option value="Folk">Folk</option>
                   <option value="Soul">Soul</option>
                   <option value="Slow Soul">Slow Soul</option>
+                  <option value="Heavy Metal">Heavy Metal</option>
+                  <option value="Country">Country</option>
+                  <option value="Pop Ballad">Pop Ballad</option>
+                  <option value="Classic Rock">Classic Rock</option>
                 </optgroup>
                 <optgroup label="Shuffle / Swung (搖擺律動)">
                   <option value="Swing">Swing</option>
                   <option value="Blues">Blues</option>
                   <option value="Shuffle Rock">Shuffle Rock</option>
                   <option value="Jazz">Jazz</option>
+                  <option value="Soft Swing">Soft Swing</option>
+                  <option value="Jazz Ballad">Jazz Ballad</option>
                 </optgroup>
                 <optgroup label="Syncopated (切分音 / 放克律動)">
                   <option value="Funk">Funk</option>
                   <option value="Hip-Hop">Hip-Hop</option>
                   <option value="Neo-Soul">Neo-Soul</option>
+                  <option value="Drum & Bass">Drum & Bass</option>
                 </optgroup>
                 <optgroup label="Polyrhythm (複節奏 / 拉丁律動)">
                   <option value="Salsa">Salsa</option>
@@ -238,6 +246,7 @@ export const MetronomeControls: React.FC<MetronomeControlsProps> = ({
                   <option value="Rumba">Rumba</option>
                   <option value="Cha-Cha">Cha-Cha</option>
                   <option value="Afrobeat">Afrobeat</option>
+                  <option value="Mambo">Mambo</option>
                 </optgroup>
               </select>
             </div>
