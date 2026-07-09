@@ -137,7 +137,7 @@ export const MetronomeControls: React.FC<MetronomeControlsProps> = ({
                 {/* Quick BPM Tweak Buttons */}
                 <div className="flex items-center gap-1 bg-indigo-950/40 p-0.5 rounded-lg border border-indigo-900/30">
                   <button
-                    onClick={() => onBpmChange(Math.max(40, bpm - 1))}
+                    onClick={() => onBpmChange(Math.max(30, bpm - 1))}
                     className="px-1.5 py-0.5 text-[10px] text-indigo-300 hover:text-white hover:bg-indigo-900/40 rounded transition-colors"
                     title="節拍速度減 1"
                   >
@@ -147,7 +147,7 @@ export const MetronomeControls: React.FC<MetronomeControlsProps> = ({
                     微調
                   </span>
                   <button
-                    onClick={() => onBpmChange(Math.min(168, bpm + 1))}
+                    onClick={() => onBpmChange(Math.min(300, bpm + 1))}
                     className="px-1.5 py-0.5 text-[10px] text-indigo-300 hover:text-white hover:bg-indigo-900/40 rounded transition-colors"
                     title="節拍速度加 1"
                   >
@@ -238,6 +238,7 @@ export const MetronomeControls: React.FC<MetronomeControlsProps> = ({
                   <option value="Hip-Hop">Hip-Hop</option>
                   <option value="Neo-Soul">Neo-Soul</option>
                   <option value="Drum & Bass">Drum & Bass</option>
+                  <option value="Rap">Rap</option>
                 </optgroup>
                 <optgroup label="Polyrhythm (複節奏 / 拉丁律動)">
                   <option value="Salsa">Salsa</option>
@@ -262,16 +263,16 @@ export const MetronomeControls: React.FC<MetronomeControlsProps> = ({
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[9px] font-mono text-indigo-600">40</span>
+                <span className="text-[9px] font-mono text-indigo-600">30</span>
                 <input
                   type="range"
-                  min="40"
-                  max="168"
+                  min="30"
+                  max="300"
                   value={bpm}
                   onChange={(e) => onBpmChange(Number(e.target.value))}
                   className="flex-1 accent-indigo-500 h-1 bg-indigo-950 rounded-lg appearance-none cursor-pointer"
                 />
-                <span className="text-[9px] font-mono text-indigo-600">168</span>
+                <span className="text-[9px] font-mono text-indigo-600">300</span>
               </div>
             </div>
           </div>

@@ -103,6 +103,7 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
            {onPlayChordDirectly && (
              <button 
                onClick={onPlayChordDirectly} 
+               title="播放當前和弦 (Play Current Chord)"
                className="w-full bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-slate-600 text-slate-200 font-medium py-1.5 rounded-md flex items-center justify-center gap-1.5 transition-all shadow text-xs mt-auto mobile-landscape-play-btn"
              >
                <Play className="w-3.5 h-3.5 fill-current text-slate-300" />

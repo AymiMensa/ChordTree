@@ -30,7 +30,7 @@ export type GrooveType =
   | "Disco" | "EDM" | "Pop" | "R&B" | "Jazz" | "Shuffle Rock" 
   | "Funk" | "Neo-Soul" | "Salsa" | "Afrobeat"
   | "Heavy Metal" | "Trance" | "Country" | "Pop Ballad" | "Soft Swing" 
-  | "Mambo" | "Drum & Bass" | "Classic Rock" | "Jazz Ballad";
+  | "Mambo" | "Drum & Bass" | "Classic Rock" | "Jazz Ballad" | "Rap";
 
 export interface PlaybackState {
   isPlaying: boolean;
