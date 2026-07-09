@@ -323,7 +323,7 @@ export default function App() {
   };
 
   const handleBpmChange = (newBpm: number) => {
-    const clampedBpm = Math.max(40, Math.min(168, newBpm));
+    const clampedBpm = Math.max(30, Math.min(300, newBpm));
     setPlaybackState((prev) => ({ ...prev, bpm: clampedBpm }));
   };
 
