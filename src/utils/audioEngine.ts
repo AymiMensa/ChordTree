@@ -255,10 +255,49 @@ export class AudioEngine {
     let volMult = 1.5;
 
     if (this.activeGroove === "Heavy Metal") {
-      startFreq = 200;
-      decay = 0.6;
-      volMult = 2.0; 
+      startFreq = 180;
+      endFreq = 30; // Sub
+      decay = 0.8;
+      volMult = 2.2; 
+      
+      // Heavy metal click
+      const click = this.ctx.createOscillator();
+      const clickGain = this.ctx.createGain();
+      click.type = 'triangle';
+      click.frequency.setValueAtTime(3000, time);
+      click.frequency.exponentialRampToValueAtTime(100, time + 0.05);
+      clickGain.gain.setValueAtTime(this.metronomeVolume * 0.5, time);
+      clickGain.gain.exponentialRampToValueAtTime(0.01, time + 0.05);
+      click.connect(clickGain);
+      clickGain.connect(this.ctx.destination);
+      click.start(time);
+      click.stop(time + 0.05);
     } else if (this.activeGroove === "EDM" || this.activeGroove === "Trance" || this.activeGroove === "Disco") {
+      startFreq = 220;
+      endFreq = 40;
+      decay = 0.5;
+      volMult = 2.5; // Extra loud 909 kick
+      osc.type = "sine";
+      
+      // Add subtle synth bass stab on kick
+      if (this.activeGroove === "Trance" || this.activeGroove === "EDM") {
+        const synthBass = this.ctx.createOscillator();
+        const bassGain = this.ctx.createGain();
+        synthBass.type = "sawtooth";
+        // Root note base freq (usually currentNotes[0] but we hardcode a low freq for bass)
+        synthBass.frequency.setValueAtTime(65.41, time); // C2
+        bassGain.gain.setValueAtTime(this.metronomeVolume * 0.4, time);
+        bassGain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(800, time);
+        filter.frequency.exponentialRampToValueAtTime(100, time + 0.3);
+        synthBass.connect(filter);
+        filter.connect(bassGain);
+        bassGain.connect(this.ctx.destination);
+        synthBass.start(time);
+        synthBass.stop(time + 0.3);
+      }
       startFreq = 250; 
       decay = 0.4;
       volMult = 1.8;
@@ -334,10 +373,28 @@ export class AudioEngine {
       noiseVol = 1.8; 
       noiseDecay = 0.3;
     } else if (this.activeGroove === "EDM" || this.activeGroove === "Trance") {
-      bodyFreq = 300; 
-      bodyVol = 1.0;
-      noiseFilterFreq = 3000; 
-      noiseDecay = 0.15; 
+      bodyFreq = 400; 
+      bodyVol = 0.8;
+      noiseFilterFreq = 2500; 
+      noiseDecay = 0.3; 
+      noiseVol = 2.0; // Synth Clap noise
+      // Add a secondary noise burst for the clap effect
+      setTimeout(() => {
+        if (!this.ctx) return;
+        const bSize = this.ctx.sampleRate * 0.15;
+        const b = this.ctx.createBuffer(1, bSize, this.ctx.sampleRate);
+        const d = b.getChannelData(0);
+        for (let i = 0; i < bSize; i++) d[i] = Math.random() * 2 - 1;
+        const n = this.ctx.createBufferSource();
+        n.buffer = b;
+        const f = this.ctx.createBiquadFilter();
+        f.type = "highpass"; f.frequency.value = 2000;
+        const g = this.ctx.createGain();
+        g.gain.setValueAtTime(this.metronomeVolume * 1.5, this.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+        n.connect(f); f.connect(g); g.connect(this.ctx.destination);
+        n.start();
+      }, 20); // 20ms delay for the second clap layer
     }
 
     // Snare Body

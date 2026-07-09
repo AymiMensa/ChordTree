@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Play, Square, Settings2, X, Music, Piano } from 'lucide-react';
 import { AudioEngine } from '../utils/audioEngine';
+import { GrooveType } from '../types';
 import { QUIZ_CHORDS, getChordMidiNotes, getChordDetails, getChordSpelling } from '../chordsData';
 import { PianoVisualizer } from './PianoVisualizer';
 
 export function PopQuiz({ onClose }: { onClose: () => void }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [bpm, setBpm] = useState(60);
+  const [activeGroove, setActiveGroove] = useState<GrooveType>("None");
   const [showPiano, setShowPiano] = useState(false);
   
   // history to keep track of chords
@@ -43,49 +45,45 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
     stateRef.current = { history: chordHistory, index: currentIndex, isPlaying };
   }, [chordHistory, currentIndex, isPlaying]);
 
+  // Initialize Audio Engine once
   useEffect(() => {
     if (!engineRef.current) {
       engineRef.current = new AudioEngine(
         (beat) => {
           if (!stateRef.current.isPlaying) return null;
-          
           if (beat === 1) {
-            // advance
             stateRef.current.index++;
             if (stateRef.current.index >= stateRef.current.history.length - 1) {
               const newChord = QUIZ_CHORDS[Math.floor(Math.random() * QUIZ_CHORDS.length)];
               stateRef.current.history.push(newChord);
-              // also update React state so UI follows
-              setTimeout(() => {
-                setChordHistory(prev => [...prev, newChord]);
-              }, 0);
+              setTimeout(() => setChordHistory(prev => [...prev, newChord]), 0);
             }
-            setTimeout(() => {
-              setCurrentIndex(stateRef.current.index);
-            }, 0);
+            setTimeout(() => setCurrentIndex(stateRef.current.index), 0);
           }
-          
           const chord = stateRef.current.history[stateRef.current.index];
           return getChordSpelling(chord);
         },
-        (beat) => {
-          // Play beat callback for visual sync if needed
-        }
+        (beat) => {}
       );
     }
-    
-    engineRef.current.setParams({
-      bpm,
-      metronomeVolume: 0.8,
-      synthVolume: 0.6,
-      soundMode: "pad",
-      synthStyle: "epiano",
-    });
-
     return () => {
       engineRef.current?.stop();
     };
-  }, [bpm]);
+  }, []);
+
+  // Update params whenever they change without stopping playback
+  useEffect(() => {
+    if (engineRef.current) {
+      engineRef.current.setParams({
+        bpm,
+        activeGroove,
+        metronomeVolume: 0.8,
+        synthVolume: 0.6,
+        soundMode: "pad",
+        synthStyle: "epiano",
+      });
+    }
+  }, [bpm, activeGroove]);
 
   const togglePlay = () => {
     if (isPlaying) {
@@ -117,17 +115,16 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
             <Music className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-base sm:text-xl md:text-2xl [@media(max-height:500px)]:text-sm font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 to-white">
+            <h1 className="text-base sm:text-xl md:text-2xl [@media(max-height:600px)]:text-sm [@media(max-height:400px)]:text-xs font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 to-white">
               和弦隨堂考試
             </h1>
-            <p className="text-[9px] sm:text-xs [@media(max-height:500px)]:text-[8px] text-indigo-300/70 font-medium tracking-widest uppercase">
+            <p className="text-[9px] sm:text-xs [@media(max-height:600px)]:text-[8px] [@media(max-height:400px)]:text-[7px] text-indigo-300/70 font-medium tracking-widest uppercase">
               CHORD PROGRESSION QUIZ
             </p>
           </div>
         </div>
-        </div>
         <button 
-          title="關閉隨堂考試"
+          title="關閉隨堂考試 (Close Quiz)"
           onClick={() => {
             engineRef.current?.stop();
             onClose();
@@ -147,7 +144,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
           {/* Previous Chord */}
           <div className="flex-1 flex justify-end opacity-40 scale-75 md:scale-90 transition-all duration-300 blur-[1px]">
             {prevChord && (
-              <div className={`font-bold text-slate-500 whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-xl sm:text-2xl md:text-4xl [@media(max-height:500px)]:text-sm' : 'text-2xl sm:text-4xl md:text-6xl [@media(max-height:500px)]:text-xl'}`}>
+              <div className={`font-bold text-slate-500 whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-xl sm:text-2xl md:text-4xl [@media(max-height:600px)]:text-xs' : 'text-2xl sm:text-4xl md:text-6xl [@media(max-height:600px)]:text-lg'}`}>
                 {prevChord}
               </div>
             )}
@@ -160,7 +157,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
                 ${isPlaying ? 'text-white scale-110' : 'text-slate-200'}`}>
               {currentChord}
             </div>
-            <div className={`mt-1 px-2 sm:px-4 py-0.5 sm:py-1 rounded-full bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 font-bold tracking-widest whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-[9px] sm:text-xs [@media(max-height:500px)]:text-[8px] [@media(max-height:500px)]:mt-0' : 'text-[10px] sm:text-sm md:text-base md:mt-4 [@media(max-height:500px)]:text-[10px] [@media(max-height:500px)]:mt-1'}`}>
+            <div className={`mt-1 px-2 sm:px-4 py-0.5 sm:py-1 rounded-full bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 font-bold tracking-widest whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-[9px] sm:text-xs [@media(max-height:600px)]:text-[7px] [@media(max-height:600px)]:px-2 [@media(max-height:600px)]:py-0' : 'text-[10px] sm:text-sm md:text-base md:mt-4 [@media(max-height:600px)]:text-[9px] [@media(max-height:600px)]:mt-1'}`}>
               目前和弦
             </div>
           </div>
@@ -168,7 +165,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
           {/* Next Chord */}
           <div className="flex-1 flex justify-start opacity-80 scale-90 md:scale-100 transition-all duration-300">
             {nextChord && (
-              <div className={`font-bold text-pink-500 drop-shadow-[0_0_15px_rgba(236,72,153,0.4)] whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-xl sm:text-3xl md:text-5xl [@media(max-height:500px)]:text-lg' : 'text-3xl sm:text-5xl md:text-7xl [@media(max-height:500px)]:text-2xl'}`}>
+              <div className={`font-bold text-pink-500 drop-shadow-[0_0_15px_rgba(236,72,153,0.4)] whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-xl sm:text-3xl md:text-5xl [@media(max-height:600px)]:text-xs' : 'text-3xl sm:text-5xl md:text-7xl [@media(max-height:600px)]:text-lg'}`}>
                 {nextChord}
               </div>
             )}
@@ -178,7 +175,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
 
         {/* Controls */}
         <div className={`flex flex-col items-center bg-slate-900/60 backdrop-blur-xl rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl w-full max-w-xl shrink-0 transition-all duration-300 
-           ${showPiano ? 'mt-1 p-2 sm:p-4 gap-1 sm:gap-4 [@media(max-height:500px)]:p-1.5 [@media(max-height:500px)]:gap-1' : 'mt-4 md:mt-12 p-4 md:p-8 gap-4 md:gap-8 [@media(max-height:500px)]:mt-2 [@media(max-height:500px)]:p-2 [@media(max-height:500px)]:gap-2'}`}>
+           ${showPiano ? 'mt-0 p-2 sm:p-4 gap-1 sm:gap-3 [@media(max-height:600px)]:p-1 [@media(max-height:600px)]:gap-0.5' : 'mt-2 md:mt-8 p-4 md:p-6 gap-3 md:gap-6 [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:p-2 [@media(max-height:600px)]:gap-1'}`}>
           
           {/* Play/Pause Button */}
           <button
@@ -203,8 +200,53 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
             )}
           </button>
 
+          {/* Groove Selector */}
+          <div className="w-full flex items-center gap-2 sm:gap-4 px-2 sm:px-4" title="選擇伴奏鼓組律動 (Select Drum Groove)">
+            <span className="text-slate-400 font-bold text-xs sm:text-base w-8 sm:w-12 text-right whitespace-nowrap">節奏</span>
+            <select
+              value={activeGroove}
+              onChange={(e) => setActiveGroove(e.target.value as GrooveType)}
+              className="flex-1 bg-indigo-950/40 border border-indigo-900/50 text-indigo-300 text-xs sm:text-sm rounded-lg px-2 py-1 focus:outline-none focus:border-indigo-500 cursor-pointer"
+            >
+              <option value="None">無鼓點 (None)</option>
+              <optgroup label="Dance / Electronic">
+                <option value="Disco">Disco</option>
+                <option value="EDM">EDM</option>
+                <option value="Trance">Trance</option>
+              </optgroup>
+              <optgroup label="Rock / Pop">
+                <option value="Rock">Rock</option>
+                <option value="Classic Rock">Classic Rock</option>
+                <option value="Heavy Metal">Heavy Metal</option>
+                <option value="Pop">Pop</option>
+                <option value="Pop Ballad">Pop Ballad</option>
+              </optgroup>
+              <optgroup label="Jazz / Swing">
+                <option value="Swing">Swing</option>
+                <option value="Soft Swing">Soft Swing</option>
+                <option value="Jazz">Jazz</option>
+                <option value="Jazz Ballad">Jazz Ballad</option>
+              </optgroup>
+              <optgroup label="Latin / World">
+                <option value="Salsa">Salsa</option>
+                <option value="Bossa Nova">Bossa Nova</option>
+                <option value="Samba">Samba</option>
+                <option value="Rumba">Rumba</option>
+                <option value="Cha-Cha">Cha-Cha</option>
+                <option value="Mambo">Mambo</option>
+              </optgroup>
+              <optgroup label="R&B / Country">
+                <option value="Country">Country</option>
+                <option value="R&B">R&B</option>
+                <option value="Soul">Soul</option>
+                <option value="Funk">Funk</option>
+                <option value="Hip-Hop">Hip-Hop</option>
+              </optgroup>
+            </select>
+          </div>
+
           {/* BPM Slider */}
-          <div className="w-full flex items-center gap-2 sm:gap-4 px-2 sm:px-4" title="調整節拍器速度">
+          <div className="w-full flex items-center gap-2 sm:gap-4 px-2 sm:px-4" title="調整節拍器速度 (Adjust BPM)">
             <span className="text-slate-400 font-mono font-bold text-xs sm:text-base w-8 sm:w-12 text-right">BPM</span>
             <input
               type="range"
@@ -218,9 +260,9 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
           </div>
 
           <button
-            title={showPiano ? "隱藏下方鋼琴鍵盤提示" : "顯示下方鋼琴鍵盤提示"}
+            title={showPiano ? "隱藏下方鋼琴鍵盤提示 (Hide Piano)" : "顯示下方鋼琴鍵盤提示 (Show Piano)"}
             onClick={() => setShowPiano(!showPiano)}
-            className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm text-indigo-300 hover:text-white transition-colors mt-1 sm:mt-2 [@media(max-height:500px)]:mt-0"
+            className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm text-indigo-300 hover:text-white transition-colors mt-0.5 sm:mt-2 [@media(max-height:600px)]:mt-0 [@media(max-height:600px)]:text-[9px]"
           >
             <Piano className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             {showPiano ? "隱藏鋼琴提示" : "顯示鋼琴提示"}
@@ -231,7 +273,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
 
       {/* Piano Hint Footer */}
       <div className={`transition-all duration-500 ease-in-out border-t border-indigo-900/50 bg-slate-950 ${showPiano ? 'translate-y-0 opacity-100 mb-0' : 'translate-y-full opacity-0 absolute bottom-0 left-0 right-0 h-0 overflow-hidden'}`}>
-        <div className="p-2 sm:p-4 [@media(max-height:500px)]:p-1 max-w-5xl mx-auto">
+        <div className="p-2 sm:p-4 [@media(max-height:600px)]:p-0 max-w-5xl mx-auto scale-90 sm:scale-100 [@media(max-height:600px)]:scale-[0.85] origin-bottom">
           <PianoVisualizer 
              activeMidiNotes={getChordMidiNotes(currentChord)}
              chordType={null} 
