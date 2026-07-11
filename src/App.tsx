@@ -34,14 +34,6 @@ function generateRandomProgression(
     const children = currentNode.children;
     const randomChild = children[Math.floor(Math.random() * children.length)];
     
-    const domChord = getDominant(randomChild.name);
-    progression.push({
-      type: "transition",
-      id: `dom-${currentNode.id}-${randomChild.id}`,
-      label: domChord,
-      notes: getChordSpelling(domChord),
-    });
-
     currentNode = randomChild;
 
     progression.push({
@@ -503,7 +495,7 @@ export default function App() {
 
               {/* Variant Selector */}
               {!isFreeModeEditing && !isCustomPlayback && (
-                <div className="flex items-center bg-[#03001e]/80 border border-indigo-950/50 rounded-lg p-0.5 shadow-lg shrink-0 w-max self-start xl:self-auto overflow-x-auto max-w-full">
+                <div className="flex flex-wrap items-center bg-[#03001e]/80 border border-indigo-950/50 rounded-lg p-0.5 shadow-lg shrink-0 xl:self-auto max-w-full">
                   <button
                     onClick={() => setTreeVariant("A")}
                     className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all ${
@@ -532,7 +524,7 @@ export default function App() {
                         : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
                     }`}
                   >
-                    橫向圓框版
+                    自訂和弦表
                   </button>
                 </div>
               )}
