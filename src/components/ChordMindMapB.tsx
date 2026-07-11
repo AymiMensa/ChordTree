@@ -135,6 +135,17 @@ export const ChordMindMapB: React.FC<ChordMindMapProps> = ({
     // Prepare active tracking lists
     const activeProgressionIds = new Set(activeProgression.map(p => p.id));
 
+    // Add intermediate dominant nodes to the active path for visualization
+    mainNodes.forEach(d => {
+        if (d.data.type === 'dominant') {
+            const parentId = d.parent?.data.id;
+            const childId = d.children?.[0]?.data.id;
+            if (parentId && childId && activeProgressionIds.has(parentId) && activeProgressionIds.has(childId)) {
+                activeProgressionIds.add(d.data.id);
+            }
+        }
+    });
+
     // 5. Draw Links
     g.append('g')
       .selectAll('line')

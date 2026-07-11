@@ -17,31 +17,39 @@ import { ChordMindMapB } from "./components/ChordMindMapB";
 function generateRandomProgression(
   startNodeId: string,
   chordNodes: ChordTreeNode[],
-  maxDepth: number
+  targetDepth: number
 ): ProgressionStep[] {
   // Always start from ROOT as requested by user to ensure full path
   let currentNode = chordNodes[0];
   const progression: ProgressionStep[] = [];
 
-  progression.push({
-    type: "node",
-    id: currentNode.id,
-    label: currentNode.name,
-    notes: getChordSpelling(currentNode.name),
-  });
-
-  while (currentNode && currentNode.depth < maxDepth && currentNode.children.length > 0) {
-    const children = currentNode.children;
-    const randomChild = children[Math.floor(Math.random() * children.length)];
-    
-    currentNode = randomChild;
-
+  if (currentNode.type !== "dominant") {
     progression.push({
       type: "node",
       id: currentNode.id,
       label: currentNode.name,
       notes: getChordSpelling(currentNode.name),
     });
+  }
+
+  let targetCount = progression.length;
+  const desiredTargets = targetDepth + 1;
+
+  while (currentNode && targetCount < desiredTargets && currentNode.children.length > 0) {
+    const children = currentNode.children;
+    const randomChild = children[Math.floor(Math.random() * children.length)];
+    
+    currentNode = randomChild;
+
+    if (currentNode.type !== "dominant") {
+      progression.push({
+        type: "node",
+        id: currentNode.id,
+        label: currentNode.name,
+        notes: getChordSpelling(currentNode.name),
+      });
+      targetCount++;
+    }
   }
 
   return progression;
@@ -63,7 +71,7 @@ export default function App() {
   const [searchFeedback, setSearchFeedback] = useState<string | null>(null);
 
   const rootTree = useMemo(() => {
-    if (treeVariant === "B") return buildChordTreeB(maxDepth);
+    if (treeVariant === "B") return buildChordTreeB(maxDepth * 2);
     return buildChordTree(maxDepth);
   }, [maxDepth, treeVariant]);
   
@@ -582,7 +590,7 @@ export default function App() {
                      <div className="absolute inset-0 p-1 flex items-center justify-center">
                         <ChordMindMapB
                           rootTree={rootTree}
-                          maxTreeDepth={maxDepth}
+                          maxTreeDepth={maxDepth * 2}
                           collapsedNodes={collapsedNodes}
                           activeNodeId={playbackState.activeNodeId}
                           activeStepIndex={playbackState.activeStepIndex}
