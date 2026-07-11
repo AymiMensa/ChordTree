@@ -14,6 +14,7 @@ import {
   X
 } from "lucide-react";
 import { PlaybackState, ProgressionStep, GrooveType } from "../types";
+import { Tooltip } from "./TooltipProvider";
 
 interface MetronomeControlsProps {
   playbackState: PlaybackState;
@@ -71,88 +72,94 @@ export const MetronomeControls: React.FC<MetronomeControlsProps> = ({
     <div className="w-full bg-[#03001e]/80 backdrop-blur-xl border border-indigo-950/50 rounded-2xl p-2 sm:p-3 md:p-4 flex flex-col gap-2 md:gap-3 shadow-2xl">
       {/* 1. Playback & Tempo Accordion */}
       <div className="flex flex-col gap-2">
-        <button 
-          onClick={() => setIsPlaybackExpanded(!isPlaybackExpanded)}
-          className="flex items-center justify-between bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2 md:p-3 hover:bg-indigo-900/30 transition-colors shadow-inner w-full"
-          title={isPlaybackExpanded ? "收合播放與節拍控制" : "展開播放與節拍控制"}
-        >
-          <span className="text-[11px] md:text-xs font-mono tracking-wider text-slate-300 font-semibold flex items-center gap-1">
-            <Play className="w-3 h-3" />
-            播放與節拍控制 (Playback & Tempo)
-          </span>
-          {isPlaybackExpanded ? <ChevronUp className="w-4 h-4 text-indigo-400" /> : <ChevronDown className="w-4 h-4 text-indigo-400" />}
-        </button>
+        <Tooltip content={isPlaybackExpanded ? "收合播放與節拍控制" : "展開播放與節拍控制"} className="w-full">
+          <button 
+            onClick={() => setIsPlaybackExpanded(!isPlaybackExpanded)}
+            className="flex items-center justify-between bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2 md:p-3 hover:bg-indigo-900/30 transition-colors shadow-inner w-full"
+          >
+            <span className="text-[11px] md:text-xs font-mono tracking-wider text-slate-300 font-semibold flex items-center gap-1">
+              <Play className="w-3 h-3" />
+              播放與節拍控制 (Playback & Tempo)
+            </span>
+            {isPlaybackExpanded ? <ChevronUp className="w-4 h-4 text-indigo-400" /> : <ChevronDown className="w-4 h-4 text-indigo-400" />}
+          </button>
+        </Tooltip>
 
         {isPlaybackExpanded && (
           <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
             {/* Playback Status & Main Actions */}
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-indigo-950/40 pb-2">
               <div className="flex flex-wrap items-center gap-2">
-                <button
-                  onClick={onTogglePlay}
-                  className={`flex items-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 transform active:scale-95 cursor-pointer select-none shadow-lg ${
-                    isPlaying
-                      ? "bg-red-500 hover:bg-red-600 text-white shadow-red-500/20"
-                      : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30 glow-button"
-                  }`}
-                  title={isPlaying ? "停止播放" : "開始播放"}
-                >
-                  {isPlaying ? (
-                    <>
-                      <Square className="w-3 h-3 fill-current" />
-                      <span>停止</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-3 h-3 fill-current" />
-                      <span>開始</span>
-                    </>
-                  )}
-                </button>
+                <Tooltip content={isPlaying ? "停止播放" : "開始播放"}>
+                  <button
+                    onClick={onTogglePlay}
+                    className={`flex items-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 transform active:scale-95 cursor-pointer select-none shadow-lg ${
+                      isPlaying
+                        ? "bg-red-500 hover:bg-red-600 text-white shadow-red-500/20"
+                        : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30 glow-button"
+                    }`}
+                  >
+                    {isPlaying ? (
+                      <>
+                        <Square className="w-3 h-3 fill-current" />
+                        <span>停止</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-3 h-3 fill-current" />
+                        <span>開始</span>
+                      </>
+                    )}
+                  </button>
+                </Tooltip>
 
-                <button
-                  onClick={onToggleRepeat}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 md:py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 transform active:scale-95 cursor-pointer select-none shadow-lg ${
-                    isRepeat
-                      ? "bg-indigo-500 text-white shadow-indigo-500/30 border border-indigo-400/50"
-                      : "bg-indigo-950/40 text-indigo-300 hover:bg-indigo-900/60 border border-indigo-900/30"
-                  }`}
-                  title={isRepeat ? "關閉重複播放" : "開啟重複播放"}
-                >
-                  <RefreshCw
-                    className={`w-3 h-3 ${isRepeat ? "animate-spin-slow" : ""}`}
-                  />
-                  <span className="hidden sm:inline">重複</span>
-                </button>
+                <Tooltip content={isRepeat ? "關閉重複播放" : "開啟重複播放"}>
+                  <button
+                    onClick={onToggleRepeat}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 md:py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 transform active:scale-95 cursor-pointer select-none shadow-lg ${
+                      isRepeat
+                        ? "bg-indigo-500 text-white shadow-indigo-500/30 border border-indigo-400/50"
+                        : "bg-indigo-950/40 text-indigo-300 hover:bg-indigo-900/60 border border-indigo-900/30"
+                    }`}
+                  >
+                    <RefreshCw
+                      className={`w-3 h-3 ${isRepeat ? "animate-spin-slow" : ""}`}
+                    />
+                    <span className="hidden sm:inline">重複</span>
+                  </button>
+                </Tooltip>
 
-                <button
-                  onClick={onGenerateNewPath}
-                  className="flex items-center gap-1.5 px-3 py-1.5 md:py-2 rounded-xl text-xs md:text-sm font-semibold bg-emerald-600/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 transition-all duration-300 transform active:scale-95 cursor-pointer select-none shadow-lg"
-                  title="生成新的隨機路徑"
-                >
-                  <Shuffle className="w-3 h-3" />
-                  <span className="hidden sm:inline">新路徑</span>
-                </button>
+                <Tooltip content="生成新的隨機路徑">
+                  <button
+                    onClick={onGenerateNewPath}
+                    className="flex items-center gap-1.5 px-3 py-1.5 md:py-2 rounded-xl text-xs md:text-sm font-semibold bg-emerald-600/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 transition-all duration-300 transform active:scale-95 cursor-pointer select-none shadow-lg"
+                  >
+                    <Shuffle className="w-3 h-3" />
+                    <span className="hidden sm:inline">新路徑</span>
+                  </button>
+                </Tooltip>
 
                 {/* Quick BPM Tweak Buttons */}
                 <div className="flex items-center gap-1 bg-indigo-950/40 p-0.5 rounded-lg border border-indigo-900/30">
-                  <button
-                    onClick={() => onBpmChange(Math.max(30, bpm - 1))}
-                    className="px-1.5 py-0.5 text-[10px] text-indigo-300 hover:text-white hover:bg-indigo-900/40 rounded transition-colors"
-                    title="節拍速度減 1"
-                  >
-                    -1
-                  </button>
+                  <Tooltip content="節拍速度減 1">
+                    <button
+                      onClick={() => onBpmChange(Math.max(30, bpm - 1))}
+                      className="px-1.5 py-0.5 text-[10px] text-indigo-300 hover:text-white hover:bg-indigo-900/40 rounded transition-colors"
+                    >
+                      -1
+                    </button>
+                  </Tooltip>
                   <span className="text-[10px] font-mono px-1 text-indigo-400">
                     微調
                   </span>
-                  <button
-                    onClick={() => onBpmChange(Math.min(300, bpm + 1))}
-                    className="px-1.5 py-0.5 text-[10px] text-indigo-300 hover:text-white hover:bg-indigo-900/40 rounded transition-colors"
-                    title="節拍速度加 1"
-                  >
-                    +1
-                  </button>
+                  <Tooltip content="節拍速度加 1">
+                    <button
+                      onClick={() => onBpmChange(Math.min(300, bpm + 1))}
+                      className="px-1.5 py-0.5 text-[10px] text-indigo-300 hover:text-white hover:bg-indigo-900/40 rounded transition-colors"
+                    >
+                      +1
+                    </button>
+                  </Tooltip>
                 </div>
               </div>
 
@@ -192,62 +199,63 @@ export const MetronomeControls: React.FC<MetronomeControlsProps> = ({
                 <span className="text-slate-400 font-medium">
                   伴奏鼓組律動 (Drum Groove)
                 </span>
-                <button
-                  onClick={() => setIsGrooveModalOpen(true)}
-                  className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 border border-sky-500/30 transition-colors text-[9px] sm:text-[10px]"
-                  title="查看鼓組 Groove 說明"
-                >
-                  <Info className="w-3 h-3" />
-                  Groove 說明
-                </button>
+                <Tooltip content="查看鼓組 Groove 說明">
+                  <button
+                    onClick={() => setIsGrooveModalOpen(true)}
+                    className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 border border-sky-500/30 transition-colors text-[9px] sm:text-[10px]"
+                  >
+                    <Info className="w-3 h-3" />
+                    Groove 說明
+                  </button>
+                </Tooltip>
               </div>
               <select
                 value={playbackState.activeGroove || "None"}
                 onChange={(e) => onGrooveChange && onGrooveChange(e.target.value as GrooveType)}
                 className="w-full bg-indigo-950/40 border border-indigo-900/50 text-indigo-300 text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-500 appearance-none cursor-pointer"
               >
-                <option value="None">傳統節拍器 (無鼓點)</option>
-                <optgroup label="Four-on-the-floor (四拍直踏)">
-                  <option value="Disco">Disco</option>
-                  <option value="EDM">EDM</option>
-                  <option value="Pop">Pop</option>
-                  <option value="Trance">Trance</option>
+                <option value="None" className="bg-slate-900 text-white">傳統節拍器 (無鼓點)</option>
+                <optgroup label="Four-on-the-floor (四拍直踏)" className="bg-slate-900 text-white font-bold">
+                  <option value="Disco" className="font-normal text-indigo-200">Disco</option>
+                  <option value="EDM" className="font-normal text-indigo-200">EDM</option>
+                  <option value="Pop" className="font-normal text-indigo-200">Pop</option>
+                  <option value="Trance" className="font-normal text-indigo-200">Trance</option>
                 </optgroup>
-                <optgroup label="Backbeat Groove (後拍律動)">
-                  <option value="Rock">Rock</option>
-                  <option value="R&B">R&B</option>
-                  <option value="Ballad">Ballad</option>
-                  <option value="Folk">Folk</option>
-                  <option value="Soul">Soul</option>
-                  <option value="Slow Soul">Slow Soul</option>
-                  <option value="Heavy Metal">Heavy Metal</option>
-                  <option value="Country">Country</option>
-                  <option value="Pop Ballad">Pop Ballad</option>
-                  <option value="Classic Rock">Classic Rock</option>
+                <optgroup label="Backbeat Groove (後拍律動)" className="bg-slate-900 text-white font-bold">
+                  <option value="Rock" className="font-normal text-indigo-200">Rock</option>
+                  <option value="R&B" className="font-normal text-indigo-200">R&B</option>
+                  <option value="Ballad" className="font-normal text-indigo-200">Ballad</option>
+                  <option value="Folk" className="font-normal text-indigo-200">Folk</option>
+                  <option value="Soul" className="font-normal text-indigo-200">Soul</option>
+                  <option value="Slow Soul" className="font-normal text-indigo-200">Slow Soul</option>
+                  <option value="Heavy Metal" className="font-normal text-indigo-200">Heavy Metal</option>
+                  <option value="Country" className="font-normal text-indigo-200">Country</option>
+                  <option value="Pop Ballad" className="font-normal text-indigo-200">Pop Ballad</option>
+                  <option value="Classic Rock" className="font-normal text-indigo-200">Classic Rock</option>
                 </optgroup>
-                <optgroup label="Shuffle / Swung (搖擺律動)">
-                  <option value="Swing">Swing</option>
-                  <option value="Blues">Blues</option>
-                  <option value="Shuffle Rock">Shuffle Rock</option>
-                  <option value="Jazz">Jazz</option>
-                  <option value="Soft Swing">Soft Swing</option>
-                  <option value="Jazz Ballad">Jazz Ballad</option>
+                <optgroup label="Shuffle / Swung (搖擺律動)" className="bg-slate-900 text-white font-bold">
+                  <option value="Swing" className="font-normal text-indigo-200">Swing</option>
+                  <option value="Blues" className="font-normal text-indigo-200">Blues</option>
+                  <option value="Shuffle Rock" className="font-normal text-indigo-200">Shuffle Rock</option>
+                  <option value="Jazz" className="font-normal text-indigo-200">Jazz</option>
+                  <option value="Soft Swing" className="font-normal text-indigo-200">Soft Swing</option>
+                  <option value="Jazz Ballad" className="font-normal text-indigo-200">Jazz Ballad</option>
                 </optgroup>
-                <optgroup label="Syncopated (切分音 / 放克律動)">
-                  <option value="Funk">Funk</option>
-                  <option value="Hip-Hop">Hip-Hop</option>
-                  <option value="Neo-Soul">Neo-Soul</option>
-                  <option value="Drum & Bass">Drum & Bass</option>
-                  <option value="Rap">Rap</option>
+                <optgroup label="Syncopated (切分音 / 放克律動)" className="bg-slate-900 text-white font-bold">
+                  <option value="Funk" className="font-normal text-indigo-200">Funk</option>
+                  <option value="Hip-Hop" className="font-normal text-indigo-200">Hip-Hop</option>
+                  <option value="Neo-Soul" className="font-normal text-indigo-200">Neo-Soul</option>
+                  <option value="Drum & Bass" className="font-normal text-indigo-200">Drum & Bass</option>
+                  <option value="Rap" className="font-normal text-indigo-200">Rap</option>
                 </optgroup>
-                <optgroup label="Polyrhythm (複節奏 / 拉丁律動)">
-                  <option value="Salsa">Salsa</option>
-                  <option value="Bossa Nova">Bossa Nova</option>
-                  <option value="Samba">Samba</option>
-                  <option value="Rumba">Rumba</option>
-                  <option value="Cha-Cha">Cha-Cha</option>
-                  <option value="Afrobeat">Afrobeat</option>
-                  <option value="Mambo">Mambo</option>
+                <optgroup label="Polyrhythm (複節奏 / 拉丁律動)" className="bg-slate-900 text-white font-bold">
+                  <option value="Salsa" className="font-normal text-indigo-200">Salsa</option>
+                  <option value="Bossa Nova" className="font-normal text-indigo-200">Bossa Nova</option>
+                  <option value="Samba" className="font-normal text-indigo-200">Samba</option>
+                  <option value="Rumba" className="font-normal text-indigo-200">Rumba</option>
+                  <option value="Cha-Cha" className="font-normal text-indigo-200">Cha-Cha</option>
+                  <option value="Afrobeat" className="font-normal text-indigo-200">Afrobeat</option>
+                  <option value="Mambo" className="font-normal text-indigo-200">Mambo</option>
                 </optgroup>
               </select>
             </div>
@@ -281,17 +289,18 @@ export const MetronomeControls: React.FC<MetronomeControlsProps> = ({
 
       {/* 2. Sound & Mixer Accordion */}
       <div className="flex flex-col gap-2">
-        <button 
-          onClick={() => setIsMixerExpanded(!isMixerExpanded)}
-          className="flex items-center justify-between bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2 md:p-3 hover:bg-indigo-900/30 transition-colors shadow-inner w-full"
-          title={isMixerExpanded ? "收合音色與音量設定" : "展開音色與音量設定"}
-        >
-          <span className="text-[11px] md:text-xs font-mono tracking-wider text-slate-300 font-semibold flex items-center gap-1">
-            <Volume2 className="w-3 h-3" />
-            音色與音量設定 (Sound & Mixer)
-          </span>
-          {isMixerExpanded ? <ChevronUp className="w-4 h-4 text-indigo-400" /> : <ChevronDown className="w-4 h-4 text-indigo-400" />}
-        </button>
+        <Tooltip content={isMixerExpanded ? "收合音色與音量設定" : "展開音色與音量設定"} className="w-full">
+          <button 
+            onClick={() => setIsMixerExpanded(!isMixerExpanded)}
+            className="flex items-center justify-between bg-indigo-950/30 border border-indigo-900/40 rounded-xl p-2 md:p-3 hover:bg-indigo-900/30 transition-colors shadow-inner w-full"
+          >
+            <span className="text-[11px] md:text-xs font-mono tracking-wider text-slate-300 font-semibold flex items-center gap-1">
+              <Volume2 className="w-3 h-3" />
+              音色與音量設定 (Sound & Mixer)
+            </span>
+            {isMixerExpanded ? <ChevronUp className="w-4 h-4 text-indigo-400" /> : <ChevronDown className="w-4 h-4 text-indigo-400" />}
+          </button>
+        </Tooltip>
 
         {isMixerExpanded && (
           <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -357,20 +366,20 @@ export const MetronomeControls: React.FC<MetronomeControlsProps> = ({
                 },
                 { id: "silent", label: "靜音" },
               ].map((mode) => (
-                <button
-                  key={mode.id}
-                  onClick={() => onSoundModeChange(mode.id as any)}
-                  className={`flex flex-col items-center justify-center p-1.5 md:p-2 rounded-xl border text-center transition-all duration-200 cursor-pointer select-none w-full ${
-                    soundMode === mode.id
-                      ? "bg-indigo-500/15 border-indigo-500/80 text-white shadow-md shadow-indigo-500/5"
-                      : "bg-indigo-950/20 border-indigo-950/40 text-slate-400 hover:bg-indigo-950/30 hover:border-indigo-900"
-                  }`}
-                  title={`切換至 ${mode.label} 模式`}
-                >
-                  <span className="text-[10px] md:text-xs font-semibold">
-                    {mode.label}
-                  </span>
-                </button>
+                <Tooltip key={mode.id} content={`切換至 ${mode.label} 模式`} className="w-full">
+                  <button
+                    onClick={() => onSoundModeChange(mode.id as any)}
+                    className={`flex flex-col items-center justify-center p-1.5 md:p-2 rounded-xl border text-center transition-all duration-200 cursor-pointer select-none w-full ${
+                      soundMode === mode.id
+                        ? "bg-indigo-500/15 border-indigo-500/80 text-white shadow-md shadow-indigo-500/5"
+                        : "bg-indigo-950/20 border-indigo-950/40 text-slate-400 hover:bg-indigo-950/30 hover:border-indigo-900"
+                    }`}
+                  >
+                    <span className="text-[10px] md:text-xs font-semibold">
+                      {mode.label}
+                    </span>
+                  </button>
+                </Tooltip>
               ))}
             </div>
 
@@ -381,20 +390,20 @@ export const MetronomeControls: React.FC<MetronomeControlsProps> = ({
                 { id: "pad", label: "合成器 Pad" },
                 { id: "strings", label: "柔和 Strings" },
               ].map((style) => (
-                <button
-                  key={style.id}
-                  onClick={() => onSynthStyleChange(style.id as any)}
-                  className={`flex flex-col items-center justify-center p-1 md:p-1.5 rounded-lg border text-center transition-all duration-200 cursor-pointer select-none w-full ${
-                    synthStyle === style.id
-                      ? "bg-purple-500/15 border-purple-500/80 text-white shadow-md shadow-purple-500/5"
-                      : "bg-indigo-950/10 border-indigo-950/30 text-slate-500 hover:bg-indigo-950/20 hover:border-indigo-900/50"
-                  }`}
-                  title={`切換音色至 ${style.label}`}
-                >
-                  <span className="text-[9px] md:text-[10px] font-semibold">
-                    {style.label}
-                  </span>
-                </button>
+                <Tooltip key={style.id} content={`切換音色至 ${style.label}`} className="w-full">
+                  <button
+                    onClick={() => onSynthStyleChange(style.id as any)}
+                    className={`flex flex-col items-center justify-center p-1 md:p-1.5 rounded-lg border text-center transition-all duration-200 cursor-pointer select-none w-full ${
+                      synthStyle === style.id
+                        ? "bg-purple-500/15 border-purple-500/80 text-white shadow-md shadow-purple-500/5"
+                        : "bg-indigo-950/10 border-indigo-950/30 text-slate-500 hover:bg-indigo-950/20 hover:border-indigo-900/50"
+                    }`}
+                  >
+                    <span className="text-[9px] md:text-[10px] font-semibold">
+                      {style.label}
+                    </span>
+                  </button>
+                </Tooltip>
               ))}
             </div>
           </div>

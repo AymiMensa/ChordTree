@@ -11,6 +11,7 @@ import { InteractiveGuides } from "./components/InteractiveGuides";
 import { MetronomeControls } from "./components/MetronomeControls";
 import { PianoVisualizer } from "./components/PianoVisualizer";
 import { PopQuiz } from "./components/PopQuiz";
+import { ChordMindMapB } from "./components/ChordMindMapB";
 
 // Generate a random path starting at a specified node
 function generateRandomProgression(
@@ -64,6 +65,7 @@ export default function App() {
   const [customProgressionList, setCustomProgressionList] = useState<CustomChord[]>([]);
   const [isCustomPlayback, setIsCustomPlayback] = useState(false);
   const [isPopQuizActive, setIsPopQuizActive] = useState(false);
+  const [treeVariant, setTreeVariant] = useState<"A" | "B" | "CUSTOM">("A");
   
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFeedback, setSearchFeedback] = useState<string | null>(null);
@@ -472,7 +474,7 @@ export default function App() {
           <div className="flex flex-col shrink-0 h-[45vh] landscape:h-auto landscape:flex-1 lg:h-auto lg:flex-1 min-w-0">
             
             {/* Title Header */}
-            <header className="flex items-center justify-between gap-2 shrink-0 px-1 pb-1 sm:pb-2 mb-0.5 sm:mb-1 border-b border-indigo-900/30">
+            <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0 px-1 pb-1 sm:pb-2 mb-0.5 sm:mb-1 border-b border-indigo-900/30">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <span className="p-1 sm:p-1.5 bg-gradient-to-br from-pink-500 to-indigo-600 rounded-lg sm:rounded-xl text-white shadow-lg shadow-pink-500/20 shrink-0">
                   <Music className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
@@ -493,6 +495,42 @@ export default function App() {
                   </div>
                 </div>
               </div>
+
+              {/* Variant Selector */}
+              {!isFreeModeEditing && !isCustomPlayback && (
+                <div className="flex items-center bg-[#03001e]/80 border border-indigo-950/50 rounded-lg p-0.5 shadow-lg shrink-0 w-max self-start sm:self-auto">
+                  <button
+                    onClick={() => setTreeVariant("A")}
+                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all ${
+                      treeVariant === "A"
+                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
+                        : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
+                    }`}
+                  >
+                    原始心智圖
+                  </button>
+                  <button
+                    onClick={() => setTreeVariant("B")}
+                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all ${
+                      treeVariant === "B"
+                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
+                        : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
+                    }`}
+                  >
+                    對稱放射版
+                  </button>
+                  <button
+                    onClick={() => setTreeVariant("CUSTOM")}
+                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all ${
+                      treeVariant === "CUSTOM"
+                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
+                        : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
+                    }`}
+                  >
+                    橫向圓框版
+                  </button>
+                </div>
+              )}
             </header>
 
             {/* Graph Area */}
@@ -516,30 +554,54 @@ export default function App() {
                 </>
               ) : (
                 <>
-                  {/* Background vector accents */}
-                  <div className="absolute top-2 left-2 sm:left-3 flex items-center gap-1 text-[8px] sm:text-[9px] font-mono text-slate-500 tracking-wider uppercase z-10 pointer-events-none">
-                    <Layers className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-indigo-500" />
-                    <span>和弦分支圖 (支援拖曳與縮放)</span>
-                  </div>
-                  <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 text-[7px] sm:text-[8px] font-mono text-slate-600 z-10 pointer-events-none text-right">
-                    D3.js 遞迴圖 (層級 0 - {maxDepth})<br/>(觸控 / 滑鼠拖曳移動視角)
-                  </div>
-                  {/* Render the Tree component */}
-                  <div className="absolute inset-0 p-1 flex items-center justify-center">
-                    <ChordMindMap
-                      rootTree={rootTree}
-                      maxTreeDepth={maxDepth}
-                      collapsedNodes={collapsedNodes}
-                      activeNodeId={playbackState.activeNodeId}
-                      activeStepIndex={playbackState.activeStepIndex}
-                      activeProgression={playbackState.activeProgression}
-                      onNodeClick={handleNodeClick}
-                      onToggleFold={handleToggleFold}
-                      metronomeBeat={metronomeBeat}
-                      interactionMode={interactionMode}
-                      isPlaying={playbackState.isPlaying}
-                    />
-                  </div>
+                  {/* Render the selected Variant */}
+                  {treeVariant === "A" && (
+                    <>
+                      <div className="absolute top-2 left-2 sm:left-3 flex items-center gap-1 text-[8px] sm:text-[9px] font-mono text-slate-500 tracking-wider uppercase z-10 pointer-events-none">
+                        <Layers className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-indigo-500" />
+                        <span>和弦分支圖 (支援拖曳與縮放)</span>
+                      </div>
+                      <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 text-[7px] sm:text-[8px] font-mono text-slate-600 z-10 pointer-events-none text-right">
+                        D3.js 遞迴圖 (層級 0 - {maxDepth})<br/>(觸控 / 滑鼠拖曳移動視角)
+                      </div>
+                      <div className="absolute inset-0 p-1 flex items-center justify-center">
+                        <ChordMindMap
+                          rootTree={rootTree}
+                          maxTreeDepth={maxDepth}
+                          collapsedNodes={collapsedNodes}
+                          activeNodeId={playbackState.activeNodeId}
+                          activeStepIndex={playbackState.activeStepIndex}
+                          activeProgression={playbackState.activeProgression}
+                          onNodeClick={handleNodeClick}
+                          onToggleFold={handleToggleFold}
+                          metronomeBeat={metronomeBeat}
+                          interactionMode={interactionMode}
+                          isPlaying={playbackState.isPlaying}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {treeVariant === "B" && (
+                     <div className="absolute inset-0 p-1 flex items-center justify-center">
+                        <ChordMindMapB
+                          maxDepth={maxDepth}
+                        />
+                     </div>
+                  )}
+
+                  {treeVariant === "CUSTOM" && (
+                    <>
+                      <div className="absolute top-2 left-2 sm:left-3 flex items-center gap-1 text-[8px] sm:text-[9px] font-mono text-slate-500 tracking-wider uppercase z-10 pointer-events-none">
+                        <Layers className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-indigo-500" />
+                        <span>目前和弦進行軌跡 (橫向版)</span>
+                      </div>
+                      <CustomProgressionFlow 
+                        progression={playbackState.activeProgression}
+                        activeStepIndex={playbackState.activeStepIndex}
+                      />
+                    </>
+                  )}
                 </>
               )}
             </div>
