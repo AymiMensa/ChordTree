@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Play, Square, Settings2, Share2, Volume2, Waves, Repeat, RefreshCw, FolderTree, FileCode, CheckSquare, Settings, Compass, Activity, Layers, Sparkles, Search, Music } from "lucide-react";
 import { AudioEngine } from "./utils/audioEngine";
-import { ChordTreeNode, buildChordTree, flattenTree, getChordSpelling, getChordMidiNotes, getChordDetails, getDominant } from "./chordsData";
+import { ChordTreeNode, buildChordTree, buildChordTreeB, flattenTree, getChordSpelling, getChordMidiNotes, getChordDetails, getDominant } from "./chordsData";
 import { PlaybackState, ProgressionStep } from "./types";
 import { CustomChord } from "./components/FreeModeEditor";
 import { ChordMindMap } from "./components/ChordMindMap";
@@ -70,7 +70,11 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFeedback, setSearchFeedback] = useState<string | null>(null);
 
-  const rootTree = useMemo(() => buildChordTree(maxDepth), [maxDepth]);
+  const rootTree = useMemo(() => {
+    if (treeVariant === "B") return buildChordTreeB(maxDepth);
+    return buildChordTree(maxDepth);
+  }, [maxDepth, treeVariant]);
+  
   const CHORD_NODES = useMemo(() => flattenTree(rootTree), [rootTree]);
 
   const ROOT_NODE_ID = "root-C";
@@ -474,7 +478,7 @@ export default function App() {
           <div className="flex flex-col shrink-0 h-[45vh] landscape:h-auto landscape:flex-1 lg:h-auto lg:flex-1 min-w-0">
             
             {/* Title Header */}
-            <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0 px-1 pb-1 sm:pb-2 mb-0.5 sm:mb-1 border-b border-indigo-900/30">
+            <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-2 shrink-0 px-1 pb-1 sm:pb-2 mb-0.5 sm:mb-1 border-b border-indigo-900/30">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <span className="p-1 sm:p-1.5 bg-gradient-to-br from-pink-500 to-indigo-600 rounded-lg sm:rounded-xl text-white shadow-lg shadow-pink-500/20 shrink-0">
                   <Music className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
@@ -498,7 +502,7 @@ export default function App() {
 
               {/* Variant Selector */}
               {!isFreeModeEditing && !isCustomPlayback && (
-                <div className="flex items-center bg-[#03001e]/80 border border-indigo-950/50 rounded-lg p-0.5 shadow-lg shrink-0 w-max self-start sm:self-auto">
+                <div className="flex items-center bg-[#03001e]/80 border border-indigo-950/50 rounded-lg p-0.5 shadow-lg shrink-0 w-max self-start xl:self-auto overflow-x-auto max-w-full">
                   <button
                     onClick={() => setTreeVariant("A")}
                     className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all ${
@@ -585,7 +589,17 @@ export default function App() {
                   {treeVariant === "B" && (
                      <div className="absolute inset-0 p-1 flex items-center justify-center">
                         <ChordMindMapB
-                          maxDepth={maxDepth}
+                          rootTree={rootTree}
+                          maxTreeDepth={maxDepth}
+                          collapsedNodes={collapsedNodes}
+                          activeNodeId={playbackState.activeNodeId}
+                          activeStepIndex={playbackState.activeStepIndex}
+                          activeProgression={playbackState.activeProgression}
+                          onNodeClick={handleNodeClick}
+                          onToggleFold={handleToggleFold}
+                          metronomeBeat={metronomeBeat}
+                          interactionMode={interactionMode}
+                          isPlaying={playbackState.isPlaying}
                         />
                      </div>
                   )}
@@ -612,7 +626,7 @@ export default function App() {
             
             {/* Global Controls Card (Moved from header) */}
             <div className="flex flex-col gap-1.5 shrink-0 bg-[#03001e]/80 backdrop-blur-xl border border-indigo-950/50 rounded-xl p-1.5 sm:p-2 shadow-2xl">
-              <div className="flex items-center justify-between gap-1 sm:gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-1 sm:gap-2">
                 {/* Search Input */}
                 <form onSubmit={handleSearch} className="relative flex-1 min-w-[90px]">
                   <input 

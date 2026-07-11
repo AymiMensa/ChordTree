@@ -236,3 +236,93 @@ export function flattenTree(node: ChordTreeNode): ChordTreeNode[] {
     }
     return arr;
 }
+
+// --- VARIANT B LOGIC ---
+const chromaticB = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+function getIndexB(note: string) {
+  const aliases: Record<string, string> = {
+    'Db': 'C#', 'D#': 'Eb', 'Gb': 'F#', 'G#': 'Ab', 'A#': 'Bb'
+  };
+  const n = aliases[note] || note;
+  return chromaticB.indexOf(n);
+}
+
+function getNoteB(index: number) {
+  return chromaticB[(index % 12 + 12) % 12];
+}
+
+function getP5DownB(note: string) { 
+  return getNoteB(getIndexB(note) + 5);
+}
+
+function getM3UpB(note: string) { 
+  return getNoteB(getIndexB(note) + 3);
+}
+
+function getMaj3UpB(note: string) { 
+  return getNoteB(getIndexB(note) + 4);
+}
+
+/**
+ * Builds the symmetrical Variant B chord progression tree.
+ * Root -> Dom -> Major/Minor -> Dom -> ...
+ */
+export function buildChordTreeB(maxDepth: number = 4): ChordTreeNode {
+  function recurseB(name: string, type: 'major' | 'minor' | 'dominant' | 'Root', depth: number, parentId: string | null, parentPath: string[]): ChordTreeNode {
+    // Map internal type 'Root' to 'major' for rendering, but we keep track logically.
+    const renderType = type === 'Root' ? 'major' : type;
+    const currentId = parentId ? `${parentId}-${name}` : `root-${name}`;
+    const currentPath = [...parentPath, name];
+
+    const node: ChordTreeNode = {
+      id: currentId,
+      name,
+      type: renderType,
+      depth,
+      parentId,
+      path: currentPath,
+      children: []
+    };
+
+    if (depth >= maxDepth) return node;
+
+    let childrenConfigs: { name: string, t: 'major' | 'minor' | 'dominant' }[] = [];
+
+    if (type === 'Root') {
+      childrenConfigs = [
+        { name: 'E7', t: 'dominant' },
+        { name: 'B7', t: 'dominant' },
+        { name: 'G7', t: 'dominant' }
+      ];
+    } else if (type === 'dominant') {
+      const rootNote = name.replace('7', '');
+      const resMaj = getP5DownB(rootNote);
+      const resMin = resMaj + 'm';
+      childrenConfigs = [
+        { name: resMaj, t: 'major' },
+        { name: resMin, t: 'minor' }
+      ];
+    } else if (type === 'minor') {
+      const rootNote = name.replace('m', '');
+      const m3Note = getM3UpB(rootNote);
+      const dom1 = m3Note + '7';
+      const dom2 = rootNote + '7';
+      childrenConfigs = [
+        { name: dom1, t: 'dominant' },
+        { name: dom2, t: 'dominant' }
+      ];
+    } else if (type === 'major') {
+      const M3Note = getMaj3UpB(name);
+      const dom = M3Note + '7';
+      childrenConfigs = [
+        { name: dom, t: 'dominant' }
+      ];
+    }
+
+    node.children = childrenConfigs.map(c => recurseB(c.name, c.t, depth + 1, currentId, currentPath));
+    return node;
+  }
+
+  return recurseB('C', 'Root', 0, null, []);
+}
