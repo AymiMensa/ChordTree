@@ -264,13 +264,8 @@ function getMaj3UpB(note: string) {
   return getNoteB(getIndexB(note) + 4);
 }
 
-/**
- * Builds the symmetrical Variant B chord progression tree.
- * Root -> Dom -> Major/Minor -> Dom -> ...
- */
 export function buildChordTreeB(maxDepth: number = 4): ChordTreeNode {
-  function recurseB(name: string, type: 'major' | 'minor' | 'dominant' | 'Root', depth: number, parentId: string | null, parentPath: string[]): ChordTreeNode {
-    // Map internal type 'Root' to 'major' for rendering, but we keep track logically.
+  function recurseB(name: string, type: 'major' | 'minor' | 'dominant' | 'Root', depth: number, state: string, parentId: string | null, parentPath: string[]): ChordTreeNode {
     const renderType = type === 'Root' ? 'major' : type;
     const currentId = parentId ? `${parentId}-${name}` : `root-${name}`;
     const currentPath = [...parentPath, name];
@@ -287,42 +282,121 @@ export function buildChordTreeB(maxDepth: number = 4): ChordTreeNode {
 
     if (depth >= maxDepth) return node;
 
-    let childrenConfigs: { name: string, t: 'major' | 'minor' | 'dominant' }[] = [];
+    const getMinor = (n: string, interval: number) => getNoteB(getIndexB(n) + interval) + 'm';
+    const getMajor = (n: string, interval: number) => getNoteB(getIndexB(n) + interval);
+    const rootName = name.replace('m', '').replace('7', '');
 
-    if (type === 'Root') {
-      childrenConfigs = [
-        { name: 'E7', t: 'dominant' },
-        { name: 'B7', t: 'dominant' },
-        { name: 'G7', t: 'dominant' }
-      ];
+    if (type === 'Root' || type === 'major' || type === 'minor') {
+        let targets: { name: string, t: 'major' | 'minor', s: string }[] = [];
+        
+        switch (state) {
+            case 'ROOT':
+                targets = [
+                    { name: rootName + 'm', t: 'minor', s: 'N' },
+                    { name: getMinor(rootName, 4), t: 'minor', s: 'E' }, // iii
+                    { name: getMajor(rootName, 5), t: 'major', s: 'S' }, // IV
+                    { name: getMinor(rootName, 9), t: 'minor', s: 'W' }  // vi
+                ];
+                break;
+            case 'N':
+                targets = [
+                    { name: getMajor(rootName, 3), t: 'major', s: 'NE_N' }, // III
+                    { name: getMinor(rootName, 5), t: 'minor', s: 'N' },    // iv
+                    { name: getMajor(rootName, 8), t: 'major', s: 'NW' }    // VI
+                ];
+                break;
+            case 'E':
+                targets = [
+                    { name: rootName, t: 'major', s: 'SE_leaf' },           // I
+                    { name: getMinor(rootName, 5), t: 'minor', s: 'E' },    // iv
+                    { name: getMajor(rootName, 3), t: 'major', s: 'NE_E' }  // III
+                ];
+                break;
+            case 'S':
+                targets = [
+                    { name: rootName + 'm', t: 'minor', s: 'SW' },          // Parallel minor
+                    { name: getMajor(rootName, 5), t: 'major', s: 'S' },    // IV
+                    { name: getMinor(rootName, 9), t: 'minor', s: 'SE' }    // vi
+                ];
+                break;
+            case 'W':
+                targets = [
+                    { name: getMajor(rootName, 8), t: 'major', s: 'NW' },   // VI
+                    { name: getMinor(rootName, 5), t: 'minor', s: 'W' },    // iv
+                    { name: rootName, t: 'major', s: 'SW_leaf' }            // I
+                ];
+                break;
+            case 'NE_N':
+                targets = [
+                    { name: getMinor(rootName, 4), t: 'minor', s: 'E' },    // iii
+                    { name: rootName + 'm', t: 'minor', s: 'N' }            // Parallel minor
+                ];
+                break;
+            case 'NE_E':
+                targets = [
+                    { name: rootName + 'm', t: 'minor', s: 'E' },           // Parallel minor
+                    { name: getMinor(rootName, 4), t: 'minor', s: 'N' }     // iii
+                ];
+                break;
+            case 'NW':
+                targets = [
+                    { name: getMinor(rootName, 9), t: 'minor', s: 'N' },    // vi
+                    { name: getMajor(rootName, 5), t: 'major', s: 'W' }     // IV
+                ];
+                break;
+            case 'SW':
+                targets = [
+                    { name: getMajor(rootName, 8), t: 'major', s: 'W' },    // VI
+                    { name: getMinor(rootName, 5), t: 'minor', s: 'SW' },   // iv
+                    { name: rootName, t: 'major', s: 'S' }                  // I
+                ];
+                break;
+            case 'SE':
+                targets = [
+                    { name: getMajor(rootName, 8), t: 'major', s: 'S' },    // VI
+                    { name: getMinor(rootName, 5), t: 'minor', s: 'E' }     // iv
+                ];
+                break;
+            case 'SE_leaf':
+                targets = [
+                    { name: getMinor(rootName, 9), t: 'minor', s: 'SE_next' } // vi
+                ];
+                break;
+            case 'SW_leaf':
+                targets = [
+                    { name: getMinor(rootName, 4), t: 'minor', s: 'SW_next' } // iii
+                ];
+                break;
+            default:
+                // Generic fallback for very deep layers to prevent stopping
+                if (type === 'minor') {
+                    targets = [
+                        { name: getMajor(rootName, 3), t: 'major', s: 'generic_M' },
+                        { name: getMinor(rootName, 5), t: 'minor', s: 'generic_m' }
+                    ];
+                } else {
+                    targets = [
+                        { name: getMinor(rootName, 9), t: 'minor', s: 'generic_m' },
+                        { name: getMajor(rootName, 5), t: 'major', s: 'generic_M' }
+                    ];
+                }
+                break;
+        }
+
+        node.children = targets.map(t => {
+            const domName = getDominant(t.name);
+            return recurseB(domName, 'dominant', depth + 1, JSON.stringify(t), currentId, currentPath);
+        });
+
     } else if (type === 'dominant') {
-      const rootNote = name.replace('7', '');
-      const resMaj = getP5DownB(rootNote);
-      const resMin = resMaj + 'm';
-      childrenConfigs = [
-        { name: resMaj, t: 'major' },
-        { name: resMin, t: 'minor' }
-      ];
-    } else if (type === 'minor') {
-      const rootNote = name.replace('m', '');
-      const m3Note = getM3UpB(rootNote);
-      const dom1 = m3Note + '7';
-      const dom2 = rootNote + '7';
-      childrenConfigs = [
-        { name: dom1, t: 'dominant' },
-        { name: dom2, t: 'dominant' }
-      ];
-    } else if (type === 'major') {
-      const M3Note = getMaj3UpB(name);
-      const dom = M3Note + '7';
-      childrenConfigs = [
-        { name: dom, t: 'dominant' }
-      ];
+        const target = JSON.parse(state);
+        node.children = [
+            recurseB(target.name, target.t, depth + 1, target.s, currentId, currentPath)
+        ];
     }
 
-    node.children = childrenConfigs.map(c => recurseB(c.name, c.t, depth + 1, currentId, currentPath));
     return node;
   }
 
-  return recurseB('C', 'Root', 0, null, []);
+  return recurseB('C', 'Root', 0, 'ROOT', null, []);
 }

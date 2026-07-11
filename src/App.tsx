@@ -56,8 +56,8 @@ function generateRandomProgression(
 }
 
 export default function App() {
-  const [layers, setLayers] = useState<number>(3);
-  const maxDepth = useMemo(() => layers, [layers]);
+  const [layers, setLayers] = useState<number>(11);
+  const maxDepth = useMemo(() => layers - 1, [layers]);
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
   const [interactionMode, setInteractionMode] = useState<"play" | "fold">("play");
   const [activeTab, setActiveTab] = useState<"controls" | "path" | "guide">("controls");
@@ -72,7 +72,8 @@ export default function App() {
 
   const rootTree = useMemo(() => {
     if (treeVariant === "B") return buildChordTreeB(maxDepth);
-    return buildChordTree(maxDepth);
+    // Variant A grows exponentially, so we clamp its depth to prevent performance issues
+    return buildChordTree(Math.min(maxDepth, 4));
   }, [maxDepth, treeVariant]);
   
   const CHORD_NODES = useMemo(() => flattenTree(rootTree), [rootTree]);
@@ -701,7 +702,7 @@ export default function App() {
                 <div className="flex items-center gap-0.5 sm:gap-1 bg-black/20 border border-indigo-900/40 px-1 sm:px-1.5 py-0.5 sm:py-1 rounded text-[9px] sm:text-[11px] text-indigo-300 whitespace-nowrap shrink-0">
                   <FolderTree className="w-2.5 h-2.5 sm:w-3 sm:h-3 hidden sm:block text-slate-400" />
                   <span className="font-semibold text-slate-400">層次:</span>
-                  {[1, 2, 3, 4, 5].map(d => (
+                  {[5, 7, 9, 11].map(d => (
                     <button
                       key={d}
                       onClick={() => {
@@ -710,7 +711,7 @@ export default function App() {
                         handleReset();
                       }}
                       className={`px-1 sm:px-1.5 py-0.5 rounded transition-all ${layers === d ? "bg-indigo-500 text-white shadow-sm" : "hover:bg-indigo-900/60"}`}
-                      title={`切換顯示層數至 ${d}`}
+                      title={`切換顯示層數至 ${d} 層`}
                     >
                       {d}
                     </button>
