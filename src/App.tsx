@@ -64,8 +64,7 @@ export default function App() {
 
   const rootTree = useMemo(() => {
     if (treeVariant === "B") return buildChordTreeB(maxDepth);
-    // Variant A grows exponentially, so we clamp its depth to prevent performance issues
-    return buildChordTree(Math.min(maxDepth, 4));
+    return buildChordTree(maxDepth);
   }, [maxDepth, treeVariant]);
   
   const CHORD_NODES = useMemo(() => flattenTree(rootTree), [rootTree]);
@@ -495,10 +494,10 @@ export default function App() {
 
               {/* Variant Selector */}
               {!isFreeModeEditing && !isCustomPlayback && (
-                <div className="flex flex-wrap items-center bg-[#03001e]/80 border border-indigo-950/50 rounded-lg p-0.5 shadow-lg shrink-0 xl:self-auto max-w-full">
+                <div className="flex items-center bg-[#03001e]/80 border border-indigo-950/50 rounded-lg p-0.5 shadow-lg shrink-0 max-w-full overflow-x-auto custom-scrollbar">
                   <button
                     onClick={() => setTreeVariant("A")}
-                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all ${
+                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${
                       treeVariant === "A"
                         ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
                         : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
@@ -508,7 +507,7 @@ export default function App() {
                   </button>
                   <button
                     onClick={() => setTreeVariant("B")}
-                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all ${
+                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${
                       treeVariant === "B"
                         ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
                         : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
@@ -518,7 +517,7 @@ export default function App() {
                   </button>
                   <button
                     onClick={() => setTreeVariant("CUSTOM")}
-                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all ${
+                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${
                       treeVariant === "CUSTOM"
                         ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
                         : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
