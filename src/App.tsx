@@ -71,7 +71,7 @@ export default function App() {
   const [searchFeedback, setSearchFeedback] = useState<string | null>(null);
 
   const rootTree = useMemo(() => {
-    if (treeVariant === "B") return buildChordTreeB(maxDepth * 2);
+    if (treeVariant === "B") return buildChordTreeB(maxDepth);
     return buildChordTree(maxDepth);
   }, [maxDepth, treeVariant]);
   

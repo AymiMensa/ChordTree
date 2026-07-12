@@ -279,26 +279,35 @@ export const ChordMindMap: React.FC<ChordMindMapProps> = ({
   // Separate animation loop for active node pulsing (avoids rebuilding D3 DOM)
   useEffect(() => {
     const svg = d3.select(svgRef.current);
+    let prevAnimatingId: string | null = null;
+    
+    const resetNode = (nodeId: string) => {
+      let g = svg.select(`#node-g-${CSS.escape(nodeId)}`);
+      if (g.empty()) {
+        const el = document.getElementById(`node-g-${nodeId}`);
+        if (el) g = d3.select(el);
+      }
+      if (!g.empty()) {
+        g.select('.active-halo').attr('stroke', 'none').attr('transform', 'scale(1)');
+        g.select('.main-circle').attr('transform', 'scale(1)');
+        g.select('text').attr('transform', 'scale(1)');
+      }
+    };
     
     const animate = (time: number) => {
         timeRef.current = time;
-        
-        // Reset all halos and circles and text
-        svg.selectAll('.active-halo')
-           .attr('stroke', 'none');
-        
-        svg.selectAll('.main-circle')
-           .attr('transform', 'scale(1)');
-           
-        svg.selectAll('text')
-           .attr('transform', 'scale(1)');
 
         const currentStep = activeProgression[activeStepIndex];
         const animatingId = currentStep ? currentStep.id : activeNodeId;
 
+        // Reset previous node if it changed
+        if (prevAnimatingId && prevAnimatingId !== animatingId) {
+          resetNode(prevAnimatingId);
+        }
+        prevAnimatingId = animatingId;
+
         if (animatingId) {
-            // Use CSS.escape to prevent syntax errors on chords like C#m, fallback to getElementById
-            let activeG = d3.select(svgRef.current).select(`#node-g-${CSS.escape(animatingId)}`);
+            let activeG = svg.select(`#node-g-${CSS.escape(animatingId)}`);
             if (activeG.empty()) {
                 const el = document.getElementById(`node-g-${animatingId}`);
                 if (el) activeG = d3.select(el);
@@ -314,12 +323,8 @@ export const ChordMindMap: React.FC<ChordMindMapProps> = ({
                    .attr('stroke-opacity', strokeOpacity)
                    .attr('transform', `scale(${pingScale})`);
 
-                // Pulsing main circle for extreme enlargement
-                const baseEnlargeScale = targetScale;
-                const nodeScale = baseEnlargeScale + (isPlaying ? Math.sin(time / 200) * 0.15 : 0);
+                const nodeScale = targetScale + (isPlaying ? Math.sin(time / 200) * 0.15 : 0);
                 activeG.select('.main-circle').attr('transform', `scale(${nodeScale})`);
-                
-                // Enlarge text and center dot
                 activeG.select('text').attr('transform', `scale(${nodeScale})`);
             }
         }
