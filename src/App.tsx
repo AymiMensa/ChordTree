@@ -38,7 +38,7 @@ function generateRandomProgression(
   while (currentNode && targetCount < desiredTargets && currentNode.children.length > 0) {
     const children = currentNode.children;
     const randomChild = children[Math.floor(Math.random() * children.length)];
-    
+
     currentNode = randomChild;
 
     if (currentNode.type !== "dominant") {
@@ -56,7 +56,10 @@ function generateRandomProgression(
 }
 
 export default function App() {
-  const [layers, setLayers] = useState<number>(11);
+  const [layers, setLayers] = useState<number>(() => {
+    if (typeof window !== 'undefined' && window.innerWidth <= 640) return 5;
+    return 11;
+  });
   const maxDepth = useMemo(() => layers - 1, [layers]);
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
   const [interactionMode, setInteractionMode] = useState<"play" | "fold">("play");
@@ -66,7 +69,7 @@ export default function App() {
   const [isCustomPlayback, setIsCustomPlayback] = useState(false);
   const [isPopQuizActive, setIsPopQuizActive] = useState(false);
   const [treeVariant, setTreeVariant] = useState<"A" | "B" | "CUSTOM">("A");
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFeedback, setSearchFeedback] = useState<string | null>(null);
 
@@ -74,7 +77,7 @@ export default function App() {
     if (treeVariant === "B") return buildChordTreeB(maxDepth);
     return buildChordTree(maxDepth);
   }, [maxDepth, treeVariant]);
-  
+
   const CHORD_NODES = useMemo(() => flattenTree(rootTree), [rootTree]);
 
   const ROOT_NODE_ID = "root-C";
@@ -132,7 +135,7 @@ export default function App() {
   // Synchronize state when the chord tree structure is rebuilt (e.g., layers or fold state changed)
   useEffect(() => {
     if (isCustomPlayback) return;
-    
+
     // If the currently active node is no longer present in the newly generated node set, reset to ROOT
     const nodeExists = CHORD_NODES.some((n) => n.id === playbackState.activeNodeId);
     if (!nodeExists) {
@@ -205,7 +208,7 @@ export default function App() {
         currentActiveStep && currentActiveStep.type === "node"
           ? currentActiveStep.id
           : prev.activeNodeId;
-      
+
       const activeNode = CHORD_NODES.find(n => n.id === activeNodeId);
       const activePath = activeNode ? activeNode.path : [ROOT_NODE_ID];
 
@@ -388,7 +391,7 @@ export default function App() {
 
   const handleReset = () => {
     setIsCustomPlayback(false);
-    
+
     const defaultStep: ProgressionStep = {
       type: "node",
       id: ROOT_NODE_ID,
@@ -412,7 +415,7 @@ export default function App() {
     if (progression.length > 0) {
       setIsCustomPlayback(true);
       setCustomProgressionList(rawChords);
-      
+
       setPlaybackState((prev) => ({
         ...prev,
         activeNodeId: "",
@@ -473,17 +476,17 @@ export default function App() {
 
         {/* NEW LAYOUT WRAPPER */}
         <div className="flex flex-col landscape:flex-row lg:flex-row gap-2 sm:gap-3 flex-1 items-stretch min-h-0">
-          
+
           {/* LEFT COLUMN (Title + Graph) */}
           <div className="flex flex-col shrink-0 h-[45vh] landscape:h-auto landscape:flex-1 lg:h-auto lg:flex-1 min-w-0">
-            
+
             {/* Title Header */}
             <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-2 shrink-0 px-1 pb-1 sm:pb-2 mb-0.5 sm:mb-1 border-b border-indigo-900/30">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <span className="p-1 sm:p-1.5 bg-gradient-to-br from-pink-500 to-indigo-600 rounded-lg sm:rounded-xl text-white shadow-lg shadow-pink-500/20 shrink-0">
                   <Music className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                 </span>
-                
+
                 <div className="flex flex-col min-w-0">
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <h1 className="text-sm sm:text-lg md:text-xl font-extrabold font-display text-white tracking-wide truncate mobile-landscape-title">
@@ -505,31 +508,28 @@ export default function App() {
                 <div className="flex items-center bg-[#03001e]/80 border border-indigo-950/50 rounded-lg p-0.5 shadow-lg shrink-0 max-w-full overflow-x-auto custom-scrollbar">
                   <button
                     onClick={() => setTreeVariant("A")}
-                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${
-                      treeVariant === "A"
+                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${treeVariant === "A"
                         ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
                         : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
-                    }`}
+                      }`}
                   >
                     原始心智圖
                   </button>
                   <button
                     onClick={() => setTreeVariant("B")}
-                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${
-                      treeVariant === "B"
+                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${treeVariant === "B"
                         ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
                         : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
-                    }`}
+                      }`}
                   >
                     對稱放射版
                   </button>
                   <button
                     onClick={() => setTreeVariant("CUSTOM")}
-                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${
-                      treeVariant === "CUSTOM"
+                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${treeVariant === "CUSTOM"
                         ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
                         : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
-                    }`}
+                      }`}
                   >
                     自訂和弦表
                   </button>
@@ -540,7 +540,7 @@ export default function App() {
             {/* Graph Area */}
             <div className="relative flex-1 bg-slate-950/80 backdrop-blur-3xl border border-indigo-900/50 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl flex flex-col min-h-0">
               {isFreeModeEditing ? (
-                <FreeModeEditor 
+                <FreeModeEditor
                   initialChords={customProgressionList}
                   onConfirm={handleConfirmCustomProgression}
                   onCancel={() => setIsFreeModeEditing(false)}
@@ -551,7 +551,7 @@ export default function App() {
                     <Layers className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-500" />
                     <span>自訂和弦進行</span>
                   </div>
-                  <CustomProgressionFlow 
+                  <CustomProgressionFlow
                     progression={playbackState.activeProgression}
                     activeStepIndex={playbackState.activeStepIndex}
                   />
@@ -566,7 +566,7 @@ export default function App() {
                         <span>和弦分支圖 (支援拖曳與縮放)</span>
                       </div>
                       <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 text-[7px] sm:text-[8px] font-mono text-slate-600 z-10 pointer-events-none text-right">
-                        D3.js 遞迴圖 (層級 0 - {maxDepth})<br/>(觸控 / 滑鼠拖曳移動視角)
+                        D3.js 遞迴圖 (層級 0 - {maxDepth})<br />(觸控 / 滑鼠拖曳移動視角)
                       </div>
                       <div className="absolute inset-0 p-1 flex items-center justify-center">
                         <ChordMindMap
@@ -587,21 +587,21 @@ export default function App() {
                   )}
 
                   {treeVariant === "B" && (
-                     <div className="absolute inset-0 p-1 flex items-center justify-center">
-                        <ChordMindMapB
-                          rootTree={rootTree}
-                          maxTreeDepth={maxDepth * 2}
-                          collapsedNodes={collapsedNodes}
-                          activeNodeId={playbackState.activeNodeId}
-                          activeStepIndex={playbackState.activeStepIndex}
-                          activeProgression={playbackState.activeProgression}
-                          onNodeClick={handleNodeClick}
-                          onToggleFold={handleToggleFold}
-                          metronomeBeat={metronomeBeat}
-                          interactionMode={interactionMode}
-                          isPlaying={playbackState.isPlaying}
-                        />
-                     </div>
+                    <div className="absolute inset-0 p-1 flex items-center justify-center">
+                      <ChordMindMapB
+                        rootTree={rootTree}
+                        maxTreeDepth={maxDepth * 2}
+                        collapsedNodes={collapsedNodes}
+                        activeNodeId={playbackState.activeNodeId}
+                        activeStepIndex={playbackState.activeStepIndex}
+                        activeProgression={playbackState.activeProgression}
+                        onNodeClick={handleNodeClick}
+                        onToggleFold={handleToggleFold}
+                        metronomeBeat={metronomeBeat}
+                        interactionMode={interactionMode}
+                        isPlaying={playbackState.isPlaying}
+                      />
+                    </div>
                   )}
 
                   {treeVariant === "CUSTOM" && (
@@ -610,7 +610,7 @@ export default function App() {
                         <Layers className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-indigo-500" />
                         <span>目前和弦進行軌跡 (橫向版)</span>
                       </div>
-                      <CustomProgressionFlow 
+                      <CustomProgressionFlow
                         progression={playbackState.activeProgression}
                         activeStepIndex={playbackState.activeStepIndex}
                       />
@@ -623,19 +623,19 @@ export default function App() {
 
           {/* RIGHT COLUMN (Controls) */}
           <div className={`flex flex-col flex-1 landscape:flex-none landscape:w-[48%] lg:flex-none lg:w-[400px] xl:w-[450px] shrink-0 gap-1.5 sm:gap-2 min-h-0 overflow-y-auto custom-scrollbar pb-2 pr-1 ${isFreeModeEditing ? 'max-lg:landscape:hidden' : ''}`}>
-            
+
             {/* Global Controls Card (Moved from header) */}
             <div className="flex flex-col gap-1.5 shrink-0 bg-[#03001e]/80 backdrop-blur-xl border border-indigo-950/50 rounded-xl p-1.5 sm:p-2 shadow-2xl">
               <div className="flex flex-wrap items-center justify-between gap-1 sm:gap-2">
                 {/* Search Input */}
                 <form onSubmit={handleSearch} className="relative flex-1 min-w-[90px]">
-                  <input 
-                    type="text" 
-                    placeholder="搜尋和弦..." 
+                  <input
+                    type="text"
+                    placeholder="搜尋和弦..."
                     value={searchQuery}
                     onChange={(e) => {
-                       setSearchQuery(e.target.value);
-                       setSearchFeedback(null);
+                      setSearchQuery(e.target.value);
+                      setSearchFeedback(null);
                     }}
                     className="w-full bg-slate-900/80 border border-indigo-900/40 text-slate-200 placeholder-slate-500 text-[10px] sm:text-[11px] px-2 py-1 pl-5 sm:pl-6 rounded focus:outline-none focus:border-indigo-500 transition-all"
                   />
@@ -646,7 +646,7 @@ export default function App() {
                     </div>
                   )}
                 </form>
-                
+
                 <button
                   onClick={() => setIsFreeModeEditing(true)}
                   className="flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 transition-colors text-[9px] sm:text-[11px] font-semibold whitespace-nowrap active:scale-95 shrink-0"
@@ -668,7 +668,7 @@ export default function App() {
                   <Music className="w-2.5 h-2.5 sm:w-3 sm:h-3 hidden sm:block" />
                   隨堂考試
                 </button>
-                
+
                 <button
                   onClick={handleReset}
                   className="flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1 rounded bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-900/50 text-[9px] sm:text-[11px] text-indigo-300 transition-all active:scale-95 cursor-pointer whitespace-nowrap shrink-0"
@@ -723,33 +723,30 @@ export default function App() {
             <div className="flex bg-[#03001e]/80 backdrop-blur-xl border border-indigo-950/50 rounded-xl p-1 shadow-2xl shrink-0">
               <button
                 onClick={() => setActiveTab("controls")}
-                className={`flex-1 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold rounded-lg transition-all ${
-                  activeTab === "controls"
+                className={`flex-1 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold rounded-lg transition-all ${activeTab === "controls"
                     ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
                     : "text-slate-400 hover:text-slate-200"
-                }`}
+                  }`}
                 title="切換至控制面板"
               >
                 控制面板
               </button>
               <button
                 onClick={() => setActiveTab("path")}
-                className={`flex-1 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold rounded-lg transition-all ${
-                  activeTab === "path"
+                className={`flex-1 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold rounded-lg transition-all ${activeTab === "path"
                     ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
                     : "text-slate-400 hover:text-slate-200"
-                }`}
+                  }`}
                 title="切換至進行軌跡"
               >
                 進行軌跡
               </button>
               <button
                 onClick={() => setActiveTab("guide")}
-                className={`flex-1 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold rounded-lg transition-all ${
-                  activeTab === "guide"
+                className={`flex-1 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold rounded-lg transition-all ${activeTab === "guide"
                     ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
                     : "text-slate-400 hover:text-slate-200"
-                }`}
+                  }`}
                 title="切換至互動指南"
               >
                 互動指南
@@ -759,117 +756,116 @@ export default function App() {
             {/* Tab Content Container */}
             <div className="flex-none relative flex flex-col gap-2">
               <div className="flex-none">
-                  {activeTab === "controls" && (
-                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                      <MetronomeControls
-                        playbackState={playbackState}
-                        onTogglePlay={handleTogglePlay}
-                        onToggleRepeat={handleToggleRepeat}
-                        onGenerateNewPath={handleGenerateNewPath}
-                        onBpmChange={handleBpmChange}
-                        onVolumeChange={handleVolumeChange}
-                        onSoundModeChange={handleSoundModeChange}
-                        onSynthStyleChange={handleSynthStyleChange}
-                        onGrooveChange={handleGrooveChange}
-                        activeChordLabel={currentStep ? currentStep.label : "C"}
-                        activeChordNotes={
-                          currentStep ? currentStep.notes : ["C", "E", "G"]
+                {activeTab === "controls" && (
+                  <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <MetronomeControls
+                      playbackState={playbackState}
+                      onTogglePlay={handleTogglePlay}
+                      onToggleRepeat={handleToggleRepeat}
+                      onGenerateNewPath={handleGenerateNewPath}
+                      onBpmChange={handleBpmChange}
+                      onVolumeChange={handleVolumeChange}
+                      onSoundModeChange={handleSoundModeChange}
+                      onSynthStyleChange={handleSynthStyleChange}
+                      onGrooveChange={handleGrooveChange}
+                      activeChordLabel={currentStep ? currentStep.label : "C"}
+                      activeChordNotes={
+                        currentStep ? currentStep.notes : ["C", "E", "G"]
+                      }
+                      activeChordFormula={
+                        getChordDetails(currentStep ? currentStep.label : "C").formula
+                      }
+                      activeChordFullName={
+                        getChordDetails(currentStep ? currentStep.label : "C").fullName
+                      }
+                      onPlayChordDirectly={() => {
+                        if (currentStep) {
+                          audioEngineRef.current.triggerChordDirectly(currentStep.notes);
+                        } else {
+                          audioEngineRef.current.triggerChordDirectly(getChordSpelling("C"));
                         }
-                        activeChordFormula={
-                          getChordDetails(currentStep ? currentStep.label : "C").formula
-                        }
-                        activeChordFullName={
-                          getChordDetails(currentStep ? currentStep.label : "C").fullName
-                        }
-                        onPlayChordDirectly={() => {
-                          if (currentStep) {
-                            audioEngineRef.current.triggerChordDirectly(currentStep.notes);
-                          } else {
-                            audioEngineRef.current.triggerChordDirectly(getChordSpelling("C"));
-                          }
-                        }}
-                        currentStep={currentStep}
-                      />
+                      }}
+                      currentStep={currentStep}
+                    />
+                  </div>
+                )}
+
+                {activeTab === "path" && (
+                  <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 bg-[#030018]/80 border border-indigo-950/40 rounded-xl p-3 flex flex-col gap-2">
+                    <div className="flex items-center justify-between text-[9px] font-mono uppercase tracking-wider text-slate-400 shrink-0">
+                      <span className="flex items-center gap-1 font-semibold text-pink-400">
+                        <Sparkles className="w-2.5 h-2.5" />
+                        進行軌跡
+                      </span>
+                      <span className="text-slate-500">
+                        第 {playbackState.activeStepIndex + 1} 步 / 共{" "}
+                        {playbackState.activeProgression.length} 步
+                      </span>
                     </div>
-                  )}
 
-                  {activeTab === "path" && (
-                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 bg-[#030018]/80 border border-indigo-950/40 rounded-xl p-3 flex flex-col gap-2">
-                      <div className="flex items-center justify-between text-[9px] font-mono uppercase tracking-wider text-slate-400 shrink-0">
-                        <span className="flex items-center gap-1 font-semibold text-pink-400">
-                          <Sparkles className="w-2.5 h-2.5" />
-                          進行軌跡
-                        </span>
-                        <span className="text-slate-500">
-                          第 {playbackState.activeStepIndex + 1} 步 / 共{" "}
-                          {playbackState.activeProgression.length} 步
-                        </span>
-                      </div>
+                    <div className="flex flex-wrap items-start content-start gap-1.5 bg-black/30 p-3 rounded-lg border border-indigo-950/50 flex-1 overflow-y-auto custom-scrollbar">
+                      {playbackState.activeProgression.map((step, idx) => {
+                        const isActive = idx === playbackState.activeStepIndex;
 
-                      <div className="flex flex-wrap items-start content-start gap-1.5 bg-black/30 p-3 rounded-lg border border-indigo-950/50 flex-1 overflow-y-auto custom-scrollbar">
-                        {playbackState.activeProgression.map((step, idx) => {
-                          const isActive = idx === playbackState.activeStepIndex;
-
-                          return (
-                            <div
-                              key={`${step.id}-${idx}`}
-                              className="flex items-center gap-1"
-                            >
-                              <span
-                                onClick={() => {
-                                  if (step.type === "node") {
-                                    const nodeObj = CHORD_NODES.find(
-                                      (n) => n.id === step.id,
-                                    );
-                                    if (nodeObj) handleNodeClick(nodeObj.id, nodeObj.name, nodeObj.path);
-                                  }
-                                }}
-                                className={`text-xs font-bold font-mono px-2 py-1 rounded transition-all duration-200 select-none ${
-                                  isActive
-                                    ? "bg-pink-500/20 text-pink-400 border border-pink-500/45 shadow-md shadow-pink-500/10 scale-105 cursor-default"
-                                    : step.type === "transition"
-                                      ? "bg-amber-950/20 text-amber-500 border border-amber-950/40 cursor-default"
-                                      : "bg-indigo-950/45 text-slate-400 hover:text-slate-200 border border-indigo-900/20 cursor-pointer"
+                        return (
+                          <div
+                            key={`${step.id}-${idx}`}
+                            className="flex items-center gap-1"
+                          >
+                            <span
+                              onClick={() => {
+                                if (step.type === "node") {
+                                  const nodeObj = CHORD_NODES.find(
+                                    (n) => n.id === step.id,
+                                  );
+                                  if (nodeObj) handleNodeClick(nodeObj.id, nodeObj.name, nodeObj.path);
+                                }
+                              }}
+                              className={`text-xs font-bold font-mono px-2 py-1 rounded transition-all duration-200 select-none ${isActive
+                                  ? "bg-pink-500/20 text-pink-400 border border-pink-500/45 shadow-md shadow-pink-500/10 scale-105 cursor-default"
+                                  : step.type === "transition"
+                                    ? "bg-amber-950/20 text-amber-500 border border-amber-950/40 cursor-default"
+                                    : "bg-indigo-950/45 text-slate-400 hover:text-slate-200 border border-indigo-900/20 cursor-pointer"
                                 }`}
-                              >
-                                {step.label}
+                            >
+                              {step.label}
+                            </span>
+                            {idx < playbackState.activeProgression.length - 1 && (
+                              <span className="text-indigo-950 font-bold text-xs select-none">
+                                →
                               </span>
-                              {idx < playbackState.activeProgression.length - 1 && (
-                                <span className="text-indigo-950 font-bold text-xs select-none">
-                                  →
-                                </span>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {activeTab === "guide" && (
-                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                      <InteractiveGuides />
-                    </div>
-                  )}
+                {activeTab === "guide" && (
+                  <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <InteractiveGuides />
+                  </div>
+                )}
               </div>
-              
+
               {/* Keyboard Visualizer firmly at bottom */}
               <div className="shrink-0">
-                 <PianoVisualizer 
-                   activeMidiNotes={getChordMidiNotes(currentStep?.label || "C")}
-                   chordType={CHORD_NODES.find(n => n.id === currentStep?.id)?.type || 'major'}
-                   activeChordLabel={currentStep ? currentStep.label : "C"}
-                   activeChordNotes={currentStep ? currentStep.notes : ["C", "E", "G"]}
-                   activeChordFormula={getChordDetails(currentStep ? currentStep.label : "C").formula}
-                   activeChordFullName={getChordDetails(currentStep ? currentStep.label : "C").fullName}
-                   onPlayChordDirectly={() => {
-                     if (currentStep) {
-                       audioEngineRef.current.triggerChordDirectly(currentStep.notes);
-                     } else {
-                       audioEngineRef.current.triggerChordDirectly(getChordSpelling("C"));
-                     }
-                   }}
-                 />
+                <PianoVisualizer
+                  activeMidiNotes={getChordMidiNotes(currentStep?.label || "C")}
+                  chordType={CHORD_NODES.find(n => n.id === currentStep?.id)?.type || 'major'}
+                  activeChordLabel={currentStep ? currentStep.label : "C"}
+                  activeChordNotes={currentStep ? currentStep.notes : ["C", "E", "G"]}
+                  activeChordFormula={getChordDetails(currentStep ? currentStep.label : "C").formula}
+                  activeChordFullName={getChordDetails(currentStep ? currentStep.label : "C").fullName}
+                  onPlayChordDirectly={() => {
+                    if (currentStep) {
+                      audioEngineRef.current.triggerChordDirectly(currentStep.notes);
+                    } else {
+                      audioEngineRef.current.triggerChordDirectly(getChordSpelling("C"));
+                    }
+                  }}
+                />
               </div>
 
             </div>
