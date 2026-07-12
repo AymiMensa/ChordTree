@@ -253,10 +253,11 @@ export const ChordMindMapB: React.FC<ChordMindMapProps> = ({
 
   }, [dimensions, collapsedNodes, rootTree, interactionMode, activeProgression]); // Rebuild tree when structure changes
 
+  const prevAnimatingIdRef = useRef<string | null>(null);
+
   // Separate animation loop for active node pulsing (avoids rebuilding D3 DOM)
   useEffect(() => {
     const svg = d3.select(svgRef.current);
-    let prevAnimatingId: string | null = null;
     
     const resetNode = (nodeId: string) => {
       let g = svg.select(`#node-g-${CSS.escape(nodeId)}`);
@@ -278,10 +279,10 @@ export const ChordMindMapB: React.FC<ChordMindMapProps> = ({
         const animatingId = currentStep ? currentStep.id : activeNodeId;
 
         // Reset previous node if it changed
-        if (prevAnimatingId && prevAnimatingId !== animatingId) {
-          resetNode(prevAnimatingId);
+        if (prevAnimatingIdRef.current && prevAnimatingIdRef.current !== animatingId) {
+          resetNode(prevAnimatingIdRef.current);
         }
-        prevAnimatingId = animatingId;
+        prevAnimatingIdRef.current = animatingId;
 
         if (animatingId) {
             let activeG = svg.select(`#node-g-${CSS.escape(animatingId)}`);

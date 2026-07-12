@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Plus, X, ArrowLeft, Check, Trash2, Settings2, Download, Upload } from 'lucide-react';
 import { parseChordToNotes } from '../utils/chordParser';
 import { ProgressionStep } from '../types';
+import { Tooltip } from './TooltipProvider';
 
 export const CHORD_ROOTS = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"];
 
@@ -71,6 +72,12 @@ export const FreeModeEditor: React.FC<FreeModeEditorProps> = ({ initialChords, o
 
   const handleAddChord = () => {
     setChords([...chords, { id: Date.now().toString(), root: "C", quality: "M", bass: "" }]);
+  };
+
+  const handleInsertChord = (index: number) => {
+    const newChords = [...chords];
+    newChords.splice(index + 1, 0, { id: Date.now().toString(), root: "C", quality: "M", bass: "" });
+    setChords(newChords);
   };
 
   const handleRemoveChord = (idToRemove: string) => {
@@ -152,22 +159,30 @@ export const FreeModeEditor: React.FC<FreeModeEditorProps> = ({ initialChords, o
             onChange={handleImportJSON} 
           />
           <div className="flex bg-indigo-950/40 rounded-lg md:rounded-xl border border-indigo-900/40 p-1 max-md:landscape:p-0.5">
-            <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-md md:rounded-lg text-indigo-300 hover:text-indigo-100 hover:bg-indigo-900/60 transition-colors text-xs md:text-sm font-medium max-md:landscape:px-1.5 max-md:landscape:py-0.5 max-md:landscape:text-[10px]" title="匯入 JSON (讀取)">
-              <Upload className="w-4 h-4 md:w-4 md:h-4 max-md:landscape:w-3 max-md:landscape:h-3" />
-              <span className="hidden sm:inline">讀取</span>
-            </button>
+            <Tooltip content="匯入 JSON 檔案">
+              <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-md md:rounded-lg text-indigo-300 hover:text-indigo-100 hover:bg-indigo-900/60 transition-colors text-xs md:text-sm font-medium max-md:landscape:px-1.5 max-md:landscape:py-0.5 max-md:landscape:text-[10px]" title="匯入 JSON (讀取)">
+                <Upload className="w-4 h-4 md:w-4 md:h-4 max-md:landscape:w-3 max-md:landscape:h-3" />
+                <span className="hidden sm:inline">讀取</span>
+              </button>
+            </Tooltip>
             <div className="w-[1px] bg-indigo-900/50 mx-1 max-md:landscape:mx-0.5"></div>
-            <button onClick={handleExportJSON} className="flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-md md:rounded-lg text-indigo-300 hover:text-indigo-100 hover:bg-indigo-900/60 transition-colors text-xs md:text-sm font-medium max-md:landscape:px-1.5 max-md:landscape:py-0.5 max-md:landscape:text-[10px]" title="匯出 JSON (儲存)">
-              <Download className="w-4 h-4 md:w-4 md:h-4 max-md:landscape:w-3 max-md:landscape:h-3" />
-              <span className="hidden sm:inline">儲存</span>
-            </button>
+            <Tooltip content="匯出成 JSON 檔案">
+              <button onClick={handleExportJSON} className="flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-md md:rounded-lg text-indigo-300 hover:text-indigo-100 hover:bg-indigo-900/60 transition-colors text-xs md:text-sm font-medium max-md:landscape:px-1.5 max-md:landscape:py-0.5 max-md:landscape:text-[10px]" title="匯出 JSON (儲存)">
+                <Download className="w-4 h-4 md:w-4 md:h-4 max-md:landscape:w-3 max-md:landscape:h-3" />
+                <span className="hidden sm:inline">儲存</span>
+              </button>
+            </Tooltip>
           </div>
 
-          <button onClick={onCancel} className="px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-slate-300 hover:bg-white/5 transition-colors text-sm md:text-base font-medium ml-auto max-md:landscape:px-2 max-md:landscape:py-1 max-md:landscape:text-[10px]">取消</button>
-          <button onClick={handleSave} className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm md:text-base font-medium shadow-lg shadow-indigo-500/25 transition-all max-md:landscape:px-2 max-md:landscape:py-1 max-md:landscape:text-[10px]">
-            <Check className="w-4 h-4 max-md:landscape:w-3 max-md:landscape:h-3" />
-            確認
-          </button>
+          <Tooltip content="放棄變更並關閉">
+            <button onClick={onCancel} className="px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-slate-300 hover:bg-white/5 transition-colors text-sm md:text-base font-medium ml-auto max-md:landscape:px-2 max-md:landscape:py-1 max-md:landscape:text-[10px]">取消</button>
+          </Tooltip>
+          <Tooltip content="確認並套用變更">
+            <button onClick={handleSave} className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm md:text-base font-medium shadow-lg shadow-indigo-500/25 transition-all max-md:landscape:px-2 max-md:landscape:py-1 max-md:landscape:text-[10px]">
+              <Check className="w-4 h-4 max-md:landscape:w-3 max-md:landscape:h-3" />
+              確認
+            </button>
+          </Tooltip>
         </div>
       </div>
       
@@ -216,24 +231,39 @@ export const FreeModeEditor: React.FC<FreeModeEditorProps> = ({ initialChords, o
                 </select>
               </div>
               
-              {chords.length > 1 && (
-                <button 
-                  onClick={() => handleRemoveChord(chord.id)}
-                  className="p-1 md:p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors ml-0 md:ml-1 shrink-0 max-md:landscape:p-0.5"
-                >
-                  <Trash2 className="w-4 h-4 md:w-5 md:h-5 max-md:landscape:w-3 max-md:landscape:h-3" />
-                </button>
-              )}
+              <div className="flex items-center gap-0.5 md:gap-1 ml-0 md:ml-1 shrink-0">
+                <Tooltip content="在此和弦之後插入新和弦">
+                  <button 
+                    onClick={() => handleInsertChord(index)}
+                    className="p-1 md:p-1.5 text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-md transition-colors max-md:landscape:p-0.5 text-[10px] md:text-xs font-bold flex items-center justify-center gap-0.5"
+                  >
+                    <Plus className="w-3 h-3 md:w-4 md:h-4 max-md:landscape:w-2.5 max-md:landscape:h-2.5" />
+                    🎵
+                  </button>
+                </Tooltip>
+                {chords.length > 1 && (
+                  <Tooltip content="移除這個和弦">
+                    <button 
+                      onClick={() => handleRemoveChord(chord.id)}
+                      className="p-1 md:p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors max-md:landscape:p-0.5"
+                    >
+                      <Trash2 className="w-4 h-4 md:w-5 md:h-5 max-md:landscape:w-3 max-md:landscape:h-3" />
+                    </button>
+                  </Tooltip>
+                )}
+              </div>
             </div>
           ))}
           
-          <button 
-            onClick={handleAddChord}
-            className="flex items-center justify-center h-[42px] md:h-[62px] px-4 md:px-5 border-2 border-dashed border-indigo-900/50 rounded-lg md:rounded-xl text-indigo-400 hover:text-indigo-300 hover:border-indigo-500 hover:bg-indigo-950/30 transition-all font-medium w-full max-md:portrait:w-full sm:w-auto text-sm md:text-base max-md:landscape:h-[32px] max-md:landscape:px-3 max-md:landscape:text-xs"
-          >
-            <Plus className="w-4 h-4 md:w-5 md:h-5 mr-1 max-md:landscape:w-3 max-md:landscape:h-3 max-md:landscape:mr-0.5" />
-            增加和弦
-          </button>
+          <Tooltip content="在尾端新增一個和弦" className="w-full max-md:portrait:w-full sm:w-auto flex">
+            <button 
+              onClick={handleAddChord}
+              className="flex items-center justify-center h-[42px] md:h-[62px] px-4 md:px-5 border-2 border-dashed border-indigo-900/50 rounded-lg md:rounded-xl text-indigo-400 hover:text-indigo-300 hover:border-indigo-500 hover:bg-indigo-950/30 transition-all font-medium w-full text-sm md:text-base max-md:landscape:h-[32px] max-md:landscape:px-3 max-md:landscape:text-xs"
+            >
+              <Plus className="w-4 h-4 md:w-5 md:h-5 mr-1 max-md:landscape:w-3 max-md:landscape:h-3 max-md:landscape:mr-0.5" />
+              增加和弦
+            </button>
+          </Tooltip>
         </div>
       </div>
     </div>

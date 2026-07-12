@@ -8,7 +8,6 @@ import {
   RefreshCw,
   Shuffle,
   ChevronDown,
-  ChevronDown,
   ChevronUp,
   Info,
   X

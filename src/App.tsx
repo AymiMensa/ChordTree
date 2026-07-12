@@ -12,36 +12,59 @@ import { MetronomeControls } from "./components/MetronomeControls";
 import { PianoVisualizer } from "./components/PianoVisualizer";
 import { PopQuiz } from "./components/PopQuiz";
 import { ChordMindMapB } from "./components/ChordMindMapB";
+import { Tooltip } from "./components/TooltipProvider";
 
 // Generate a random path starting at a specified node
 function generateRandomProgression(
   startNodeId: string,
   chordNodes: ChordTreeNode[],
-  targetDepth: number
+  targetDepth: number,
+  treeVariant: "A" | "B" | "CUSTOM"
 ): ProgressionStep[] {
-  // Always start from ROOT as requested by user to ensure full path
-  let currentNode = chordNodes[0];
+  let currentNode = chordNodes.find(n => n.id === startNodeId) || chordNodes[0];
   const progression: ProgressionStep[] = [];
 
-  if (currentNode.type !== "dominant") {
-    progression.push({
-      type: "node",
-      id: currentNode.id,
-      label: currentNode.name,
-      notes: getChordSpelling(currentNode.name),
-    });
-  }
+  progression.push({
+    type: "node",
+    id: currentNode.id,
+    label: currentNode.name,
+    notes: getChordSpelling(currentNode.name),
+  });
 
-  let targetCount = progression.length;
-  const desiredTargets = targetDepth + 1;
+  if (treeVariant === "B") {
+    let currentDepth = 0;
+    while (currentNode && currentDepth < targetDepth && currentNode.children.length > 0) {
+      const children = currentNode.children;
+      const randomChild = children[Math.floor(Math.random() * children.length)];
 
-  while (currentNode && targetCount < desiredTargets && currentNode.children.length > 0) {
-    const children = currentNode.children;
-    const randomChild = children[Math.floor(Math.random() * children.length)];
+      progression.push({
+        type: "node",
+        id: randomChild.id,
+        label: randomChild.name,
+        notes: getChordSpelling(randomChild.name),
+      });
 
-    currentNode = randomChild;
+      currentNode = randomChild;
+      currentDepth++;
+    }
+  } else {
+    let targetCount = 1;
+    const desiredTargets = targetDepth + 1;
 
-    if (currentNode.type !== "dominant") {
+    while (currentNode && targetCount < desiredTargets && currentNode.children.length > 0) {
+      const children = currentNode.children;
+      const randomChild = children[Math.floor(Math.random() * children.length)];
+
+      const domChord = getDominant(randomChild.name);
+      progression.push({
+        type: "node",
+        id: `dom-${currentNode.id}-${randomChild.id}`,
+        label: domChord,
+        notes: getChordSpelling(domChord),
+      });
+
+      currentNode = randomChild;
+
       progression.push({
         type: "node",
         id: currentNode.id,
@@ -58,9 +81,9 @@ function generateRandomProgression(
 export default function App() {
   const [layers, setLayers] = useState<number>(() => {
     if (typeof window !== 'undefined' && window.innerWidth <= 640) return 5;
-    return 11;
+    return 5;
   });
-  const maxDepth = useMemo(() => layers - 1, [layers]);
+
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
   const [interactionMode, setInteractionMode] = useState<"play" | "fold">("play");
   const [activeTab, setActiveTab] = useState<"controls" | "path" | "guide">("controls");
@@ -69,6 +92,11 @@ export default function App() {
   const [isCustomPlayback, setIsCustomPlayback] = useState(false);
   const [isPopQuizActive, setIsPopQuizActive] = useState(false);
   const [treeVariant, setTreeVariant] = useState<"A" | "B" | "CUSTOM">("A");
+
+  const maxDepth = useMemo(() => {
+    if (treeVariant === "B") return layers - 1;
+    return Math.floor((layers - 1) / 2);
+  }, [layers, treeVariant]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFeedback, setSearchFeedback] = useState<string | null>(null);
@@ -135,6 +163,7 @@ export default function App() {
   // Synchronize state when the chord tree structure is rebuilt (e.g., layers or fold state changed)
   useEffect(() => {
     if (isCustomPlayback) return;
+    if (playbackState.activeNodeId.startsWith("dom-") || playbackState.activeNodeId.startsWith("search-")) return;
 
     // If the currently active node is no longer present in the newly generated node set, reset to ROOT
     const nodeExists = CHORD_NODES.some((n) => n.id === playbackState.activeNodeId);
@@ -210,7 +239,7 @@ export default function App() {
           : prev.activeNodeId;
 
       const activeNode = CHORD_NODES.find(n => n.id === activeNodeId);
-      const activePath = activeNode ? activeNode.path : [ROOT_NODE_ID];
+      const activePath = activeNode ? activeNode.path : prev.activePath;
 
       return {
         ...prev,
@@ -273,7 +302,7 @@ export default function App() {
         nextPlaying &&
         prev.activeProgression.length === 1
       ) {
-        updatedProg = generateRandomProgression(prev.activeNodeId, CHORD_NODES, maxDepth);
+        updatedProg = generateRandomProgression(prev.activeNodeId, CHORD_NODES, maxDepth, treeVariant);
         updatedIdx = 0;
 
         // Auto-expand nodes in the generated path so they become visible
@@ -311,7 +340,7 @@ export default function App() {
   };
 
   const handleGenerateNewPath = () => {
-    const newProgression = generateRandomProgression(playbackState.activeNodeId, CHORD_NODES, maxDepth);
+    const newProgression = generateRandomProgression(playbackState.activeNodeId, CHORD_NODES, maxDepth, treeVariant);
     // Auto-expand nodes in the new path
     setCollapsedNodes(prevCollapsed => {
       const next = new Set(prevCollapsed);
@@ -506,33 +535,47 @@ export default function App() {
               {/* Variant Selector */}
               {!isFreeModeEditing && !isCustomPlayback && (
                 <div className="flex items-center bg-[#03001e]/80 border border-indigo-950/50 rounded-lg p-0.5 shadow-lg shrink-0 max-w-full overflow-x-auto custom-scrollbar">
-                  <button
-                    onClick={() => setTreeVariant("A")}
-                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${treeVariant === "A"
-                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
-                        : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
-                      }`}
-                  >
-                    原始心智圖
-                  </button>
-                  <button
-                    onClick={() => setTreeVariant("B")}
-                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${treeVariant === "B"
-                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
-                        : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
-                      }`}
-                  >
-                    對稱放射版
-                  </button>
-                  <button
-                    onClick={() => setTreeVariant("CUSTOM")}
-                    className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${treeVariant === "CUSTOM"
-                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
-                        : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
-                      }`}
-                  >
-                    自訂和弦表
-                  </button>
+                  <Tooltip content="原始版本的和弦進行心智圖">
+                    <button
+                      onClick={() => {
+                        setTreeVariant("A");
+                        setLayers(5);
+                        setCollapsedNodes(new Set());
+                      }}
+                      className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${treeVariant === "A"
+                          ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
+                          : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
+                        }`}
+                    >
+                      原始心智圖
+                    </button>
+                  </Tooltip>
+                  <Tooltip content="以五度圈結構為基礎的放射狀版本">
+                    <button
+                      onClick={() => {
+                        setTreeVariant("B");
+                        setLayers(11);
+                        setCollapsedNodes(new Set());
+                      }}
+                      className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${treeVariant === "B"
+                          ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
+                          : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
+                        }`}
+                    >
+                      對稱放射版
+                    </button>
+                  </Tooltip>
+                  <Tooltip content="由您自己建立的和弦進行">
+                    <button
+                      onClick={() => setTreeVariant("CUSTOM")}
+                      className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${treeVariant === "CUSTOM"
+                          ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
+                          : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
+                        }`}
+                    >
+                      自訂和弦表
+                    </button>
+                  </Tooltip>
                 </div>
               )}
             </header>
@@ -590,7 +633,7 @@ export default function App() {
                     <div className="absolute inset-0 p-1 flex items-center justify-center">
                       <ChordMindMapB
                         rootTree={rootTree}
-                        maxTreeDepth={maxDepth * 2}
+                        maxTreeDepth={maxDepth}
                         collapsedNodes={collapsedNodes}
                         activeNodeId={playbackState.activeNodeId}
                         activeStepIndex={playbackState.activeStepIndex}
@@ -629,16 +672,18 @@ export default function App() {
               <div className="flex flex-wrap items-center justify-between gap-1 sm:gap-2">
                 {/* Search Input */}
                 <form onSubmit={handleSearch} className="relative flex-1 min-w-[90px]">
-                  <input
-                    type="text"
-                    placeholder="搜尋和弦..."
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setSearchFeedback(null);
-                    }}
-                    className="w-full bg-slate-900/80 border border-indigo-900/40 text-slate-200 placeholder-slate-500 text-[10px] sm:text-[11px] px-2 py-1 pl-5 sm:pl-6 rounded focus:outline-none focus:border-indigo-500 transition-all"
-                  />
+                  <Tooltip content="輸入和弦名稱進行搜尋 (如: Cmaj7, Dm, G7)" className="w-full flex">
+                    <input
+                      type="text"
+                      placeholder="搜尋和弦..."
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setSearchFeedback(null);
+                      }}
+                      className="w-full bg-slate-900/80 border border-indigo-900/40 text-slate-200 placeholder-slate-500 text-[10px] sm:text-[11px] px-2 py-1 pl-5 sm:pl-6 rounded focus:outline-none focus:border-indigo-500 transition-all"
+                    />
+                  </Tooltip>
                   <Search className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-500 absolute left-1.5 sm:left-2 top-[6px] sm:top-[6px]" />
                   {searchFeedback && (
                     <div className="absolute top-full left-0 mt-1 bg-indigo-950/90 text-[9px] sm:text-[10px] text-indigo-300 px-2 py-1 rounded shadow-lg border border-indigo-900 z-50 whitespace-nowrap">
@@ -647,73 +692,84 @@ export default function App() {
                   )}
                 </form>
 
-                <button
-                  onClick={() => setIsFreeModeEditing(true)}
-                  className="flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 transition-colors text-[9px] sm:text-[11px] font-semibold whitespace-nowrap active:scale-95 shrink-0"
-                  title="開啟自由編輯模式"
-                >
-                  <FileCode className="w-2.5 h-2.5 sm:w-3 sm:h-3 hidden sm:block" />
-                  自由編輯
-                </button>
+                <Tooltip content="建立自訂的和弦進行序列">
+                  <button
+                    onClick={() => setIsFreeModeEditing(true)}
+                    className="flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 transition-colors text-[9px] sm:text-[11px] font-semibold whitespace-nowrap active:scale-95 shrink-0"
+                    title="開啟自由編輯模式"
+                  >
+                    <FileCode className="w-2.5 h-2.5 sm:w-3 sm:h-3 hidden sm:block" />
+                    自由編輯
+                  </button>
+                </Tooltip>
 
-                <button
-                  onClick={() => {
-                    audioEngineRef.current?.stop();
-                    setPlaybackState(prev => ({ ...prev, isPlaying: false }));
-                    setIsPopQuizActive(true);
-                  }}
-                  className="flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1 rounded bg-pink-500/10 border border-pink-500/30 text-pink-400 hover:bg-pink-500/20 transition-colors text-[9px] sm:text-[11px] font-semibold whitespace-nowrap active:scale-95 shrink-0"
-                  title="開啟隨堂考試"
-                >
-                  <Music className="w-2.5 h-2.5 sm:w-3 sm:h-3 hidden sm:block" />
-                  隨堂考試
-                </button>
+                <Tooltip content="隨機和弦測驗，訓練聽力與反應">
+                  <button
+                    onClick={() => {
+                      audioEngineRef.current?.stop();
+                      setPlaybackState(prev => ({ ...prev, isPlaying: false }));
+                      setIsPopQuizActive(true);
+                    }}
+                    className="flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1 rounded bg-pink-500/10 border border-pink-500/30 text-pink-400 hover:bg-pink-500/20 transition-colors text-[9px] sm:text-[11px] font-semibold whitespace-nowrap active:scale-95 shrink-0"
+                    title="開啟隨堂考試"
+                  >
+                    <Music className="w-2.5 h-2.5 sm:w-3 sm:h-3 hidden sm:block" />
+                    隨堂考試
+                  </button>
+                </Tooltip>
 
-                <button
-                  onClick={handleReset}
-                  className="flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1 rounded bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-900/50 text-[9px] sm:text-[11px] text-indigo-300 transition-all active:scale-95 cursor-pointer whitespace-nowrap shrink-0"
-                  title="回到中心主音 C"
-                >
-                  <RefreshCw className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                  <span className="hidden sm:inline">重置 C</span>
-                </button>
+                <Tooltip content="回到預設的 C 和弦節點">
+                  <button
+                    onClick={handleReset}
+                    className="flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1 rounded bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-900/50 text-[9px] sm:text-[11px] text-indigo-300 transition-all active:scale-95 cursor-pointer whitespace-nowrap shrink-0"
+                    title="回到中心主音 C"
+                  >
+                    <RefreshCw className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                    <span className="hidden sm:inline">重置 C</span>
+                  </button>
+                </Tooltip>
               </div>
 
               <div className="flex items-center justify-between gap-1 overflow-x-auto custom-scrollbar pb-0.5">
                 <div className="flex items-center gap-0.5 sm:gap-1 bg-black/20 border border-indigo-900/40 px-1 sm:px-1.5 py-0.5 sm:py-1 rounded text-[9px] sm:text-[11px] text-indigo-300 whitespace-nowrap shrink-0">
                   <span className="font-semibold text-slate-400">點擊模式:</span>
-                  <button
-                    onClick={() => setInteractionMode("play")}
-                    className={`px-1 sm:px-1.5 py-0.5 rounded transition-all ${interactionMode === "play" ? "bg-indigo-500 text-white shadow-sm" : "hover:bg-indigo-900/60"}`}
-                    title="點擊節點進行試聽與播放路徑"
-                  >
-                    🎵 試聽
-                  </button>
-                  <button
-                    onClick={() => setInteractionMode("fold")}
-                    className={`px-1 sm:px-1.5 py-0.5 rounded transition-all ${interactionMode === "fold" ? "bg-pink-600 text-white shadow-sm" : "hover:bg-indigo-900/60"}`}
-                    title="點擊節點將其分支摺疊或展開"
-                  >
-                    📂 摺疊
-                  </button>
+                  <Tooltip content="點擊節點進行試聽與播放路徑">
+                    <button
+                      onClick={() => setInteractionMode("play")}
+                      className={`px-1 sm:px-1.5 py-0.5 rounded transition-all ${interactionMode === "play" ? "bg-indigo-500 text-white shadow-sm" : "hover:bg-indigo-900/60"}`}
+                      title="點擊節點進行試聽與播放路徑"
+                    >
+                      🎵 試聽
+                    </button>
+                  </Tooltip>
+                  <Tooltip content="點擊節點將其分支摺疊或展開">
+                    <button
+                      onClick={() => setInteractionMode("fold")}
+                      className={`px-1 sm:px-1.5 py-0.5 rounded transition-all ${interactionMode === "fold" ? "bg-pink-600 text-white shadow-sm" : "hover:bg-indigo-900/60"}`}
+                      title="點擊節點將其分支摺疊或展開"
+                    >
+                      📂 摺疊
+                    </button>
+                  </Tooltip>
                 </div>
 
                 <div className="flex items-center gap-0.5 sm:gap-1 bg-black/20 border border-indigo-900/40 px-1 sm:px-1.5 py-0.5 sm:py-1 rounded text-[9px] sm:text-[11px] text-indigo-300 whitespace-nowrap shrink-0">
                   <FolderTree className="w-2.5 h-2.5 sm:w-3 sm:h-3 hidden sm:block text-slate-400" />
                   <span className="font-semibold text-slate-400">層次:</span>
                   {[5, 7, 9, 11].map(d => (
-                    <button
-                      key={d}
-                      onClick={() => {
-                        setLayers(d);
-                        setCollapsedNodes(new Set());
-                        handleReset();
-                      }}
-                      className={`px-1 sm:px-1.5 py-0.5 rounded transition-all ${layers === d ? "bg-indigo-500 text-white shadow-sm" : "hover:bg-indigo-900/60"}`}
-                      title={`切換顯示層數至 ${d} 層`}
-                    >
-                      {d}
-                    </button>
+                    <Tooltip content={`切換顯示層數至 ${d} 層`} key={d}>
+                      <button
+                        onClick={() => {
+                          setLayers(d);
+                          setCollapsedNodes(new Set());
+                          handleReset();
+                        }}
+                        className={`px-1 sm:px-1.5 py-0.5 rounded transition-all ${layers === d ? "bg-indigo-500 text-white shadow-sm" : "hover:bg-indigo-900/60"}`}
+                        title={`切換顯示層數至 ${d} 層`}
+                      >
+                        {d}
+                      </button>
+                    </Tooltip>
                   ))}
                 </div>
               </div>
@@ -721,36 +777,42 @@ export default function App() {
 
             {/* Tabs Header */}
             <div className="flex bg-[#03001e]/80 backdrop-blur-xl border border-indigo-950/50 rounded-xl p-1 shadow-2xl shrink-0">
-              <button
-                onClick={() => setActiveTab("controls")}
-                className={`flex-1 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold rounded-lg transition-all ${activeTab === "controls"
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
-                    : "text-slate-400 hover:text-slate-200"
-                  }`}
-                title="切換至控制面板"
-              >
-                控制面板
-              </button>
-              <button
-                onClick={() => setActiveTab("path")}
-                className={`flex-1 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold rounded-lg transition-all ${activeTab === "path"
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
-                    : "text-slate-400 hover:text-slate-200"
-                  }`}
-                title="切換至進行軌跡"
-              >
-                進行軌跡
-              </button>
-              <button
-                onClick={() => setActiveTab("guide")}
-                className={`flex-1 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold rounded-lg transition-all ${activeTab === "guide"
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
-                    : "text-slate-400 hover:text-slate-200"
-                  }`}
-                title="切換至互動指南"
-              >
-                互動指南
-              </button>
+              <Tooltip content="調整節拍器與合成器設定" className="flex-1 flex">
+                <button
+                  onClick={() => setActiveTab("controls")}
+                  className={`flex-1 py-1 sm:py-1.5 w-full text-[10px] sm:text-xs font-semibold rounded-lg transition-all ${activeTab === "controls"
+                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
+                      : "text-slate-400 hover:text-slate-200"
+                    }`}
+                  title="切換至控制面板"
+                >
+                  控制面板
+                </button>
+              </Tooltip>
+              <Tooltip content="檢視目前的和弦進行軌跡" className="flex-1 flex">
+                <button
+                  onClick={() => setActiveTab("path")}
+                  className={`flex-1 py-1 sm:py-1.5 w-full text-[10px] sm:text-xs font-semibold rounded-lg transition-all ${activeTab === "path"
+                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
+                      : "text-slate-400 hover:text-slate-200"
+                    }`}
+                  title="切換至進行軌跡"
+                >
+                  進行軌跡
+                </button>
+              </Tooltip>
+              <Tooltip content="檢視心智圖的操作說明" className="flex-1 flex">
+                <button
+                  onClick={() => setActiveTab("guide")}
+                  className={`flex-1 py-1 sm:py-1.5 w-full text-[10px] sm:text-xs font-semibold rounded-lg transition-all ${activeTab === "guide"
+                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
+                      : "text-slate-400 hover:text-slate-200"
+                    }`}
+                  title="切換至互動指南"
+                >
+                  互動指南
+                </button>
+              </Tooltip>
             </div>
 
             {/* Tab Content Container */}
