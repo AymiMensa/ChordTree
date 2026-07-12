@@ -1,5 +1,5 @@
-import React from 'react';
-import { Play, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { Play, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface PianoVisualizerProps {
   activeMidiNotes: number[];
@@ -51,6 +51,8 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
   activeChordFullName,
   onPlayChordDirectly
 }) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+
   const getHighlightColor = () => {
     switch (chordType) {
       case 'minor': return 'bg-blue-500 fill-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.6)]';
@@ -69,9 +71,28 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
   const totalWidth = 15 * keyWidth;
 
   return (
-    <div className="w-full bg-[#0a0f1d] border border-indigo-900/40 rounded-xl p-2 md:p-3 shadow-inner flex flex-col sm:flex-row items-stretch gap-3 md:gap-4 relative overflow-hidden backdrop-blur-sm">
+    <div className="w-full bg-[#0a0f1d] border border-indigo-900/40 rounded-xl p-2 md:p-3 shadow-inner flex flex-col items-stretch gap-3 md:gap-4 relative overflow-hidden backdrop-blur-sm">
+      
+      {/* Fold/Unfold Header */}
+      <div className="flex items-center justify-between px-1 md:hidden">
+         <div className="text-[7px] md:text-[8px] font-mono text-slate-500 flex items-center gap-1">
+           <Sparkles className="w-3 h-3 text-indigo-400" />
+           <span>和弦與鍵盤資訊</span>
+         </div>
+         <button 
+           onClick={() => setIsExpanded(!isExpanded)}
+           className="flex items-center gap-1 text-[7px] md:text-[8px] bg-indigo-950/50 hover:bg-indigo-900 text-indigo-300 px-2 py-1 rounded transition-colors active:scale-95"
+         >
+           {isExpanded ? (
+             <><ChevronUp className="w-3 h-3" /> 摺疊資訊</>
+           ) : (
+             <><ChevronDown className="w-3 h-3" /> 展開資訊</>
+           )}
+         </button>
+      </div>
+
       {/* Left Area: Chord Details and Formula */}
-      <div className="flex-1 w-full flex flex-col gap-2 min-w-0">
+      <div className={`w-full flex-col gap-2 min-w-0 ${isExpanded ? 'flex' : 'hidden md:flex'}`}>
         
         {/* Card 1: Main details */}
         <div className="flex-1 bg-black/40 border border-indigo-950/80 rounded-lg p-2.5 md:p-3 flex flex-col justify-center shadow-lg relative overflow-hidden group mobile-landscape-card">
@@ -124,7 +145,7 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
       </div>
 
       {/* Right Area: Keyboard Visualizer */}
-      <div className="shrink-0 flex flex-col items-center justify-center bg-indigo-950/20 p-2 md:p-3 rounded-lg border border-indigo-900/40 w-full sm:w-[320px] md:w-[380px] lg:w-[440px] min-w-0">
+      <div className="shrink-0 flex flex-col items-center justify-center bg-indigo-950/20 p-2 md:p-3 rounded-lg border border-indigo-900/40 w-full min-w-0">
         <div className="text-[6px] md:text-[7px] font-mono text-slate-500 mb-2 flex flex-wrap items-center justify-between w-full gap-1" title="下方為鋼琴鍵盤可視化">
           <span>鍵盤可視化</span>
           <span className="bg-indigo-950 px-1 py-0.5 rounded text-indigo-400 border border-indigo-900 text-[5px] md:text-[6px]" title="顯示範圍">MIDI C3 - C5</span>

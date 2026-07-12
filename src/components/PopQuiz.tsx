@@ -129,7 +129,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Main Content Area */}
-      <div className={`relative z-10 flex-1 flex flex-col max-lg:landscape:flex-row items-center justify-center p-1 sm:p-2 min-h-0 overflow-hidden pt-12 max-lg:landscape:pt-0`}>
+      <div className={`relative z-10 flex-1 flex flex-col max-lg:landscape:flex-row items-center justify-center p-1 sm:p-2 min-h-0 overflow-hidden pt-2 sm:pt-6 max-lg:landscape:pt-0`}>
         
         {/* Chord Flow Display */}
         <div className={`flex flex-row items-center justify-center gap-2 sm:gap-6 md:gap-12 w-full max-w-5xl flex-1 min-h-0 max-lg:landscape:pr-[120px]`}>
