@@ -526,7 +526,7 @@ export default function App() {
                       樂理解析版
                     </div>
                   </div>
-                  <div className="text-[9px] sm:text-[11px] md:text-xs text-slate-400 mt-0.5 font-medium tracking-wide truncate hidden landscape:block sm:block mobile-landscape-subtitle max-lg:landscape:text-[6px]">
+                  <div className="text-[9px] sm:text-[11px] md:text-xs text-slate-400 mt-0.5 font-medium tracking-wide truncate hidden landscape:block sm:block mobile-landscape-subtitle max-xl:landscape:text-[6px]">
                     基於屬七和弦 (Dominant 7th) 與主音 (Tonic) 解決關係的無限遞迴樂理視覺化演繹。
                   </div>
                 </div>
