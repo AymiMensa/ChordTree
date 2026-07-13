@@ -151,13 +151,12 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
           <span className="bg-indigo-950 px-1 py-0.5 rounded text-indigo-400 border border-indigo-900 text-[5px] md:text-[6px]" title="顯示範圍">MIDI C3 - C5</span>
         </div>
 
-        <div className="relative overflow-visible w-full flex-1 flex items-center justify-center">
+        <div className="relative overflow-visible w-full flex items-center justify-center mt-1">
           <svg 
             width="100%" 
-            height="100%"
             viewBox={`0 0 ${totalWidth} 120`}
             preserveAspectRatio="xMidYMid meet"
-            className="absolute inset-0 select-none overflow-visible"
+            className="select-none overflow-visible h-auto max-h-[120px] min-h-[40px]"
             style={{ 
               filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.5))' 
             }}
