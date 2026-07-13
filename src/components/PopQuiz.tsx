@@ -103,10 +103,10 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
       {/* Header - Made transparent and absolute to save space on landscape */}
       <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-2 sm:p-4 bg-transparent pointer-events-none">
         <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
-          <div className="p-1 sm:p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg sm:rounded-xl shadow-lg shadow-indigo-500/20 max-lg:landscape:scale-75 origin-left">
+          <div className="p-1 sm:p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg sm:rounded-xl shadow-lg shadow-indigo-500/20 max-lg:landscape:scale-50 origin-left">
             <Music className="w-3 h-3 sm:w-6 sm:h-6 text-white" />
           </div>
-          <div className="max-lg:landscape:scale-75 origin-left">
+          <div className="max-lg:landscape:scale-50 origin-left">
             <h1 className="text-[7px] sm:text-[11px] md:text-[12px] font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 to-white">
               和弦隨堂考試
             </h1>
@@ -121,7 +121,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
               engineRef.current?.stop();
               onClose();
             }}
-            className="p-1.5 sm:p-2 rounded-full hover:bg-white/10 transition-colors pointer-events-auto max-lg:landscape:scale-75 origin-right"
+            className="p-1.5 sm:p-2 rounded-full hover:bg-white/10 transition-colors pointer-events-auto max-lg:landscape:scale-50 origin-right"
           >
             <X className="w-4 h-4 sm:w-6 sm:h-6 text-slate-400 hover:text-white" />
           </button>
@@ -132,12 +132,12 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
       <div className={`relative z-10 flex-1 flex flex-col max-lg:landscape:flex-row items-center justify-center p-1 sm:p-2 min-h-0 overflow-hidden pt-2 sm:pt-6 max-lg:landscape:pt-0`}>
         
         {/* Chord Flow Display */}
-        <div className={`flex flex-row items-center justify-center gap-2 sm:gap-6 md:gap-12 w-full max-w-5xl flex-1 min-h-0 max-lg:landscape:pr-[120px]`}>
+        <div className={`flex flex-row items-center justify-center gap-2 sm:gap-6 md:gap-12 w-full max-w-5xl flex-1 min-h-0 max-lg:landscape:pr-12`}>
           
           {/* Previous Chord */}
           <div className="flex-1 flex justify-end opacity-40 scale-75 md:scale-90 transition-all duration-300 blur-[1px]">
             {prevChord && (
-              <div className={`font-bold text-slate-500 whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-xl sm:text-2xl md:text-4xl max-lg:landscape:text-xs' : 'text-2xl sm:text-4xl md:text-6xl max-lg:landscape:text-lg'}`}>
+              <div className={`font-bold text-slate-500 whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-xl sm:text-2xl md:text-4xl max-lg:landscape:text-[10px]' : 'text-2xl sm:text-4xl md:text-6xl max-lg:landscape:text-sm'}`}>
                 {prevChord}
               </div>
             )}
@@ -146,11 +146,11 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
           {/* Current Chord */}
           <div className="flex-none flex flex-col items-center justify-center min-w-[100px] sm:min-w-[150px] md:min-w-[250px] shrink-0">
             <div className={`font-black transition-all duration-300 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]
-                ${showPiano ? 'text-4xl sm:text-5xl md:text-7xl max-lg:landscape:text-2xl' : 'text-5xl sm:text-7xl md:text-[9rem] lg:text-[10rem] max-lg:landscape:text-4xl'}
+                ${showPiano ? 'text-4xl sm:text-5xl md:text-7xl max-lg:landscape:text-4xl' : 'text-5xl sm:text-7xl md:text-[9rem] lg:text-[10rem] max-lg:landscape:text-6xl'}
                 ${isPlaying ? 'text-white scale-110' : 'text-slate-200'}`}>
               {currentChord}
             </div>
-            <div className={`mt-1 px-2 sm:px-4 py-0.5 sm:py-1 rounded-full bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 font-bold tracking-widest whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-[5px] sm:text-[6px] max-lg:landscape:text-[4px] max-lg:landscape:px-1.5 max-lg:landscape:py-0' : 'text-[6px] sm:text-[8px] md:text-[10px] md:mt-4 max-lg:landscape:text-[5px] max-lg:landscape:mt-1'}`}>
+            <div className={`mt-1 px-2 sm:px-4 py-0.5 sm:py-1 rounded-full bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 font-bold tracking-widest whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-[5px] sm:text-[6px] max-lg:landscape:text-[4px] max-lg:landscape:px-1 max-lg:landscape:py-0' : 'text-[6px] sm:text-[8px] md:text-[10px] md:mt-4 max-lg:landscape:text-[5px] max-lg:landscape:mt-0.5'}`}>
               目前和弦
             </div>
           </div>
@@ -158,7 +158,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
           {/* Next Chord */}
           <div className="flex-1 flex justify-start opacity-80 scale-90 md:scale-100 transition-all duration-300">
             {nextChord && (
-              <div className={`font-bold text-pink-500 drop-shadow-[0_0_15px_rgba(236,72,153,0.4)] whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-xl sm:text-3xl md:text-5xl max-lg:landscape:text-xs' : 'text-3xl sm:text-5xl md:text-7xl max-lg:landscape:text-lg'}`}>
+              <div className={`font-bold text-pink-500 drop-shadow-[0_0_15px_rgba(236,72,153,0.4)] whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-xl sm:text-3xl md:text-5xl max-lg:landscape:text-[10px]' : 'text-3xl sm:text-5xl md:text-7xl max-lg:landscape:text-sm'}`}>
                 {nextChord}
               </div>
             )}
@@ -168,7 +168,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
 
         {/* Controls - Moved to right side on landscape */}
         <div className={`flex flex-col items-center bg-slate-900/60 backdrop-blur-xl rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl w-full max-w-xl shrink-0 transition-all duration-300 
-           max-lg:landscape:absolute max-lg:landscape:right-2 max-lg:landscape:top-10 max-lg:landscape:w-auto max-lg:landscape:min-w-[120px] max-lg:landscape:z-20 max-lg:landscape:p-1.5 max-lg:landscape:gap-1.5 max-lg:landscape:scale-90 max-lg:landscape:origin-top-right
+           max-lg:landscape:absolute max-lg:landscape:right-2 max-lg:landscape:top-7 max-lg:landscape:w-auto max-lg:landscape:min-w-[100px] max-lg:landscape:z-20 max-lg:landscape:p-1 max-lg:landscape:gap-1 max-lg:landscape:scale-[0.55] max-lg:landscape:origin-top-right
            ${showPiano ? 'mt-0 p-1.5 sm:p-2 gap-1' : 'mt-2 md:mt-6 p-2 md:p-3 gap-1.5 md:gap-3'}`}>
           
           {/* Play/Pause Button */}
@@ -274,7 +274,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
 
       {/* Piano Hint Footer */}
       <div className={`transition-all duration-500 ease-in-out border-t border-indigo-900/50 bg-slate-950 flex justify-center ${showPiano ? 'translate-y-0 opacity-100 mb-0' : 'translate-y-full opacity-0 absolute bottom-0 left-0 right-0 h-0 overflow-hidden'}`}>
-        <div className="w-full max-w-5xl mx-auto p-2 sm:p-4 max-lg:landscape:p-1 scale-90 sm:scale-95 lg:scale-100 origin-bottom transition-transform duration-300">
+        <div className="w-full max-w-5xl mx-auto p-2 sm:p-4 max-lg:landscape:px-1 max-lg:landscape:py-0 scale-90 sm:scale-95 lg:scale-100 max-lg:landscape:scale-100 origin-bottom transition-transform duration-300">
           <PianoVisualizer 
              activeMidiNotes={getChordMidiNotes(currentChord)}
              chordType={null} 
