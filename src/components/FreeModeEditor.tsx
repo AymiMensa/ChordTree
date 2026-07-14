@@ -187,7 +187,7 @@ export const FreeModeEditor: React.FC<FreeModeEditorProps> = ({ initialChords, o
       </div>
       
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto overscroll-contain touch-pan-y custom-scrollbar bg-black/20 rounded-xl md:rounded-2xl border border-indigo-950/50 p-2 md:p-4 max-md:landscape:p-1 max-md:landscape:rounded-lg">
-        <div className="flex flex-wrap gap-2 md:gap-3 items-start content-start w-full max-md:landscape:gap-1.5">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 md:gap-3 items-start content-start w-full max-md:landscape:flex-row max-md:landscape:flex-wrap max-md:landscape:gap-1.5">
           {chords.map((chord, index) => (
             <div key={chord.id} className="relative group flex flex-nowrap items-center gap-1.5 md:gap-2 bg-[#090524] border border-indigo-900/40 p-2 md:p-3 rounded-lg md:rounded-xl shadow-lg hover:border-indigo-500/50 transition-colors w-full sm:w-auto min-w-[280px] max-md:landscape:p-1 max-md:landscape:min-w-[200px] max-md:landscape:gap-1 max-md:landscape:rounded-md">
               <span className="absolute -top-2 -left-2 md:-top-2.5 md:-left-2.5 w-5 h-5 md:w-6 md:h-6 bg-indigo-950 text-indigo-300 text-[10px] md:text-xs flex items-center justify-center rounded-full font-mono border border-indigo-900/50 shadow-md z-10 max-md:landscape:w-4 max-md:landscape:h-4 max-md:landscape:text-[8px] max-md:landscape:-top-1.5 max-md:landscape:-left-1.5">

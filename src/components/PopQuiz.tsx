@@ -146,7 +146,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
           {/* Current Chord */}
           <div className="flex-none flex flex-col items-center justify-center min-w-[100px] sm:min-w-[150px] md:min-w-[250px] shrink-0">
             <div className={`font-black transition-all duration-300 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]
-                ${showPiano ? 'text-4xl sm:text-5xl md:text-7xl max-lg:landscape:text-4xl landscape:text-5xl' : 'text-5xl sm:text-7xl md:text-[9rem] lg:text-[10rem] max-lg:landscape:text-6xl landscape:text-7xl'}
+                ${showPiano ? 'text-4xl sm:text-5xl md:text-7xl max-lg:landscape:text-2xl landscape:text-5xl' : 'text-5xl sm:text-7xl md:text-[9rem] lg:text-[10rem] max-lg:landscape:text-4xl landscape:text-7xl'}
                 ${isPlaying ? 'text-white scale-110' : 'text-slate-200'}`}>
               {currentChord}
             </div>
@@ -168,8 +168,8 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
 
         {/* Controls - Moved to right side on landscape */}
         <div className={`flex flex-col items-center bg-slate-900/60 backdrop-blur-xl rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl w-full max-w-xl shrink-0 transition-all duration-300 
-           landscape:absolute landscape:right-2 md:landscape:right-6 landscape:bottom-2 md:landscape:bottom-4 landscape:w-auto landscape:min-w-[160px] landscape:z-20 max-lg:landscape:scale-100 landscape:scale-100 landscape:origin-bottom-right
-           ${showPiano ? 'mt-0 p-1.5 sm:p-2 gap-1 landscape:p-2 landscape:gap-2' : 'mt-2 md:mt-6 p-2 md:p-3 gap-1.5 md:gap-3 landscape:p-3 landscape:gap-3'}`}>
+           landscape:absolute landscape:right-2 md:landscape:right-6 landscape:top-2 md:landscape:top-4 landscape:w-auto landscape:min-w-[160px] landscape:z-20 max-lg:landscape:scale-95 max-lg:landscape:origin-top-right landscape:scale-100 landscape:origin-top-right
+           ${showPiano ? 'mt-0 p-1.5 sm:p-2 gap-1 landscape:p-1.5 landscape:gap-1.5' : 'mt-2 md:mt-6 p-2 md:p-3 gap-1.5 md:gap-3 landscape:p-2.5 landscape:gap-2.5'}`}>
           
           {/* Play/Pause Button */}
           <Tooltip content={isPlaying ? "暫停考試" : "開始考試"}>
@@ -274,7 +274,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
 
       {/* Piano Hint Footer */}
       <div className={`transition-all duration-500 ease-in-out border-t border-indigo-900/50 bg-slate-950 flex justify-center ${showPiano ? 'translate-y-0 opacity-100 mb-0' : 'translate-y-full opacity-0 absolute bottom-0 left-0 right-0 h-0 overflow-hidden'}`}>
-        <div className="w-full max-w-5xl mx-auto p-2 sm:p-4 max-lg:landscape:px-1 max-lg:landscape:py-0 landscape:px-4 landscape:py-2 scale-90 sm:scale-95 lg:scale-100 landscape:scale-100 origin-bottom transition-transform duration-300">
+        <div className="w-full max-w-5xl mx-auto p-2 sm:p-4 max-lg:landscape:px-1 max-lg:landscape:py-0 landscape:px-4 landscape:py-2 scale-90 sm:scale-95 lg:scale-100 landscape:scale-100 max-lg:landscape:scale-75 max-lg:landscape:origin-bottom origin-bottom transition-transform duration-300">
           <PianoVisualizer 
              activeMidiNotes={getChordMidiNotes(currentChord)}
              chordType={null} 

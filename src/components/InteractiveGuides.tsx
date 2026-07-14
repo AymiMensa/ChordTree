@@ -22,7 +22,11 @@ export const InteractiveGuides: React.FC = () => {
         </span>
       </div>
 
-      <p className="text-slate-400">
+      <p className="text-indigo-300 font-medium italic">
+        基於屬七和弦 (Dominant 7th) 與主音 (Tonic) 解決關係的無限遞迴樂理視覺化演繹。
+      </p>
+
+      <p className="text-slate-400 mt-1">
         本系統重現了您上傳的經典「圓形樹狀和弦進行圖」（Modal Interchange /
         屬七關係分支圖）。它以中央的主音
         <strong className="text-pink-400"> C </strong>
