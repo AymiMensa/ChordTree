@@ -71,7 +71,7 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
   const totalWidth = 15 * keyWidth;
 
   return (
-    <div className="w-full bg-[#0a0f1d] border border-indigo-900/40 rounded-xl p-2 md:p-3 shadow-inner flex flex-col max-xl:landscape:flex-row items-stretch gap-3 md:gap-4 max-xl:landscape:gap-2 relative overflow-hidden backdrop-blur-sm">
+    <div className="w-full bg-[#0a0f1d] border border-indigo-900/40 rounded-xl p-2 md:p-3 shadow-inner flex flex-col landscape:flex-row items-stretch gap-3 md:gap-4 landscape:gap-2 relative overflow-hidden backdrop-blur-sm">
       
       {/* Fold/Unfold Header */}
       <div className="flex items-center justify-between px-1 md:hidden">
@@ -92,7 +92,7 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
       </div>
 
       {/* Left Area: Chord Details and Formula */}
-      <div className={`w-full max-xl:landscape:w-[45%] flex-col gap-2 min-w-0 max-xl:landscape:justify-center ${isExpanded ? 'flex' : 'hidden md:flex max-xl:landscape:flex'}`}>
+      <div className={`w-full landscape:w-[45%] flex-col gap-2 min-w-0 landscape:justify-center ${isExpanded ? 'flex' : 'hidden md:flex landscape:flex'}`}>
         
         {/* Card 1: Main details */}
         <div className="flex-1 bg-black/40 border border-indigo-950/80 rounded-lg p-2.5 md:p-3 flex flex-col justify-center shadow-lg relative overflow-hidden group mobile-landscape-card">
@@ -125,7 +125,7 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
              <button 
                onClick={onPlayChordDirectly} 
                title="播放當前和弦 (Play Current Chord)"
-               className="w-full bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-slate-600 text-slate-200 font-medium py-1.5 rounded-md flex items-center justify-center gap-1.5 transition-all shadow text-[8px] md:text-[9px] max-xl:landscape:text-[6px] max-xl:landscape:py-1 max-xl:landscape:gap-1 mt-auto mobile-landscape-play-btn"
+               className="w-full bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-slate-600 text-slate-200 font-medium py-1.5 rounded-md flex items-center justify-center gap-1.5 transition-all shadow text-[8px] md:text-[9px] max-lg:landscape:text-[6px] max-lg:landscape:py-1 max-lg:landscape:gap-1 landscape:py-1.5 landscape:text-[10px] mt-auto mobile-landscape-play-btn"
              >
                <Play className="w-3.5 h-3.5 fill-current text-slate-300" />
                播放和弦
@@ -145,7 +145,7 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
       </div>
 
       {/* Right Area: Keyboard Visualizer */}
-      <div className="shrink-0 flex flex-col items-center justify-center bg-indigo-950/20 p-2 md:p-3 max-xl:landscape:p-1 rounded-lg border border-indigo-900/40 w-full max-xl:landscape:w-[55%] min-w-0">
+      <div className="shrink-0 flex flex-col items-center justify-center bg-indigo-950/20 p-2 md:p-3 max-lg:landscape:p-1 landscape:p-2 rounded-lg border border-indigo-900/40 w-full landscape:w-[55%] min-w-0">
         <div className="text-[6px] md:text-[7px] font-mono text-slate-500 mb-2 flex flex-wrap items-center justify-between w-full gap-1" title="下方為鋼琴鍵盤可視化">
           <span>鍵盤可視化</span>
           <span className="bg-indigo-950 px-1 py-0.5 rounded text-indigo-400 border border-indigo-900 text-[5px] md:text-[6px]" title="顯示範圍">MIDI C3 - C5</span>

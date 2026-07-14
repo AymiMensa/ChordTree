@@ -103,10 +103,10 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
       {/* Header - Made transparent and absolute to save space on landscape */}
       <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-2 sm:p-4 bg-transparent pointer-events-none">
         <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
-          <div className="p-1 sm:p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg sm:rounded-xl shadow-lg shadow-indigo-500/20 max-xl:landscape:scale-50 origin-left">
+          <div className="p-1 sm:p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg sm:rounded-xl shadow-lg shadow-indigo-500/20 max-lg:landscape:scale-50 landscape:scale-75 landscape:opacity-80 origin-left">
             <Music className="w-3 h-3 sm:w-6 sm:h-6 text-white" />
           </div>
-          <div className="max-xl:landscape:scale-50 origin-left">
+          <div className="max-lg:landscape:scale-50 landscape:scale-75 landscape:opacity-80 origin-left">
             <h1 className="text-[7px] sm:text-[11px] md:text-[12px] font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 to-white">
               和弦隨堂考試
             </h1>
@@ -121,7 +121,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
               engineRef.current?.stop();
               onClose();
             }}
-            className="p-1.5 sm:p-2 rounded-full hover:bg-white/10 transition-colors pointer-events-auto max-xl:landscape:scale-50 origin-right"
+            className="p-1.5 sm:p-2 rounded-full hover:bg-white/10 transition-colors pointer-events-auto max-lg:landscape:scale-50 landscape:scale-75 origin-right"
           >
             <X className="w-4 h-4 sm:w-6 sm:h-6 text-slate-400 hover:text-white" />
           </button>
@@ -129,15 +129,15 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Main Content Area */}
-      <div className={`relative z-10 flex-1 flex flex-col max-xl:landscape:flex-row items-center justify-center p-1 sm:p-2 min-h-0 overflow-hidden pt-2 sm:pt-6 max-xl:landscape:pt-0`}>
+      <div className={`relative z-10 flex-1 flex flex-col landscape:flex-row items-center justify-center p-1 sm:p-2 min-h-0 overflow-hidden pt-2 sm:pt-6 landscape:pt-0`}>
         
         {/* Chord Flow Display */}
-        <div className={`flex flex-row items-center justify-center gap-2 sm:gap-6 md:gap-12 w-full max-w-5xl flex-1 min-h-0 max-xl:landscape:pr-12`}>
+        <div className={`flex flex-row items-center justify-center gap-2 sm:gap-6 md:gap-12 w-full max-w-5xl flex-1 min-h-0 max-lg:landscape:pr-12 landscape:pr-32`}>
           
           {/* Previous Chord */}
           <div className="flex-1 flex justify-end opacity-40 scale-75 md:scale-90 transition-all duration-300 blur-[1px]">
             {prevChord && (
-              <div className={`font-bold text-slate-500 whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-xl sm:text-2xl md:text-4xl max-xl:landscape:text-[10px]' : 'text-2xl sm:text-4xl md:text-6xl max-xl:landscape:text-sm'}`}>
+              <div className={`font-bold text-slate-500 whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-xl sm:text-2xl md:text-4xl max-lg:landscape:text-[10px] landscape:text-xl' : 'text-2xl sm:text-4xl md:text-6xl max-lg:landscape:text-sm landscape:text-2xl'}`}>
                 {prevChord}
               </div>
             )}
@@ -146,11 +146,11 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
           {/* Current Chord */}
           <div className="flex-none flex flex-col items-center justify-center min-w-[100px] sm:min-w-[150px] md:min-w-[250px] shrink-0">
             <div className={`font-black transition-all duration-300 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]
-                ${showPiano ? 'text-4xl sm:text-5xl md:text-7xl max-xl:landscape:text-4xl' : 'text-5xl sm:text-7xl md:text-[9rem] lg:text-[10rem] max-xl:landscape:text-6xl'}
+                ${showPiano ? 'text-4xl sm:text-5xl md:text-7xl max-lg:landscape:text-4xl landscape:text-5xl' : 'text-5xl sm:text-7xl md:text-[9rem] lg:text-[10rem] max-lg:landscape:text-6xl landscape:text-7xl'}
                 ${isPlaying ? 'text-white scale-110' : 'text-slate-200'}`}>
               {currentChord}
             </div>
-            <div className={`mt-1 px-2 sm:px-4 py-0.5 sm:py-1 rounded-full bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 font-bold tracking-widest whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-[5px] sm:text-[6px] max-xl:landscape:text-[4px] max-xl:landscape:px-1 max-xl:landscape:py-0' : 'text-[6px] sm:text-[8px] md:text-[10px] md:mt-4 max-xl:landscape:text-[5px] max-xl:landscape:mt-0.5'}`}>
+            <div className={`mt-1 px-2 sm:px-4 py-0.5 sm:py-1 rounded-full bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 font-bold tracking-widest whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-[5px] sm:text-[6px] max-lg:landscape:text-[4px] landscape:text-[6px] max-lg:landscape:px-1 max-lg:landscape:py-0' : 'text-[6px] sm:text-[8px] md:text-[10px] md:mt-4 max-lg:landscape:text-[5px] landscape:text-[8px] max-lg:landscape:mt-0.5 landscape:mt-1'}`}>
               目前和弦
             </div>
           </div>
@@ -158,7 +158,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
           {/* Next Chord */}
           <div className="flex-1 flex justify-start opacity-80 scale-90 md:scale-100 transition-all duration-300">
             {nextChord && (
-              <div className={`font-bold text-pink-500 drop-shadow-[0_0_15px_rgba(236,72,153,0.4)] whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-xl sm:text-3xl md:text-5xl max-xl:landscape:text-[10px]' : 'text-3xl sm:text-5xl md:text-7xl max-xl:landscape:text-sm'}`}>
+              <div className={`font-bold text-pink-500 drop-shadow-[0_0_15px_rgba(236,72,153,0.4)] whitespace-nowrap transition-all duration-300 ${showPiano ? 'text-xl sm:text-3xl md:text-5xl max-lg:landscape:text-[10px] landscape:text-xl' : 'text-3xl sm:text-5xl md:text-7xl max-lg:landscape:text-sm landscape:text-2xl'}`}>
                 {nextChord}
               </div>
             )}
@@ -168,7 +168,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
 
         {/* Controls - Moved to right side on landscape */}
         <div className={`flex flex-col items-center bg-slate-900/60 backdrop-blur-xl rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl w-full max-w-xl shrink-0 transition-all duration-300 
-           max-xl:landscape:absolute max-xl:landscape:right-2 max-xl:landscape:top-7 max-xl:landscape:w-auto max-xl:landscape:min-w-[100px] max-xl:landscape:z-20 max-xl:landscape:p-1 max-xl:landscape:gap-1 max-xl:landscape:scale-[0.55] max-xl:landscape:origin-top-right
+           landscape:absolute landscape:right-2 md:landscape:right-6 landscape:top-4 md:landscape:top-10 landscape:w-auto landscape:min-w-[100px] landscape:z-20 landscape:p-1 landscape:gap-1 max-lg:landscape:scale-[0.55] landscape:scale-[0.85] landscape:origin-top-right
            ${showPiano ? 'mt-0 p-1.5 sm:p-2 gap-1' : 'mt-2 md:mt-6 p-2 md:p-3 gap-1.5 md:gap-3'}`}>
           
           {/* Play/Pause Button */}
@@ -196,8 +196,8 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
           </Tooltip>
 
           {/* Groove Selector */}
-          <div className="w-full flex items-center gap-1 sm:gap-4 px-1 sm:px-4 relative max-xl:landscape:flex-col max-xl:landscape:items-start max-xl:landscape:gap-0.5">
-            <span className="text-slate-400 font-bold text-[7px] sm:text-[8px] w-8 sm:w-12 text-right max-xl:landscape:text-left max-xl:landscape:w-auto whitespace-nowrap">節奏</span>
+          <div className="w-full flex items-center gap-1 sm:gap-4 px-1 sm:px-4 relative landscape:flex-col landscape:items-start landscape:gap-0.5">
+            <span className="text-slate-400 font-bold text-[7px] sm:text-[8px] w-8 sm:w-12 text-right landscape:text-left landscape:w-auto whitespace-nowrap">節奏</span>
             <Tooltip content="選擇伴奏鼓組律動" className="w-full">
               <select
                 value={activeGroove}
@@ -244,8 +244,8 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
           </div>
 
           {/* BPM Slider */}
-          <div className="w-full flex items-center gap-1 sm:gap-4 px-1 sm:px-4 relative max-xl:landscape:flex-col max-xl:landscape:items-start max-xl:landscape:gap-0.5">
-            <span className="text-slate-400 font-mono font-bold text-[7px] sm:text-[8px] w-8 sm:w-12 text-right max-xl:landscape:text-left max-xl:landscape:w-auto">BPM</span>
+          <div className="w-full flex items-center gap-1 sm:gap-4 px-1 sm:px-4 relative landscape:flex-col landscape:items-start landscape:gap-0.5">
+            <span className="text-slate-400 font-mono font-bold text-[7px] sm:text-[8px] w-8 sm:w-12 text-right landscape:text-left landscape:w-auto">BPM</span>
             <Tooltip content="調整節拍器速度" className="w-full flex">
               <input
                 type="range"
@@ -256,7 +256,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
                 className="flex-1 h-1.5 sm:h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 w-full"
               />
             </Tooltip>
-            <span className="text-white font-mono font-bold text-[7px] sm:text-[8px] w-8 sm:w-12 text-left max-xl:landscape:absolute max-xl:landscape:right-2 max-xl:landscape:top-0">{bpm}</span>
+            <span className="text-white font-mono font-bold text-[7px] sm:text-[8px] w-8 sm:w-12 text-left landscape:absolute landscape:right-2 landscape:top-0">{bpm}</span>
           </div>
 
           <Tooltip content={showPiano ? "隱藏下方鋼琴鍵盤提示" : "顯示下方鋼琴鍵盤提示"}>
@@ -274,7 +274,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
 
       {/* Piano Hint Footer */}
       <div className={`transition-all duration-500 ease-in-out border-t border-indigo-900/50 bg-slate-950 flex justify-center ${showPiano ? 'translate-y-0 opacity-100 mb-0' : 'translate-y-full opacity-0 absolute bottom-0 left-0 right-0 h-0 overflow-hidden'}`}>
-        <div className="w-full max-w-5xl mx-auto p-2 sm:p-4 max-xl:landscape:px-1 max-xl:landscape:py-0 scale-90 sm:scale-95 lg:scale-100 max-xl:landscape:scale-100 origin-bottom transition-transform duration-300">
+        <div className="w-full max-w-5xl mx-auto p-2 sm:p-4 max-lg:landscape:px-1 max-lg:landscape:py-0 landscape:px-4 landscape:py-2 scale-90 sm:scale-95 lg:scale-100 landscape:scale-100 origin-bottom transition-transform duration-300">
           <PianoVisualizer 
              activeMidiNotes={getChordMidiNotes(currentChord)}
              chordType={null} 
