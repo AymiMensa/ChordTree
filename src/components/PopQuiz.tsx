@@ -168,15 +168,15 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
 
         {/* Controls - Moved to right side on landscape */}
         <div className={`flex flex-col items-center bg-slate-900/60 backdrop-blur-xl rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl w-full max-w-xl shrink-0 transition-all duration-300 
-           landscape:absolute landscape:right-2 md:landscape:right-6 landscape:top-4 md:landscape:top-10 landscape:w-auto landscape:min-w-[100px] landscape:z-20 landscape:p-1 landscape:gap-1 max-lg:landscape:scale-[0.55] landscape:scale-[0.85] landscape:origin-top-right
-           ${showPiano ? 'mt-0 p-1.5 sm:p-2 gap-1' : 'mt-2 md:mt-6 p-2 md:p-3 gap-1.5 md:gap-3'}`}>
+           landscape:absolute landscape:right-2 md:landscape:right-6 landscape:bottom-2 md:landscape:bottom-4 landscape:w-auto landscape:min-w-[160px] landscape:z-20 max-lg:landscape:scale-100 landscape:scale-100 landscape:origin-bottom-right
+           ${showPiano ? 'mt-0 p-1.5 sm:p-2 gap-1 landscape:p-2 landscape:gap-2' : 'mt-2 md:mt-6 p-2 md:p-3 gap-1.5 md:gap-3 landscape:p-3 landscape:gap-3'}`}>
           
           {/* Play/Pause Button */}
           <Tooltip content={isPlaying ? "暫停考試" : "開始考試"}>
             <button
               onClick={togglePlay}
               className={`flex items-center justify-center w-full sm:w-auto rounded-full font-bold transition-all transform hover:scale-105 active:scale-95 shadow-xl
-                ${showPiano ? 'px-3 sm:px-4 py-1 sm:py-1.5 text-[8px] sm:text-[10px] gap-1' : 'px-4 sm:px-6 py-1.5 sm:py-2 text-[10px] sm:text-[12px] gap-1.5'}
+                ${showPiano ? 'px-3 sm:px-4 py-1 sm:py-1.5 text-[8px] sm:text-[10px] gap-1 landscape:px-5 landscape:py-2 landscape:text-[14px]' : 'px-4 sm:px-6 py-1.5 sm:py-2 text-[10px] sm:text-[12px] gap-1.5 landscape:px-6 landscape:py-2.5 landscape:text-[16px]'}
                 ${isPlaying 
                   ? 'bg-red-500 hover:bg-red-400 text-white shadow-red-500/30' 
                   : 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-emerald-500/30'}`}
@@ -196,13 +196,13 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
           </Tooltip>
 
           {/* Groove Selector */}
-          <div className="w-full flex items-center gap-1 sm:gap-4 px-1 sm:px-4 relative landscape:flex-col landscape:items-start landscape:gap-0.5">
-            <span className="text-slate-400 font-bold text-[7px] sm:text-[8px] w-8 sm:w-12 text-right landscape:text-left landscape:w-auto whitespace-nowrap">節奏</span>
+          <div className="w-full flex items-center gap-1 sm:gap-4 px-1 sm:px-4 relative landscape:flex-col landscape:items-start landscape:gap-1">
+            <span className="text-slate-400 font-bold text-[7px] sm:text-[8px] w-8 sm:w-12 text-right landscape:text-left landscape:w-auto whitespace-nowrap landscape:text-[12px]">節奏</span>
             <Tooltip content="選擇伴奏鼓組律動" className="w-full">
               <select
                 value={activeGroove}
                 onChange={(e) => setActiveGroove(e.target.value as GrooveType)}
-                className="w-full bg-indigo-950/40 border border-indigo-900/50 text-indigo-300 text-[7px] sm:text-[8px] rounded-lg px-2 py-1 focus:outline-none focus:border-indigo-500 cursor-pointer"
+                className="w-full bg-indigo-950/40 border border-indigo-900/50 text-indigo-300 text-[7px] sm:text-[8px] landscape:text-[12px] rounded-lg px-2 py-1 landscape:py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer"
               >
                 <option value="None" className="bg-slate-900 text-white">無鼓點 (None)</option>
                 <optgroup label="Dance / Electronic" className="bg-slate-900 text-white font-bold">
@@ -244,8 +244,8 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
           </div>
 
           {/* BPM Slider */}
-          <div className="w-full flex items-center gap-1 sm:gap-4 px-1 sm:px-4 relative landscape:flex-col landscape:items-start landscape:gap-0.5">
-            <span className="text-slate-400 font-mono font-bold text-[7px] sm:text-[8px] w-8 sm:w-12 text-right landscape:text-left landscape:w-auto">BPM</span>
+          <div className="w-full flex items-center gap-1 sm:gap-4 px-1 sm:px-4 relative landscape:flex-col landscape:items-start landscape:gap-1">
+            <span className="text-slate-400 font-mono font-bold text-[7px] sm:text-[8px] w-8 sm:w-12 text-right landscape:text-left landscape:w-auto landscape:text-[12px]">BPM</span>
             <Tooltip content="調整節拍器速度" className="w-full flex">
               <input
                 type="range"
@@ -253,18 +253,18 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
                 max="300"
                 value={bpm}
                 onChange={(e) => setBpm(parseInt(e.target.value))}
-                className="flex-1 h-1.5 sm:h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 w-full"
+                className="flex-1 h-1.5 sm:h-2 landscape:h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 w-full landscape:my-1"
               />
             </Tooltip>
-            <span className="text-white font-mono font-bold text-[7px] sm:text-[8px] w-8 sm:w-12 text-left landscape:absolute landscape:right-2 landscape:top-0">{bpm}</span>
+            <span className="text-white font-mono font-bold text-[7px] sm:text-[8px] w-8 sm:w-12 text-left landscape:absolute landscape:right-2 landscape:top-0 landscape:text-[12px]">{bpm}</span>
           </div>
 
           <Tooltip content={showPiano ? "隱藏下方鋼琴鍵盤提示" : "顯示下方鋼琴鍵盤提示"}>
             <button
               onClick={() => setShowPiano(!showPiano)}
-              className="flex items-center justify-center gap-1 sm:gap-1.5 text-[6px] sm:text-[8px] text-indigo-300 hover:text-white transition-colors mt-0.5 sm:mt-1 bg-indigo-900/30 px-2 py-1 rounded w-full"
+              className="flex items-center justify-center gap-1 sm:gap-1.5 text-[6px] sm:text-[8px] landscape:text-[12px] text-indigo-300 hover:text-white transition-colors mt-0.5 sm:mt-1 bg-indigo-900/30 px-2 py-1 landscape:py-1.5 landscape:mt-2 rounded w-full"
             >
-              <Piano className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <Piano className="w-3.5 h-3.5 sm:w-4 sm:h-4 landscape:w-5 landscape:h-5" />
               {showPiano ? "隱藏鋼琴提示" : "顯示鋼琴提示"}
             </button>
           </Tooltip>
