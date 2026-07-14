@@ -10,6 +10,8 @@ export class AudioEngine {
   private beatsPerMeasure = 4;
   private lookahead = 25.0; // ms between schedule intervals
   private scheduleAheadTime = 0.1; // sec to schedule ahead
+  private masterOutput: GainNode | null = null;
+
 
   private metronomeVolume = 0.6;
   private synthVolume = 0.5;
@@ -37,6 +39,19 @@ export class AudioEngine {
       this.ctx = new (
         window.AudioContext || (window as any).webkitAudioContext
       )();
+
+      const compressor = this.ctx.createDynamicsCompressor();
+      compressor.threshold.value = -15;
+      compressor.knee.value = 30;
+      compressor.ratio.value = 12;
+      compressor.attack.value = 0.003;
+      compressor.release.value = 0.25;
+
+      this.masterOutput = this.ctx.createGain();
+      this.masterOutput.gain.value = 0.8;
+      
+      this.masterOutput.connect(compressor);
+      compressor.connect(this.ctx.destination);
     }
     if (this.ctx.state === "suspended") {
       this.ctx.resume();
@@ -215,7 +230,7 @@ export class AudioEngine {
 
     osc.connect(filter);
     filter.connect(gainNode);
-    gainNode.connect(this.ctx.destination);
+    gainNode.connect(this.masterOutput!);
 
     // Settings for Beat 1 vs others
     const isFirstBeat = beatNumber === 1;
@@ -247,7 +262,7 @@ export class AudioEngine {
     const gainNode = this.ctx.createGain();
 
     osc.connect(gainNode);
-    gainNode.connect(this.ctx.destination);
+    gainNode.connect(this.masterOutput!);
 
     let startFreq = 150;
     let endFreq = 0.01;
@@ -269,7 +284,7 @@ export class AudioEngine {
       clickGain.gain.setValueAtTime(this.metronomeVolume * 0.5, time);
       clickGain.gain.exponentialRampToValueAtTime(0.01, time + 0.05);
       click.connect(clickGain);
-      clickGain.connect(this.ctx.destination);
+      clickGain.connect(this.masterOutput!);
       click.start(time);
       click.stop(time + 0.05);
     } else if (this.activeGroove === "EDM" || this.activeGroove === "Trance" || this.activeGroove === "Disco") {
@@ -294,7 +309,7 @@ export class AudioEngine {
         filter.frequency.exponentialRampToValueAtTime(100, time + 0.3);
         synthBass.connect(filter);
         filter.connect(bassGain);
-        bassGain.connect(this.ctx.destination);
+        bassGain.connect(this.masterOutput!);
         synthBass.start(time);
         synthBass.stop(time + 0.3);
       }
@@ -327,7 +342,7 @@ export class AudioEngine {
       const oscGain = this.ctx.createGain();
       osc.type = "sine";
       osc.connect(oscGain);
-      oscGain.connect(this.ctx.destination);
+      oscGain.connect(this.masterOutput!);
       osc.frequency.setValueAtTime(280, time); 
       osc.frequency.exponentialRampToValueAtTime(220, time + 0.1);
       oscGain.gain.setValueAtTime(this.metronomeVolume * 1.5, time);
@@ -351,7 +366,7 @@ export class AudioEngine {
       const noiseGain = this.ctx.createGain();
       noise.connect(noiseFilter);
       noiseFilter.connect(noiseGain);
-      noiseGain.connect(this.ctx.destination);
+      noiseGain.connect(this.masterOutput!);
       noiseGain.gain.setValueAtTime(0, time);
       noiseGain.gain.linearRampToValueAtTime(this.metronomeVolume * 0.8, time + 0.05);
       noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.4);
@@ -392,7 +407,7 @@ export class AudioEngine {
         const g = this.ctx.createGain();
         g.gain.setValueAtTime(this.metronomeVolume * 1.5, this.ctx.currentTime);
         g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
-        n.connect(f); f.connect(g); g.connect(this.ctx.destination);
+        n.connect(f); f.connect(g); g.connect(this.masterOutput!);
         n.start();
       }, 20); // 20ms delay for the second clap layer
     }
@@ -402,7 +417,7 @@ export class AudioEngine {
     const oscGain = this.ctx.createGain();
     osc.type = "triangle";
     osc.connect(oscGain);
-    oscGain.connect(this.ctx.destination);
+    oscGain.connect(this.masterOutput!);
     
     osc.frequency.setValueAtTime(bodyFreq, time);
     oscGain.gain.setValueAtTime(this.metronomeVolume * bodyVol, time);
@@ -427,7 +442,7 @@ export class AudioEngine {
     const noiseGain = this.ctx.createGain();
     noise.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
-    noiseGain.connect(this.ctx.destination);
+    noiseGain.connect(this.masterOutput!);
     
     noiseGain.gain.setValueAtTime(this.metronomeVolume * noiseVol, time);
     noiseGain.gain.exponentialRampToValueAtTime(0.01, time + noiseDecay);
@@ -455,7 +470,7 @@ export class AudioEngine {
       const gainNode = this.ctx.createGain();
       noise.connect(bandpass);
       bandpass.connect(gainNode);
-      gainNode.connect(this.ctx.destination);
+      gainNode.connect(this.masterOutput!);
       
       gainNode.gain.setValueAtTime(0, time);
       gainNode.gain.linearRampToValueAtTime(this.metronomeVolume * 0.7, time + 0.02);
@@ -501,7 +516,7 @@ export class AudioEngine {
     noise.connect(bandpass);
     bandpass.connect(highpass);
     highpass.connect(gainNode);
-    gainNode.connect(this.ctx.destination);
+    gainNode.connect(this.masterOutput!);
     
     gainNode.gain.setValueAtTime(this.metronomeVolume * (closed ? 0.6 : 0.8), time);
     gainNode.gain.exponentialRampToValueAtTime(0.01, time + dur);
@@ -514,7 +529,7 @@ export class AudioEngine {
     if (!this.ctx) return;
 
     const mainGain = this.ctx.createGain();
-    mainGain.connect(this.ctx.destination);
+    mainGain.connect(this.masterOutput!);
 
     // Master volume envelope for the chord based on style
     mainGain.gain.setValueAtTime(0, time);
@@ -604,7 +619,7 @@ export class AudioEngine {
 
     osc.connect(filter);
     filter.connect(gainNode);
-    gainNode.connect(this.ctx.destination);
+    gainNode.connect(this.masterOutput!);
 
     if (this.synthStyle === "epiano") {
       osc.type = "sine";

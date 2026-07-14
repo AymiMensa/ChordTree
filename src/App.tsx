@@ -511,73 +511,73 @@ export default function App() {
 
             {/* Title Header */}
             <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-2 shrink-0 px-1 pb-1 sm:pb-2 mb-0.5 sm:mb-1 border-b border-indigo-900/30">
-              <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2 w-full">
                 <span className="p-1 sm:p-1.5 bg-gradient-to-br from-pink-500 to-indigo-600 rounded-lg sm:rounded-xl text-white shadow-lg shadow-pink-500/20 shrink-0">
                   <Music className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                 </span>
 
-                <div className="flex flex-col min-w-0">
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <h1 className="text-sm sm:text-lg md:text-xl font-extrabold font-display text-white tracking-wide truncate mobile-landscape-title">
+                <div className="flex flex-col min-w-0 w-full">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                    <h1 className="text-sm sm:text-lg md:text-xl font-extrabold font-display text-white tracking-wide truncate mobile-landscape-title shrink-0">
                       互動式樂理和弦進行心智圖
                     </h1>
                     <div className="hidden sm:flex items-center px-1.5 py-0.5 rounded-full bg-indigo-900/60 border border-indigo-700/50 text-[9px] sm:text-[10px] text-indigo-200 shrink-0">
                       <span className="font-bold mr-1 text-indigo-300">D3.js</span>
                       樂理解析版
                     </div>
+                    
+                    {/* Variant Selector */}
+                    {!isFreeModeEditing && !isCustomPlayback && (
+                      <div className="flex items-center bg-[#03001e]/80 border border-indigo-950/50 rounded-lg p-0.5 shadow-lg shrink-0 max-w-full overflow-x-auto custom-scrollbar xl:ml-auto max-xl:landscape:ml-auto mt-1 sm:mt-0">
+                        <Tooltip content="原始版本的和弦進行心智圖">
+                          <button
+                            onClick={() => {
+                              setTreeVariant("A");
+                              setLayers(5);
+                              setCollapsedNodes(new Set());
+                            }}
+                            className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${treeVariant === "A"
+                                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
+                                : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
+                              }`}
+                          >
+                            原始心智圖
+                          </button>
+                        </Tooltip>
+                        <Tooltip content="以五度圈結構為基礎的放射狀版本">
+                          <button
+                            onClick={() => {
+                              setTreeVariant("B");
+                              setLayers(11);
+                              setCollapsedNodes(new Set());
+                            }}
+                            className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${treeVariant === "B"
+                                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
+                                : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
+                              }`}
+                          >
+                            對稱放射版
+                          </button>
+                        </Tooltip>
+                        <Tooltip content="由您自己建立的和弦進行">
+                          <button
+                            onClick={() => setTreeVariant("CUSTOM")}
+                            className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${treeVariant === "CUSTOM"
+                                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
+                                : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
+                              }`}
+                          >
+                            自訂和弦表
+                          </button>
+                        </Tooltip>
+                      </div>
+                    )}
                   </div>
                   <div className="text-[9px] sm:text-[11px] md:text-xs text-slate-400 mt-0.5 font-medium tracking-wide truncate hidden landscape:block sm:block mobile-landscape-subtitle max-xl:landscape:text-[6px]">
                     基於屬七和弦 (Dominant 7th) 與主音 (Tonic) 解決關係的無限遞迴樂理視覺化演繹。
                   </div>
                 </div>
               </div>
-
-              {/* Variant Selector */}
-              {!isFreeModeEditing && !isCustomPlayback && (
-                <div className="flex items-center bg-[#03001e]/80 border border-indigo-950/50 rounded-lg p-0.5 shadow-lg shrink-0 max-w-full overflow-x-auto custom-scrollbar">
-                  <Tooltip content="原始版本的和弦進行心智圖">
-                    <button
-                      onClick={() => {
-                        setTreeVariant("A");
-                        setLayers(5);
-                        setCollapsedNodes(new Set());
-                      }}
-                      className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${treeVariant === "A"
-                          ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
-                          : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
-                        }`}
-                    >
-                      原始心智圖
-                    </button>
-                  </Tooltip>
-                  <Tooltip content="以五度圈結構為基礎的放射狀版本">
-                    <button
-                      onClick={() => {
-                        setTreeVariant("B");
-                        setLayers(11);
-                        setCollapsedNodes(new Set());
-                      }}
-                      className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${treeVariant === "B"
-                          ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
-                          : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
-                        }`}
-                    >
-                      對稱放射版
-                    </button>
-                  </Tooltip>
-                  <Tooltip content="由您自己建立的和弦進行">
-                    <button
-                      onClick={() => setTreeVariant("CUSTOM")}
-                      className={`px-2 py-1 text-[9px] sm:text-[10px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 ${treeVariant === "CUSTOM"
-                          ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
-                          : "text-slate-400 hover:text-slate-200 hover:bg-indigo-900/40"
-                        }`}
-                    >
-                      自訂和弦表
-                    </button>
-                  </Tooltip>
-                </div>
-              )}
             </header>
 
             {/* Graph Area */}
