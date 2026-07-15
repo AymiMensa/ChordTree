@@ -129,7 +129,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Main Content Area */}
-      <div className={`relative z-10 flex-1 flex flex-col landscape:flex-row items-center justify-center p-1 sm:p-2 min-h-0 overflow-hidden pt-2 sm:pt-6 landscape:pt-0`}>
+      <div className={`relative z-10 flex-1 flex flex-col landscape:flex-row items-center justify-center p-1 sm:p-2 min-h-0 overflow-visible pt-2 sm:pt-6 landscape:pt-0`}>
         
         {/* Chord Flow Display */}
         <div className={`flex flex-row items-center justify-center gap-2 sm:gap-6 md:gap-12 w-full max-w-5xl flex-1 min-h-0 max-lg:landscape:pr-12 landscape:pr-32`}>
@@ -168,8 +168,8 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
 
         {/* Controls - Moved to right side on landscape */}
         <div className={`flex flex-col items-center bg-slate-900/60 backdrop-blur-xl rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl w-full max-w-xl shrink-0 transition-all duration-300 
-           landscape:absolute landscape:right-2 md:landscape:right-6 landscape:top-2 md:landscape:top-4 landscape:w-auto landscape:min-w-[160px] landscape:z-20 max-lg:landscape:scale-100 max-lg:landscape:origin-top-right landscape:scale-100 landscape:origin-top-right
-           max-lg:landscape:bottom-2 max-lg:landscape:justify-between max-lg:landscape:min-w-[120px]
+           landscape:absolute landscape:right-2 md:landscape:right-6 landscape:top-2 md:landscape:top-4 landscape:w-auto landscape:min-w-[160px] landscape:z-20 max-lg:landscape:scale-[0.55] max-lg:landscape:origin-top-right landscape:scale-100 landscape:origin-top-right
+           max-lg:landscape:bottom-auto max-lg:landscape:justify-start max-lg:landscape:min-w-[120px]
            lg:landscape:bottom-4 lg:landscape:justify-between 
            xl:landscape:bottom-auto xl:landscape:justify-start xl:landscape:min-w-[160px]
            ${showPiano ? 'mt-0 p-1.5 sm:p-2 gap-1 max-lg:landscape:p-1 max-lg:landscape:gap-1 lg:landscape:p-3 lg:landscape:gap-3 xl:landscape:p-1.5 xl:landscape:gap-1.5' : 'mt-2 md:mt-6 p-2 md:p-3 gap-1.5 md:gap-3 max-lg:landscape:p-2 max-lg:landscape:gap-1.5 lg:landscape:p-4 lg:landscape:gap-4 xl:landscape:p-2.5 xl:landscape:gap-2.5'}`}>
