@@ -510,7 +510,7 @@ export default function App() {
           <div className="flex flex-col shrink-0 h-[45vh] landscape:h-auto landscape:flex-1 lg:h-auto lg:flex-1 min-w-0">
 
             {/* Title Header */}
-            <header className="flex flex-col xl:flex-row xl:items-start justify-between gap-2 shrink-0 px-1 pb-1 sm:pb-2 mb-0.5 sm:mb-1 border-b border-indigo-900/30">
+            <header className="flex flex-col items-start gap-2 shrink-0 px-1 pb-1 sm:pb-2 mb-0.5 sm:mb-1 border-b border-indigo-900/30">
               <div className="flex items-center gap-1.5 sm:gap-2 w-full xl:w-auto shrink-0">
                 <span className="p-1 sm:p-1.5 bg-gradient-to-br from-pink-500 to-indigo-600 rounded-lg sm:rounded-xl text-white shadow-lg shadow-pink-500/20 shrink-0">
                   <Music className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
@@ -518,23 +518,20 @@ export default function App() {
 
                 <div className="flex flex-col min-w-0 w-full">
                   <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                    <h1 className="text-sm sm:text-lg md:text-xl font-extrabold font-display text-white tracking-wide truncate mobile-landscape-title shrink-0 max-lg:landscape:text-[10px]">
+                    <h1 className="text-sm sm:text-base lg:text-lg font-extrabold font-display text-white tracking-wide truncate shrink-0">
                       互動式樂理和弦進行心智圖
                     </h1>
-                    <div className="hidden sm:flex items-center px-1.5 py-0.5 rounded-full bg-indigo-900/60 border border-indigo-700/50 text-[9px] sm:text-[10px] text-indigo-200 shrink-0 max-lg:landscape:flex max-lg:landscape:text-[10px]">
+                    <div className="hidden sm:flex items-center px-1.5 py-0.5 rounded-full bg-indigo-900/60 border border-indigo-700/50 text-sm sm:text-base lg:text-lg text-indigo-200 shrink-0">
                       <span className="font-bold mr-1 text-indigo-300">D3.js</span>
                       樂理解析版
                     </div>
-                  </div>
-                  <div className="text-[9px] sm:text-[11px] md:text-xs text-slate-400 mt-0.5 font-medium tracking-wide truncate hidden landscape:block sm:block mobile-landscape-subtitle max-lg:landscape:hidden">
-                    基於屬七和弦 (Dominant 7th) 與主音 (Tonic) 解決關係的無限遞迴樂理視覺化演繹。
                   </div>
                 </div>
               </div>
               
               {/* Variant Selector */}
               {!isFreeModeEditing && !isCustomPlayback && (
-                <div className="flex items-center bg-[#03001e]/80 border border-indigo-950/50 rounded-lg p-0.5 shadow-lg shrink-0 max-w-full overflow-x-auto custom-scrollbar xl:ml-auto max-lg:landscape:ml-0 mt-1 sm:mt-0">
+                <div className="flex items-center bg-[#03001e]/80 border border-indigo-950/50 rounded-lg p-0.5 shadow-lg shrink-0 max-w-full overflow-x-auto custom-scrollbar max-lg:landscape:ml-0 mt-1 sm:mt-0">
                   <Tooltip content="原始版本的和弦進行心智圖">
                     <button
                       onClick={() => {
