@@ -129,10 +129,10 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Main Content Area */}
-      <div className={`relative z-10 flex-1 flex flex-col landscape:flex-row items-center justify-center p-1 sm:p-2 min-h-0 overflow-visible pt-2 sm:pt-6 landscape:pt-0`}>
+      <div className={`relative z-10 flex-1 flex flex-col landscape:flex-row items-center max-lg:landscape:items-end justify-center p-1 sm:p-2 min-h-0 overflow-visible pt-2 sm:pt-6 landscape:pt-0`}>
         
         {/* Chord Flow Display */}
-        <div className={`flex flex-row items-center justify-center gap-2 sm:gap-6 md:gap-12 w-full max-w-5xl flex-1 min-h-0 max-lg:landscape:pr-12 landscape:pr-32`}>
+        <div className={`flex flex-row items-center justify-center gap-2 sm:gap-6 md:gap-12 w-full max-w-5xl flex-1 min-h-0 max-lg:landscape:pr-48 landscape:pr-32 max-lg:landscape:pb-2`}>
           
           {/* Previous Chord */}
           <div className="flex-1 flex justify-end opacity-40 scale-75 md:scale-90 transition-all duration-300 blur-[1px]">
@@ -168,7 +168,7 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
 
         {/* Controls - Moved to right side on landscape */}
         <div className={`flex flex-col items-center bg-slate-900/60 backdrop-blur-xl rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl w-full max-w-xl shrink-0 transition-all duration-300 
-           landscape:absolute landscape:right-2 md:landscape:right-6 lg:landscape:top-4 max-lg:landscape:top-auto max-lg:landscape:bottom-1 landscape:w-auto landscape:min-w-[160px] landscape:z-20 max-lg:landscape:scale-[0.45] max-lg:landscape:origin-bottom-right landscape:scale-100 lg:landscape:origin-top-right
+           landscape:absolute landscape:right-2 md:landscape:right-6 lg:landscape:top-4 max-lg:landscape:top-auto max-lg:landscape:bottom-0 landscape:w-auto landscape:min-w-[160px] landscape:z-20 max-lg:landscape:scale-90 max-lg:landscape:origin-bottom-right landscape:scale-100 lg:landscape:origin-top-right
            max-lg:landscape:justify-end max-lg:landscape:min-w-[120px]
            lg:landscape:bottom-4 lg:landscape:justify-between 
            xl:landscape:bottom-auto xl:landscape:justify-start xl:landscape:min-w-[160px]
