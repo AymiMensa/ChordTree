@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+import { Play, Sparkles, ChevronDown, ChevronUp, Keyboard, Music2 } from 'lucide-react';
 
 interface PianoVisualizerProps {
   activeMidiNotes: number[];
@@ -52,6 +52,7 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
   onPlayChordDirectly
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [displayMode, setDisplayMode] = useState<'keyboard' | 'staff'>('keyboard');
 
   const getHighlightColor = () => {
     switch (chordType) {
@@ -69,6 +70,11 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
 
   const keyWidth = 24;
   const totalWidth = 15 * keyWidth;
+  const staffNotes: number[] = Array.from(new Set<number>(activeMidiNotes)).sort((a, b) => a - b);
+  const staffPosition = (midi: number) => {
+    const steps: Record<number, number> = { 0: 0, 1: 0, 2: 1, 3: 1, 4: 2, 5: 3, 6: 3, 7: 4, 8: 4, 9: 5, 10: 5, 11: 6 };
+    return (Math.floor(midi / 12) - 4) * 7 + steps[midi % 12];
+  };
 
   return (
     <div className="w-full bg-[#0a0f1d] border border-indigo-900/40 rounded-xl p-2 md:p-3 shadow-inner flex flex-col landscape:flex-row items-stretch gap-3 md:gap-4 landscape:gap-2 relative overflow-hidden backdrop-blur-sm">
@@ -146,12 +152,16 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
 
       {/* Right Area: Keyboard Visualizer */}
       <div className="shrink-0 flex flex-col items-center justify-center bg-indigo-950/20 p-2 md:p-3 max-lg:landscape:p-1 landscape:p-2 rounded-lg border border-indigo-900/40 w-full landscape:w-[55%] min-w-0">
+        <button type="button" onClick={() => setDisplayMode(mode => mode === 'keyboard' ? 'staff' : 'keyboard')} className="self-end mb-1 flex items-center gap-1 rounded border border-indigo-800/80 bg-indigo-950/70 px-1.5 py-1 text-[6px] md:text-[7px] text-indigo-300 transition-colors hover:bg-indigo-900">
+          {displayMode === 'keyboard' ? <Music2 className="h-3 w-3" /> : <Keyboard className="h-3 w-3" />}
+          {displayMode === 'keyboard' ? '\u4e94\u7dda\u8b5c\u6a21\u5f0f' : '\u9375\u76e4\u53ef\u8996\u5316'}
+        </button>
         <div className="text-[6px] md:text-[7px] font-mono text-slate-500 mb-2 flex flex-wrap items-center justify-between w-full gap-1" title="下方為鋼琴鍵盤可視化">
           <span>鍵盤可視化</span>
           <span className="bg-indigo-950 px-1 py-0.5 rounded text-indigo-400 border border-indigo-900 text-[5px] md:text-[6px]" title="顯示範圍">MIDI C3 - C5</span>
         </div>
 
-        <div className="relative overflow-visible w-full flex items-center justify-center mt-1">
+        <div className={`${displayMode === 'keyboard' ? 'flex' : 'hidden'} relative overflow-visible w-full items-center justify-center mt-1`}>
           <svg 
             width="100%" 
             viewBox={`0 0 ${totalWidth} 120`}
@@ -202,6 +212,25 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
             })}
           </svg>
         </div>
+        {displayMode === 'staff' && (
+          <div className="flex h-[120px] w-full items-center justify-center rounded-md border border-indigo-900/40 bg-slate-950/40 px-1">
+            <svg viewBox="0 0 390 150" className="h-full w-full" role="img" aria-label="Treble staff chord notes">
+              {[45, 60, 75, 90, 105].map(y => <line key={y} x1="56" x2="372" y1={y} y2={y} stroke="currentColor" strokeWidth="1.5" className="text-slate-500" />)}
+              <text x="62" y="105" fill="currentColor" className="text-slate-200" fontSize="82" fontFamily="serif">{'\uD834\uDD1E'}</text>
+              {staffNotes.map((midi, index) => {
+                const y = 135 - staffPosition(midi) * 7.5;
+                const x = 166 + index * 62;
+                const sharp = [1, 3, 6, 8, 10].includes(midi % 12);
+                const ledgerLines = y > 105 ? Array.from({ length: Math.floor((y - 105) / 15) + 1 }, (_, i) => 120 + i * 15) : y < 45 ? Array.from({ length: Math.floor((45 - y) / 15) + 1 }, (_, i) => 30 - i * 15) : [];
+                return <g key={midi} className={getHighlightColor()}>
+                  {ledgerLines.map(lineY => <line key={lineY} x1={x - 14} x2={x + 14} y1={lineY} y2={lineY} stroke="currentColor" strokeWidth="1.5" className="text-slate-400" />)}
+                  {sharp && <text x={x - 22} y={y + 6} fill="currentColor" className="text-slate-200" fontSize="20">{'\u266F'}</text>}
+                  <ellipse cx={x} cy={y} rx="10" ry="7" fill="currentColor" transform={`rotate(-20 ${x} ${y})`} />
+                </g>;
+              })}
+            </svg>
+          </div>
+        )}
       </div>
     </div>
   );

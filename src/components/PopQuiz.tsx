@@ -102,12 +102,13 @@ export function PopQuiz({ onClose }: { onClose: () => void }) {
 
       {/* Header - Made transparent and absolute to save space on landscape */}
       <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-2 sm:p-4 bg-transparent pointer-events-none">
-        <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
+          <div className="flex items-center gap-0.5 sm:gap-1 pointer-events-auto">
           <div className="p-1 sm:p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg sm:rounded-xl shadow-lg shadow-indigo-500/20 max-lg:landscape:scale-50 landscape:scale-75 landscape:opacity-80 origin-left">
             <Music className="w-3 h-3 sm:w-6 sm:h-6 text-white" />
           </div>
           <div className="max-lg:landscape:scale-50 landscape:scale-75 landscape:opacity-80 origin-left">
-            <h1 className="text-[7px] sm:text-[11px] md:text-[12px] font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 to-white">
+            <h1 className="text-sm sm:text-[22px] md:text-[24px] leading-none font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 to-white">{'\u548c\u5f26\u96a8\u5802\u8003\u8a66'}</h1>
+            <h1 className="hidden">
               和弦隨堂考試
             </h1>
             <p className="text-[4px] sm:text-[6px] text-indigo-300/70 font-medium tracking-widest uppercase mt-0.5">
