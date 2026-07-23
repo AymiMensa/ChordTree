@@ -70,10 +70,21 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
 
   const keyWidth = 24;
   const totalWidth = 15 * keyWidth;
-  const staffNotes: number[] = Array.from(new Set<number>(activeMidiNotes)).sort((a, b) => a - b);
-  const staffPosition = (midi: number) => {
-    const steps: Record<number, number> = { 0: 0, 1: 0, 2: 1, 3: 1, 4: 2, 5: 3, 6: 3, 7: 4, 8: 4, 9: 5, 10: 5, 11: 6 };
-    return (Math.floor(midi / 12) - 4) * 7 + steps[midi % 12];
+  const notePitchClass = (note: string) => {
+    const natural: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+    return (natural[note[0]] + [...note.slice(1)].reduce((offset, accidental) => offset + (accidental === '#' ? 1 : -1), 0) + 12) % 12;
+  };
+  const staffNotes = ([...new Set(activeMidiNotes)] as number[])
+    .sort((a, b) => a - b)
+    .map((midi: number) => ({
+      // The keyboard starts at C3; voice the same chord tones from C4 upward
+      // so their notation remains readable on a treble clef.
+      midi: midi < 60 ? midi + 12 : midi,
+      spelling: activeChordNotes.find(note => notePitchClass(note) === midi % 12) ?? "C",
+    }));
+  const staffPosition = (midi: number, spelling: string) => {
+    const octave = Math.floor(midi / 12) - 1;
+    return (octave - 4) * 7 + "CDEFGAB".indexOf(spelling[0]);
   };
 
   return (
@@ -217,14 +228,14 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
             <svg viewBox="0 0 390 150" className="h-full w-full" role="img" aria-label="Treble staff chord notes">
               {[45, 60, 75, 90, 105].map(y => <line key={y} x1="56" x2="372" y1={y} y2={y} stroke="currentColor" strokeWidth="1.5" className="text-slate-500" />)}
               <text x="62" y="105" fill="currentColor" className="text-slate-200" fontSize="82" fontFamily="serif">{'\uD834\uDD1E'}</text>
-              {staffNotes.map((midi, index) => {
-                const y = 135 - staffPosition(midi) * 7.5;
+              {staffNotes.map(({ midi, spelling }, index) => {
+                const y = 120 - staffPosition(midi, spelling) * 7.5;
                 const x = 166 + index * 62;
-                const sharp = [1, 3, 6, 8, 10].includes(midi % 12);
+                const accidental = spelling.slice(1).replace(/#/g, '\u266f').replace(/b/g, '\u266d');
                 const ledgerLines = y > 105 ? Array.from({ length: Math.floor((y - 105) / 15) + 1 }, (_, i) => 120 + i * 15) : y < 45 ? Array.from({ length: Math.floor((45 - y) / 15) + 1 }, (_, i) => 30 - i * 15) : [];
                 return <g key={midi} className={getHighlightColor()}>
                   {ledgerLines.map(lineY => <line key={lineY} x1={x - 14} x2={x + 14} y1={lineY} y2={lineY} stroke="currentColor" strokeWidth="1.5" className="text-slate-400" />)}
-                  {sharp && <text x={x - 22} y={y + 6} fill="currentColor" className="text-slate-200" fontSize="20">{'\u266F'}</text>}
+                  {accidental && <text x={x - 22} y={y + 6} fill="currentColor" className="text-slate-200" fontSize="20">{accidental}</text>}
                   <ellipse cx={x} cy={y} rx="10" ry="7" fill="currentColor" transform={`rotate(-20 ${x} ${y})`} />
                 </g>;
               })}

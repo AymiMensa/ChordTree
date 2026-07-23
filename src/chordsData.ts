@@ -23,6 +23,11 @@ export const NOTE_OFFSETS: Record<string, number> = {
 
 export const CHROMATIC_SCALE = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
+const LETTERS = ["C", "D", "E", "F", "G", "A", "B"];
+const NATURAL_OFFSETS: Record<string, number> = {
+  C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11,
+};
+
 export const QUIZ_CHORDS = [
   "Cm(maj7)", "Dm7b5", "Eaug", "Bdim",
   "C", "Dm", "Ebmaj7", "Fm", "Abmaj7", "B7",
@@ -118,18 +123,43 @@ export function getChordMidiNotes(chordName: string): number[] {
 }
 
 /**
- * Get chord spelling names using chromatic scale
+ * Spell a chord tone from its diatonic degree, rather than selecting an
+ * enharmonic name from a keyboard/chromatic-scale lookup. For example,
+ * Eb7 is Eb–G–Bb–Db, never D#–G–A#–C#.
  */
+function spellChordTone(root: string, semitones: number, degree: number): string {
+  const rootLetter = root[0];
+  const rootNaturalOffset = NATURAL_OFFSETS[rootLetter];
+  const rootOffset = NOTE_OFFSETS[root] ?? rootNaturalOffset;
+  const letter = LETTERS[(LETTERS.indexOf(rootLetter) + degree) % LETTERS.length];
+  const targetOffset = (rootOffset + semitones) % 12;
+  let accidental = (targetOffset - NATURAL_OFFSETS[letter] + 12) % 12;
+  if (accidental > 6) accidental -= 12;
+
+  if (accidental === 0) return letter;
+  if (accidental === 1) return `${letter}#`;
+  if (accidental === -1) return `${letter}b`;
+  if (accidental === 2) return `${letter}##`;
+  if (accidental === -2) return `${letter}bb`;
+  return `${letter}${accidental > 0 ? "#".repeat(accidental) : "b".repeat(-accidental)}`;
+}
+
+function degreeForInterval(interval: number, chordType: string): number {
+  if (chordType === "dim7" && interval === 9) return 6;
+  const degrees: Record<number, number> = {
+    0: 0, 3: 2, 4: 2, 6: 4, 7: 4, 8: 4, 9: 5, 10: 6, 11: 6,
+  };
+  return degrees[interval] ?? 0;
+}
+
 export function getChordSpelling(chordName: string): string[] {
-    const midiNotes = getChordMidiNotes(chordName);
-    const noteNames = midiNotes.map(n => CHROMATIC_SCALE[n % 12]);
-    const uniqueNotes: string[] = [];
-    noteNames.forEach(n => {
-      if (!uniqueNotes.includes(n)) {
-        uniqueNotes.push(n);
-      }
-    });
-    return uniqueNotes;
+  const parsed = parseChordType(chordName);
+  const uniqueNotes: string[] = [];
+  parsed.intervals.forEach(interval => {
+    const noteName = spellChordTone(parsed.root, interval, degreeForInterval(interval, parsed.type));
+    if (!uniqueNotes.includes(noteName)) uniqueNotes.push(noteName);
+  });
+  return uniqueNotes;
 }
 
 /**
