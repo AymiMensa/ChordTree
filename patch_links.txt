@@ -1,0 +1,45 @@
+            const isCurrentLink = activeLinkId === link.id;
+            const isVisitedLink = visitedLinks.has(link.id);
+            const isPlannedLink = plannedLinks.has(link.id);
+
+            return (
+              <g key={link.id}>
+                {/* Highlight Glow line when active */}
+                {isCurrentLink && (
+                  <line
+                    x1={start.x}
+                    y1={start.y}
+                    x2={end.x}
+                    y2={end.y}
+                    stroke="#fbbf24"
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                    opacity="0.8"
+                    filter="url(#neon-glow)"
+                    className="animate-pulse"
+                  />
+                )}
+                {/* Base connection line */}
+                <line
+                  x1={start.x}
+                  y1={start.y}
+                  x2={end.x}
+                  y2={end.y}
+                  stroke={
+                    isCurrentLink
+                      ? "#fbbf24"
+                      : isVisitedLink
+                        ? "#a855f7"
+                        : isPlannedLink
+                          ? "#6366f1"
+                          : "#1e1b4b"
+                  }
+                  strokeWidth={
+                    isCurrentLink ? "4" : isVisitedLink ? "2.5" : isPlannedLink ? "2" : "1.5"
+                  }
+                  strokeLinecap="round"
+                  strokeDasharray={isPlannedLink && !isVisitedLink ? "4,6" : "none"}
+                  className={`transition-all duration-700 ${isPlannedLink && !isVisitedLink ? "animate-flow-path" : ""}`}
+                />
+              </g>
+            );

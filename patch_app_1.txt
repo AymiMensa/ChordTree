@@ -1,0 +1,34 @@
+// Generate the complete progression steps from Central C to target node
+function generatePathToNode(targetId: string, chordNodes: ChordNode[], chordLinks: ChordLink[]): ProgressionStep[] {
+  const nodePath = findPathFromCenter(targetId, chordNodes, chordLinks);
+  const progression: ProgressionStep[] = [];
+
+  for (let i = 0; i < nodePath.length; i++) {
+    const nodeId = nodePath[i];
+    const nodeObj = chordNodes.find((n) => n.id === nodeId)!;
+
+    // If not the first node, find the link that connects the previous node to this one
+    if (i > 0) {
+      const prevNodeId = nodePath[i - 1];
+      const link = chordLinks.find((l) => l.from === prevNodeId && l.to === nodeId);
+      if (link) {
+        progression.push({
+          type: "transition",
+          id: link.id,
+          label: link.label || "→",
+          notes: nodeObj.notes, // Play the target chord during transition for smoother audio
+        });
+      }
+    }
+
+    // Add main node
+    progression.push({
+      type: "node",
+      id: nodeObj.id,
+      label: nodeObj.label,
+      notes: nodeObj.notes,
+    });
+  }
+
+  return progression;
+}

@@ -1,0 +1,34 @@
+  // Track visited elements up to current step, and planned elements for the entire path
+  const { visitedNodes, visitedLinks, activeLinkId, plannedNodes, plannedLinks } = useMemo(() => {
+    const nodes = new Set<string>();
+    const links = new Set<string>();
+    const pNodes = new Set<string>();
+    const pLinks = new Set<string>();
+    let activeLink: string | null = null;
+
+    for (let i = 0; i < activeProgression.length; i++) {
+      const step = activeProgression[i];
+      if (!step) continue;
+      
+      if (step.type === "node") {
+        pNodes.add(step.id);
+        if (i <= activeStepIndex) nodes.add(step.id);
+      } else if (step.type === "transition") {
+        pLinks.add(step.id);
+        if (i <= activeStepIndex) {
+          links.add(step.id);
+          if (i === activeStepIndex) {
+            activeLink = step.id;
+          }
+        }
+      }
+    }
+
+    return {
+      visitedNodes: nodes,
+      visitedLinks: links,
+      activeLinkId: activeLink,
+      plannedNodes: pNodes,
+      plannedLinks: pLinks
+    };
+  }, [activeProgression, activeStepIndex]);

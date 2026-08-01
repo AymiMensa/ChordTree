@@ -1,0 +1,307 @@
+import React, { useState } from 'react';
+import { Play, Sparkles, ChevronDown, ChevronUp, Keyboard, Music2 } from 'lucide-react';
+import { getChordMidiNotes, getChordSpelling, getChordSpellingWithOctave, noteNameToMidi } from '../chordsData';
+
+interface PianoVisualizerProps {
+  activeMidiNotes: number[];
+  chordType: 'major' | 'minor' | 'dominant' | 'seventh' | 'diminished' | 'other' | null;
+  activeChordLabel: string;
+  activeChordNotes: string[];
+  activeChordFormula?: string;
+  activeChordFullName?: string;
+  onPlayChordDirectly?: () => void;
+}
+
+const WHITE_KEYS = [
+  { midi: 48, label: "C3", idx: 0 },
+  { midi: 50, label: "D3", idx: 1 },
+  { midi: 52, label: "E3", idx: 2 },
+  { midi: 53, label: "F3", idx: 3 },
+  { midi: 55, label: "G3", idx: 4 },
+  { midi: 57, label: "A3", idx: 5 },
+  { midi: 59, label: "B3", idx: 6 },
+  { midi: 60, label: "C4", idx: 7 },
+  { midi: 62, label: "D4", idx: 8 },
+  { midi: 64, label: "E4", idx: 9 },
+  { midi: 65, label: "F4", idx: 10 },
+  { midi: 67, label: "G4", idx: 11 },
+  { midi: 69, label: "A4", idx: 12 },
+  { midi: 71, label: "B4", idx: 13 },
+  { midi: 72, label: "C5", idx: 14 }
+];
+
+const BLACK_KEYS = [
+  { midi: 49, label: "C#3", x: 17 },
+  { midi: 51, label: "D#3", x: 41 },
+  { midi: 54, label: "F#3", x: 89 },
+  { midi: 56, label: "G#3", x: 113 },
+  { midi: 58, label: "A#3", x: 137 },
+  { midi: 61, label: "C#4", x: 185 },
+  { midi: 63, label: "D#4", x: 209 },
+  { midi: 66, label: "F#4", x: 257 },
+  { midi: 68, label: "G#4", x: 281 },
+  { midi: 70, label: "A#4", x: 305 }
+];
+
+export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({ 
+  activeMidiNotes, 
+  chordType,
+  activeChordLabel,
+  activeChordNotes,
+  activeChordFormula,
+  activeChordFullName,
+  onPlayChordDirectly
+}) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [displayMode, setDisplayMode] = useState<'keyboard' | 'staff'>('keyboard');
+
+  const getHighlightColor = () => {
+    switch (chordType) {
+      case 'minor': return 'bg-blue-500 fill-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.6)]';
+      case 'major': return 'bg-pink-500 fill-pink-500 shadow-[0_0_12px_rgba(219,39,119,0.6)]';
+      case 'dominant': 
+      case 'seventh': return 'bg-amber-500 fill-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.6)]';
+      default: return 'bg-sky-400 fill-sky-400 shadow-[0_0_12px_rgba(56,189,248,0.6)]';
+    }
+  };
+
+  const isNoteActive = (midi: number) => {
+    return activeMidiNotes.includes(midi);
+  };
+
+  const keyWidth = 24;
+  const totalWidth = 15 * keyWidth;
+
+  /**
+   * Absolute treble-staff Y position for a written note spelling (e.g. "C4", "Eb3", "B#3", "G##3").
+   * Staff lines are drawn at y = [85, 100, 115, 130, 145] (E4, G4, B4, D5, F5).
+   * Middle C (C4) sits on the first ledger line below the staff at y = 160.
+   * Each note letter descends 7.5px on the staff; each octave spans 52.5px.
+   * Accidentals do NOT move the note-head (they are rendered to the left),
+   * so e.g. G##4 sits exactly on the G4 line, Cb4 on the C4 ledger line.
+   */
+  const staffYForSpelling = (spelling: string): number => {
+    const noteMatch = spelling.match(/^([A-G])([#b]*)(\d)$/);
+    if (!noteMatch) return 160;
+    const [, letter, , octaveText] = noteMatch;
+    const octave = Number(octaveText);
+    const letterIndex = { C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6 }[letter] ?? 0;
+    return 160 - (octave - 4) * 52.5 - letterIndex * 7.5;
+  };
+
+  /**
+   * Staff notes in strict root-position order (root-3rd-5th-7th-...).
+   * Uses getChordSpellingWithOctave which returns octave-qualified spellings
+   * (e.g. ["C4","E4","G4","Bb4"]) that ascend left-to-right and stay
+   * within the two-ledger-line range of the treble staff.
+   */
+  const staffNotes: { midi: number; spelling: string }[] = (() => {
+    const chordName = activeChordLabel || activeChordNotes.join('');
+    if (chordName) {
+      const spellingsWithOctave = getChordSpellingWithOctave(chordName);
+      return spellingsWithOctave.map((spelling) => ({
+        midi: noteNameToMidi(spelling, 60),
+        spelling,
+      }));
+    }
+    // Fallback: sorted ascending MIDI notes
+    const midiNotes = [...activeMidiNotes].sort((a, b) => a - b);
+    const spellings = activeChordNotes;
+    return midiNotes.map((midi, index) => ({
+      midi,
+      spelling: spellings[index] || spellings[0] || 'C',
+    }));
+  })();
+
+  /**
+   * Equal spacing: distribute the whole notes evenly across the available width.
+   * The first note (root) is placed 5px away from the treble clef to avoid
+   * overlap with accidentals. All adjacent notes share the same gap.
+   */
+  const staffX = (index: number, count: number): number => {
+    const left = 125;  // 5px gap after the treble clef (clef ends ~120)
+    const right = 360;
+    if (count <= 1) return (left + right) / 2;
+    return left + (index * (right - left)) / (count - 1);
+  };
+
+  return (
+    <div className="w-full bg-[#0a0f1d] border border-indigo-900/40 rounded-xl p-2 md:p-3 shadow-inner flex flex-col landscape:flex-row items-stretch gap-3 md:gap-4 landscape:gap-2 relative overflow-hidden backdrop-blur-sm">
+      
+      {/* Fold/Unfold Header */}
+      <div className="flex items-center justify-between px-1 md:hidden">
+         <div className="text-[7px] md:text-[8px] font-mono text-slate-500 flex items-center gap-1">
+           <Sparkles className="w-3 h-3 text-indigo-400" />
+           <span>和弦與鍵盤資訊</span>
+         </div>
+         <button 
+           onClick={() => setIsExpanded(!isExpanded)}
+           className="flex items-center gap-1 text-[7px] md:text-[8px] bg-indigo-950/50 hover:bg-indigo-900 text-indigo-300 px-2 py-1 rounded transition-colors active:scale-95"
+         >
+           {isExpanded ? (
+             <><ChevronUp className="w-3 h-3" /> 摺疊資訊</>
+           ) : (
+             <><ChevronDown className="w-3 h-3" /> 展開資訊</>
+           )}
+         </button>
+      </div>
+
+      {/* Left Area: Chord Details and Formula */}
+      <div className={`w-full landscape:w-[45%] flex-col gap-2 min-w-0 landscape:justify-center ${isExpanded ? 'flex' : 'hidden md:flex landscape:flex'}`}>
+        
+        {/* Card 1: Main details */}
+        <div className="flex-1 bg-black/40 border border-indigo-950/80 rounded-lg p-2.5 md:p-3 flex flex-col justify-center shadow-lg relative overflow-hidden group mobile-landscape-card">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[7px] md:text-[8px] text-slate-500 font-medium flex items-center gap-1" title="當前選擇的和弦">
+              <Sparkles className="w-3 h-3 text-pink-500" />
+              當前和弦
+            </span>
+            <div className="flex items-center gap-1 bg-[#022c22]/80 border border-[#047857] text-[#34d399] px-1.5 py-0.5 rounded text-[6px] md:text-[7px] font-bold" title="此和弦已被選取">
+              已選取
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2 mb-1.5">
+            <div className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+              {activeChordLabel}
+            </div>
+            
+            <div className="flex flex-col gap-1 mt-0.5">
+              <span className="text-[6px] md:text-[7px] font-bold text-[#f59e0b] border border-[#b45309] bg-[#451a03]/50 px-2 py-0.5 rounded-full whitespace-nowrap self-start mobile-landscape-chord-name" title="和弦完整名稱">
+                {activeChordFullName || "Unknown"}
+              </span>
+              <span className="text-[6px] md:text-[7px] font-medium text-slate-300 bg-slate-800/80 border border-slate-700 px-2 py-0.5 rounded-full whitespace-nowrap self-start mobile-landscape-chord-name" title="和弦組成音符">
+                組成音: {activeChordNotes.join(", ")}
+              </span>
+            </div>
+          </div>
+          
+          {onPlayChordDirectly && (
+            <button 
+              onClick={onPlayChordDirectly} 
+              title="播放當前和弦 (Play Current Chord)"
+              className="w-full bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-slate-600 text-slate-200 font-medium py-1.5 rounded-md flex items-center justify-center gap-1.5 transition-all shadow text-[8px] md:text-[9px] max-lg:landscape:text-[6px] max-lg:landscape:py-1 max-lg:landscape:gap-1 landscape:py-1.5 landscape:text-[10px] mt-auto mobile-landscape-play-btn"
+            >
+              <Play className="w-3.5 h-3.5 fill-current text-slate-300" />
+              播放和弦
+            </button>
+          )}
+        </div>
+
+        {/* Card 2: Formula */}
+        <div className="bg-black/40 border border-indigo-950/80 rounded-lg p-2.5 md:p-3 shadow-lg flex flex-col justify-center min-w-0 overflow-hidden mobile-landscape-card">
+          <span className="text-[7px] md:text-[8px] text-slate-400 font-bold mb-1" title="和弦結構公式">和弦公式 (Formula)</span>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-[7px] md:text-[8px] font-mono min-w-0 gap-1">
+            <span className="text-slate-500 truncate min-w-0 mr-2 mobile-landscape-chord-formula">{activeChordFullName || "Unknown"}</span>
+            <span className="text-indigo-300 font-bold tracking-widest whitespace-nowrap shrink-0 mobile-landscape-chord-formula">{activeChordFormula || "N/A"}</span>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Right Area: Keyboard Visualizer */}
+      <div className="shrink-0 flex flex-col items-center justify-center bg-indigo-950/20 p-2 md:p-3 max-lg:landscape:p-1 landscape:p-2 rounded-lg border border-indigo-900/40 w-full landscape:w-[55%] min-w-0">
+        <button type="button" onClick={() => setDisplayMode(mode => mode === 'keyboard' ? 'staff' : 'keyboard')} className="self-end mb-1 flex items-center gap-1 rounded border border-indigo-800/80 bg-indigo-950/70 px-1.5 py-1 text-[6px] md:text-[7px] text-indigo-300 transition-colors hover:bg-indigo-900">
+          {displayMode === 'keyboard' ? <Music2 className="h-3 w-3" /> : <Keyboard className="h-3 w-3" />}
+          {displayMode === 'keyboard' ? '\u4e94\u7dda\u8b5c\u6a21\u5f0f' : '\u9375\u76e4\u53ef\u8996\u5316'}
+        </button>
+        <div className="text-[6px] md:text-[7px] font-mono text-slate-500 mb-2 flex flex-wrap items-center justify-between w-full gap-1" title="下方為鋼琴鍵盤可視化">
+          <span>鍵盤可視化</span>
+          <span className="bg-indigo-950 px-1 py-0.5 rounded text-indigo-400 border border-indigo-900 text-[5px] md:text-[6px]" title="顯示範圍">MIDI C3 - C5</span>
+        </div>
+
+        <div className={`${displayMode === 'keyboard' ? 'flex' : 'hidden'} relative overflow-visible w-full items-center justify-center mt-1`}>
+          <svg 
+            width="100%" 
+            viewBox={`0 0 ${totalWidth} 120`}
+            preserveAspectRatio="xMidYMid meet"
+            className="select-none overflow-visible h-auto max-h-[120px] min-h-[40px]"
+            style={{ 
+              filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.5))' 
+            }}
+          >
+            {/* White Keys */}
+            {WHITE_KEYS.map((key) => {
+              const active = isNoteActive(key.midi);
+              return (
+                <rect
+                  key={key.midi}
+                  x={key.idx * keyWidth}
+                  y={0}
+                  width={keyWidth - 1}
+                  height={120}
+                  rx={3}
+                  className={`transition-all duration-150 cursor-default stroke-indigo-950 stroke-1 ${
+                    active 
+                      ? getHighlightColor() 
+                      : 'fill-slate-200'
+                  }`}
+                />
+              );
+            })}
+
+            {/* Black Keys */}
+            {BLACK_KEYS.map((key) => {
+              const active = isNoteActive(key.midi);
+              return (
+                <rect
+                  key={key.midi}
+                  x={key.x}
+                  y={0}
+                  width={14}
+                  height={75}
+                  rx={2}
+                  className={`transition-all duration-150 cursor-default stroke-indigo-950 stroke-1 ${
+                    active 
+                      ? getHighlightColor() 
+                      : 'fill-slate-800'
+                  }`}
+                />
+              );
+            })}
+          </svg>
+        </div>
+        {displayMode === 'staff' && (
+          <div className="flex h-[200px] w-full items-center justify-center rounded-md border border-indigo-900/40 bg-slate-950/40 px-1">
+            <svg viewBox="0 0 390 205" className="h-full w-full" role="img" aria-label="Treble staff chord notes">
+              {/* Staff lines: E4=145, G4=130, B4=115, D5=100, F5=85 */}
+              {[85, 100, 115, 130, 145].map(y => <line key={y} x1="56" x2="376" y1={y} y2={y} stroke="currentColor" strokeWidth="1.5" className="text-slate-500" />)}
+              <text x="62" y="145" fill="currentColor" className="text-slate-200" fontSize="82" fontFamily="serif">{'\uD834\uDD1E'}</text>
+              {staffNotes.map(({ midi, spelling }, index) => {
+                const y = staffYForSpelling(spelling);
+                const x = staffX(index, staffNotes.length);
+                // Accidentals shown to the left of the note head (♯ / ♭ / 𝄪 / 𝄫)
+                const accMatch = spelling.match(/^[A-G]([#b]*)\d$/);
+                const accidental = accMatch && accMatch[1]
+                  ? accMatch[1].replace(/#/g, '\u266f').replace(/b/g, '\u266d')
+                  : '';
+                // Ledger lines: show ALL lines between the staff edge and the note.
+                // Below staff (y > 145): lines at y=160, 175, 190... — show every
+                // line that is at or above the note position.
+                // Above staff (y < 85): lines at y=70, 55, 40... — show every
+                // line that is at or below the note position.
+                const ledgerLines: number[] = [];
+                if (y < 85) {
+                  // Above staff: ledger lines at 70, 55, 40 (within two ledger lines)
+                  for (let lineY = 70; lineY >= 40; lineY -= 15) {
+                    if (y <= lineY) ledgerLines.push(lineY);
+                  }
+                } else if (y > 145) {
+                  // Below staff: ledger lines at 160, 175, 190 (within two ledger lines)
+                  for (let lineY = 160; lineY <= 190; lineY += 15) {
+                    if (y >= lineY) ledgerLines.push(lineY);
+                  }
+                }
+                return <g key={`${midi}-${index}`} className={getHighlightColor()}>
+                  {ledgerLines.map(lineY => <line key={lineY} x1={x - 14} x2={x + 14} y1={lineY} y2={lineY} stroke="currentColor" strokeWidth="1.5" className="text-slate-400" />)}
+                  {accidental && <text x={x - 24} y={y + 6} fill="currentColor" className="text-slate-200" fontSize="20">{accidental}</text>}
+                  <ellipse cx={x} cy={y} rx="10" ry="7" fill="currentColor" transform={`rotate(-20 ${x} ${y})`} />
+                </g>;
+              })}
+            </svg>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};

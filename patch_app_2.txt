@@ -1,0 +1,35 @@
+  while (true) {
+    const outgoingLinks = chordLinks.filter(
+      (link) => link.from === currentNodeId,
+    );
+
+    if (outgoingLinks.length === 0) {
+      break; // Reached an outer leaf node, end of the branch
+    }
+
+    // Select a branch randomly
+    const randomLink =
+      outgoingLinks[Math.floor(Math.random() * outgoingLinks.length)];
+
+    // Push the transition step
+    const targetNode = chordNodes.find((n) => n.id === randomLink.to);
+    if (!targetNode) break;
+
+    progression.push({
+      type: "transition",
+      id: randomLink.id,
+      label: randomLink.label || "→",
+      notes: targetNode.notes,
+    });
+
+    // Move to target node
+    currentNodeId = randomLink.to;
+    currentNode = targetNode;
+
+    progression.push({
+      type: "node",
+      id: currentNode.id,
+      label: currentNode.label,
+      notes: currentNode.notes,
+    });
+  }

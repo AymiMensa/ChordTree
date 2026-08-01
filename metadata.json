@@ -1,0 +1,6 @@
+{
+  "name": "Chord Tree Metronome",
+  "description": "An interactive, visual circular tree-based chord progression player and professional metronome with beautiful glowing paths, notes display, and Web Audio API synthesizer feedback.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

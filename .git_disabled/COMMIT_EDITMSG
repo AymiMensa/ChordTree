@@ -1,0 +1,7 @@
+fix: staff notation spelling & position + TS type inference
+
+- chordsData: getChordSpelling now uses diatonic degree-based spelling
+  (Eb7 = Eb-G-Bb-Db, not D#-G-A#-C#)
+- PianoVisualizer: staff position uses letter name, not MIDI pitch class
+- PianoVisualizer: accidentals derived from chord spelling, not hardcoded sharps
+- PianoVisualizer: fix TS2362/TS2365 Array.from(Set) type inference
