@@ -117,12 +117,33 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
    * Equal spacing: distribute the whole notes evenly across the available width.
    * The first note (root) is placed 5px away from the treble clef to avoid
    * overlap with accidentals. All adjacent notes share the same gap.
+   *
+   * Spacing adjustments to avoid the root note (and its accidental) colliding
+   * with the treble clef:
+   *  - Triad (3 notes): keep the 3rd (middle) fixed, move root & 5th 10px
+   *    closer to the middle.
+   *  - Seventh (4 notes): move all four notes 5px toward the staff center.
    */
   const staffX = (index: number, count: number): number => {
     const left = 125;  // 5px gap after the treble clef (clef ends ~120)
     const right = 360;
-    if (count <= 1) return (left + right) / 2;
-    return left + (index * (right - left)) / (count - 1);
+    let x: number;
+    if (count <= 1) {
+      x = (left + right) / 2;
+    } else {
+      x = left + (index * (right - left)) / (count - 1);
+    }
+    // Triad: root & fifth move 10px toward the third (middle stays fixed)
+    if (count === 3) {
+      if (index === 0) x += 10;      // root moves right toward the third
+      else if (index === 2) x -= 10; // fifth moves left toward the third
+    }
+    // Seventh chord: all four notes move 5px toward the staff center
+    else if (count === 4) {
+      const center = (left + right) / 2;
+      x += x < center ? 5 : (x > center ? -5 : 0);
+    }
+    return x;
   };
 
   return (
