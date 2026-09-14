@@ -34,7 +34,7 @@ export const ChordMindMapB: React.FC<ChordMindMapProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
-  const [dimensions, setDimensions] = useState({ width: 800, height: 800 });
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [isGuideExpanded, setIsGuideExpanded] = useState(false);
   const zoomBehaviorRef = useRef<any>(null);
   const timeRef = useRef<number>(0);
