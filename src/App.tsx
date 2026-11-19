@@ -391,9 +391,33 @@ export default function App() {
   }, []);
 
   // Scale Explorer Playback handlers
+  const handlePlayScaleAdvanced = useCallback((
+    items: { note: string; semitone: number; root: string }[],
+    mode: "up" | "down" | "updown" | "chord",
+    chordNotes?: string[]
+  ) => {
+    if (mode === "chord" && chordNotes && chordNotes.length > 0) {
+      audioEngineRef.current.triggerChordDirectly(chordNotes);
+      setActiveScaleNotePlaying(null);
+    } else if (items.length > 0) {
+      audioEngineRef.current.playScaleSequenceAdvanced(items, 280, (_idx, note) => {
+        setActiveScaleNotePlaying(note || null);
+      });
+    }
+  }, []);
+
+  const handlePlaySingleScaleNote = useCallback((root: string, semitone: number, note: string) => {
+    audioEngineRef.current.playSingleScaleNote(root, semitone, 0.45);
+    setActiveScaleNotePlaying(note);
+    setTimeout(() => {
+      setActiveScaleNotePlaying((prev) => (prev === note ? null : prev));
+    }, 450);
+  }, []);
+
   const handlePlayScaleNotes = useCallback((notes: string[], mode?: "up" | "down" | "updown" | "chord") => {
     if (mode === "chord") {
       audioEngineRef.current.triggerChordDirectly(notes);
+      setActiveScaleNotePlaying(null);
     } else {
       audioEngineRef.current.playScaleSequence(notes, 280, (_idx, note) => {
         setActiveScaleNotePlaying(note || null);
@@ -919,9 +943,12 @@ export default function App() {
                 {activeTab === "scale" && (
                   <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <ScaleExplorer
-                      onPlayScale={handlePlayScaleNotes}
+                      onPlayScale={handlePlayScaleAdvanced}
+                      onPlayScaleNotes={handlePlayScaleNotes}
+                      onPlaySingleNote={handlePlaySingleScaleNote}
                       onStopScale={handleStopScale}
                       onSelectScaleForPiano={handleSelectScaleForPiano}
+                      activeScaleNotePlaying={activeScaleNotePlaying}
                       activePlayingNote={activeScaleNotePlaying}
                     />
                   </div>

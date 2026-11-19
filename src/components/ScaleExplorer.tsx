@@ -11,19 +11,32 @@ import {
 } from "../utils/scaleData";
 import { Tooltip } from "./TooltipProvider";
 
+export interface ScalePlayItem {
+  note: string;
+  semitone: number;
+  root: string;
+}
+
 interface ScaleExplorerProps {
   onPlayScaleNotes?: (notes: string[], mode?: "up" | "down" | "updown" | "chord") => void;
+  onPlayScale?: (items: ScalePlayItem[], mode: "up" | "down" | "updown" | "chord", chordNotes?: string[]) => void;
+  onPlaySingleNote?: (root: string, semitone: number, note: string) => void;
   onStopScale?: () => void;
   onSelectScaleForPiano?: (notes: string[], scaleName: string) => void;
   activeScaleNotePlaying?: string | null;
+  activePlayingNote?: string | null;
 }
 
 export const ScaleExplorer: React.FC<ScaleExplorerProps> = ({
   onPlayScaleNotes,
+  onPlayScale,
+  onPlaySingleNote,
   onStopScale,
   onSelectScaleForPiano,
-  activeScaleNotePlaying
+  activeScaleNotePlaying,
+  activePlayingNote
 }) => {
+  const currentActivePlayingNote = activeScaleNotePlaying || activePlayingNote;
   const [selectedRoot, setSelectedRoot] = useState<string>("C");
   const [selectedScaleId, setSelectedScaleId] = useState<string>("gong-pentatonic");
   const [difficultyFilter, setDifficultyFilter] = useState<"all" | ScaleDifficulty>("all");
@@ -52,22 +65,53 @@ export const ScaleExplorer: React.FC<ScaleExplorerProps> = ({
 
   // Handle play modes
   const handlePlay = (mode: "up" | "down" | "updown" | "chord") => {
-    if (!onPlayScaleNotes) return;
     setIsPlayingScale(true);
-    let sequence: string[] = [];
+
+    const semitones = currentScale.semitones;
+    const notes = currentScaleNotes;
+
+    // 構建帶半音音高的完整階梯
+    const scaleItems: ScalePlayItem[] = semitones.map((st, idx) => ({
+      note: notes[idx],
+      semitone: st,
+      root: selectedRoot
+    }));
+
+    // 高八度根音 (semitone = 12)
+    const octaveRootItem: ScalePlayItem = {
+      note: selectedRoot,
+      semitone: 12,
+      root: selectedRoot
+    };
+
+    let sequenceItems: ScalePlayItem[] = [];
 
     if (mode === "up") {
-      sequence = [...currentScaleNotes, currentScaleNotes[0]];
+      sequenceItems = [...scaleItems, octaveRootItem];
     } else if (mode === "down") {
-      sequence = [currentScaleNotes[0], ...[...currentScaleNotes].reverse()];
+      sequenceItems = [octaveRootItem, ...[...scaleItems].reverse()];
     } else if (mode === "updown") {
-      sequence = [...currentScaleNotes, currentScaleNotes[0], ...[...currentScaleNotes].reverse().slice(1)];
+      sequenceItems = [...scaleItems, octaveRootItem, ...[...scaleItems].reverse().slice(1)];
     } else if (mode === "chord") {
-      // Tonic Triad / 7th from scale notes
-      sequence = [currentScaleNotes[0], currentScaleNotes[2] || currentScaleNotes[1], currentScaleNotes[4] || currentScaleNotes[2]];
+      // 主和弦 (三和弦)
+      const chordNotes = [
+        notes[0],
+        notes[2] || notes[1],
+        notes[4] || notes[2] || notes[notes.length - 1]
+      ];
+      if (onPlayScale) {
+        onPlayScale([], "chord", chordNotes);
+      } else if (onPlayScaleNotes) {
+        onPlayScaleNotes(chordNotes, "chord");
+      }
+      return;
     }
 
-    onPlayScaleNotes(sequence, mode);
+    if (onPlayScale) {
+      onPlayScale(sequenceItems, mode);
+    } else if (onPlayScaleNotes) {
+      onPlayScaleNotes(sequenceItems.map(s => s.note), mode);
+    }
   };
 
   const handleStop = () => {
@@ -353,28 +397,41 @@ export const ScaleExplorer: React.FC<ScaleExplorerProps> = ({
 
           {/* Notes & Solfege Tokens */}
           <div className="flex flex-col gap-1.5">
-            <span className="text-[10px] text-slate-400 font-semibold">
-              音階組成音與唱名 (Notes & Solfege):
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-slate-400 font-semibold">
+                音階組成音與唱名 (點擊單音可試聽):
+              </span>
+              <span className="text-[9px] text-slate-500 font-mono">
+                {currentScaleNotes.length} 音體系
+              </span>
+            </div>
             <div className="flex flex-wrap items-center gap-2">
               {currentScaleNotes.map((note, idx) => {
                 const sol = currentScale.solfege[idx] || "";
                 const chi = currentScale.chineseNames?.[idx] || "";
-                const isPlayingThis = activeScaleNotePlaying === note;
+                const isPlayingThis = currentActivePlayingNote === note;
 
                 return (
-                  <div
+                  <button
                     key={`${note}-${idx}`}
-                    className={`flex flex-col items-center justify-center min-w-[38px] p-1.5 rounded-lg border transition-all ${
+                    onClick={() => {
+                      if (onPlaySingleNote) {
+                        onPlaySingleNote(selectedRoot, currentScale.semitones[idx], note);
+                      } else if (onPlayScaleNotes) {
+                        onPlayScaleNotes([note]);
+                      }
+                    }}
+                    title={`試聽單音: ${note}`}
+                    className={`flex flex-col items-center justify-center min-w-[38px] p-1.5 rounded-lg border transition-all cursor-pointer active:scale-95 ${
                       isPlayingThis
                         ? "bg-pink-500 text-white border-white scale-110 shadow-lg shadow-pink-500/50"
-                        : "bg-slate-900/80 border-indigo-900/40 text-slate-200"
+                        : "bg-slate-900/80 border-indigo-900/40 text-slate-200 hover:border-pink-500/60 hover:bg-indigo-950/50"
                     }`}
                   >
                     <span className="text-xs font-mono font-bold">{note}</span>
                     <span className="text-[10px] font-mono text-emerald-400 font-semibold">{sol}</span>
                     {chi && <span className="text-[9px] text-amber-300 font-serif">{chi}</span>}
-                  </div>
+                  </button>
                 );
               })}
             </div>

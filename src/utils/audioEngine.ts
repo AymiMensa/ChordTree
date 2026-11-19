@@ -747,18 +747,72 @@ export class AudioEngine {
     }
   }
 
-  // Play a single note for Scale demonstration
-  public playSingleScaleNote(note: string, duration = 0.4, octave = 4) {
+  // Play a single note frequency with context resumption guarantee
+  public playScaleFrequency(freq: number, duration = 0.4) {
     this.initContext();
     if (!this.ctx) return;
-    const now = this.ctx.currentTime;
-    let baseFreq = NOTE_BASE_FREQS[note] || 261.63;
-    if (octave === 5) baseFreq *= 2.0;
-    if (octave === 3) baseFreq *= 0.5;
-    this.playSingleSynthNote(baseFreq, now, duration);
+    const play = () => {
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      this.playSingleSynthNote(freq, now, duration);
+    };
+
+    if (this.ctx.state === "suspended") {
+      this.ctx.resume().then(play).catch(play);
+    } else {
+      play();
+    }
   }
 
-  // Play a sequence of scale notes (e.g. Ascending, Descending, Arpeggios)
+  // Play a single note for Scale demonstration with precise semitone offset
+  public playSingleScaleNote(root: string, semitone: number, duration = 0.4) {
+    const rootFreq = NOTE_BASE_FREQS[root] || 261.63;
+    const freq = rootFreq * Math.pow(2, semitone / 12);
+    this.playScaleFrequency(freq, duration);
+  }
+
+  // Play a sequence of scale items (up, down, updown) with real pitch climbing/falling
+  public playScaleSequenceAdvanced(
+    items: { note: string; semitone: number; root: string }[],
+    intervalMs = 280,
+    onStep?: (index: number, note: string) => void
+  ) {
+    this.stopScaleSequence();
+    this.initContext();
+    if (!this.ctx) return;
+
+    const startSequence = () => {
+      let currentIdx = 0;
+      const playNext = () => {
+        if (currentIdx >= items.length) {
+          this.scalePlayTimer = null;
+          if (onStep) onStep(-1, "");
+          return;
+        }
+        const item = items[currentIdx];
+        const rootFreq = NOTE_BASE_FREQS[item.root] || 261.63;
+        const freq = rootFreq * Math.pow(2, item.semitone / 12);
+        
+        if (this.ctx) {
+          const now = this.ctx.currentTime;
+          this.playSingleSynthNote(freq, now, Math.max(0.2, (intervalMs / 1000) * 0.92));
+        }
+
+        if (onStep) onStep(currentIdx, item.note);
+        currentIdx++;
+        this.scalePlayTimer = window.setTimeout(playNext, intervalMs);
+      };
+      playNext();
+    };
+
+    if (this.ctx.state === "suspended") {
+      this.ctx.resume().then(startSequence).catch(startSequence);
+    } else {
+      startSequence();
+    }
+  }
+
+  // Legacy fallback for string-only arrays
   public playScaleSequence(
     notes: string[],
     intervalMs = 300,
@@ -766,20 +820,34 @@ export class AudioEngine {
   ) {
     this.stopScaleSequence();
     this.initContext();
-    let currentIdx = 0;
-    const playNext = () => {
-      if (currentIdx >= notes.length) {
-        this.scalePlayTimer = null;
-        if (onStep) onStep(-1, "");
-        return;
-      }
-      const note = notes[currentIdx];
-      this.playSingleScaleNote(note, intervalMs / 1000 * 0.9, 4);
-      if (onStep) onStep(currentIdx, note);
-      currentIdx++;
-      this.scalePlayTimer = window.setTimeout(playNext, intervalMs);
+    if (!this.ctx) return;
+
+    const start = () => {
+      let currentIdx = 0;
+      const playNext = () => {
+        if (currentIdx >= notes.length) {
+          this.scalePlayTimer = null;
+          if (onStep) onStep(-1, "");
+          return;
+        }
+        const note = notes[currentIdx];
+        const baseFreq = NOTE_BASE_FREQS[note] || 261.63;
+        if (this.ctx) {
+          const now = this.ctx.currentTime;
+          this.playSingleSynthNote(baseFreq, now, (intervalMs / 1000) * 0.9);
+        }
+        if (onStep) onStep(currentIdx, note);
+        currentIdx++;
+        this.scalePlayTimer = window.setTimeout(playNext, intervalMs);
+      };
+      playNext();
     };
-    playNext();
+
+    if (this.ctx.state === "suspended") {
+      this.ctx.resume().then(start).catch(start);
+    } else {
+      start();
+    }
   }
 
   public stopScaleSequence() {
