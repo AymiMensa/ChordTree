@@ -1,6 +1,8 @@
 import { NOTE_BASE_FREQS } from "./audioNotes";
-import { GrooveType } from "../types";
+import { GrooveType, AmbientSoundType } from "../types";
 import { GROOVES } from "./drumGrooves";
+import { AmbientEngine } from "./ambientEngine";
+
 export class AudioEngine {
   private ctx: AudioContext | null = null;
   private schedulerTimerId: number | null = null;
@@ -12,7 +14,6 @@ export class AudioEngine {
   private scheduleAheadTime = 0.1; // sec to schedule ahead
   private masterOutput: GainNode | null = null;
 
-
   private metronomeVolume = 0.6;
   private synthVolume = 0.5;
   private soundMode: "pad" | "arpeggio" | "silent" = "pad";
@@ -20,6 +21,12 @@ export class AudioEngine {
   private currentNotes: string[] = ["C", "E", "G"];
   private activeGroove: GrooveType = "None";
   private current16thStep = 0; // 0 to 15
+
+  // Ambient soundscape generator engine
+  public ambientEngine: AmbientEngine = new AmbientEngine();
+
+  // Scale playback timer
+  private scalePlayTimer: number | null = null;
 
   // Callback to synchronize visual state with exact AudioContext trigger time
   private onScheduleBeat?: (beat: number) => string[] | null;
@@ -52,11 +59,22 @@ export class AudioEngine {
       
       this.masterOutput.connect(compressor);
       compressor.connect(this.ctx.destination);
+
+      this.ambientEngine.setContext(this.ctx);
     }
     if (this.ctx.state === "suspended") {
       this.ctx.resume();
     }
     return this.ctx;
+  }
+
+  public setAmbientSound(sound: AmbientSoundType) {
+    this.initContext();
+    this.ambientEngine.play(sound);
+  }
+
+  public setAmbientVolume(vol: number) {
+    this.ambientEngine.setVolume(vol);
   }
 
   public setParams(params: {
@@ -67,6 +85,8 @@ export class AudioEngine {
     synthStyle?: "epiano" | "pad" | "strings";
     notes?: string[];
     activeGroove?: GrooveType;
+    ambientSound?: AmbientSoundType;
+    ambientVolume?: number;
   }) {
     if (params.bpm !== undefined) this.bpm = params.bpm;
     if (params.metronomeVolume !== undefined)
@@ -76,6 +96,8 @@ export class AudioEngine {
     if (params.synthStyle !== undefined) this.synthStyle = params.synthStyle;
     if (params.notes !== undefined) this.currentNotes = params.notes;
     if (params.activeGroove !== undefined) this.activeGroove = params.activeGroove;
+    if (params.ambientVolume !== undefined) this.setAmbientVolume(params.ambientVolume);
+    if (params.ambientSound !== undefined) this.setAmbientSound(params.ambientSound);
   }
 
   public start() {
@@ -319,6 +341,11 @@ export class AudioEngine {
       startFreq = 250; 
       decay = 0.4;
       volMult = 1.8;
+    } else if (this.activeGroove === "Trap" || this.activeGroove === "Drill") {
+      startFreq = 160;
+      endFreq = 38;
+      decay = 0.55;
+      volMult = 2.2;
     } else if (this.activeGroove === "Soft Swing" || this.activeGroove === "Jazz Ballad") {
       startFreq = 100;
       decay = 0.3;
@@ -339,8 +366,13 @@ export class AudioEngine {
   private playSnare(time: number) {
     if (!this.ctx) return;
     
-    if (["Salsa", "Bossa Nova", "Samba", "Rumba", "Cha-Cha", "Mambo", "Afrobeat"].includes(this.activeGroove)) {
-      // Conga / Timbale sound
+    const isLatin = [
+      "Salsa", "Bossa Nova", "Samba", "Rumba", "Cha-Cha", "Mambo", "Afrobeat",
+      "Reggaeton", "Baile Funk", "AmaPiano", "Soca", "Latin Pop", "Afro Swing"
+    ].includes(this.activeGroove);
+
+    if (isLatin) {
+      // Conga / Timbale / Rim sound
       const osc = this.ctx.createOscillator();
       const oscGain = this.ctx.createGain();
       osc.type = "sine";
@@ -385,17 +417,17 @@ export class AudioEngine {
     let bodyVol = 0.7;
     let noiseVol = 1.2;
 
-    if (this.activeGroove === "Heavy Metal") {
+    if (this.activeGroove === "Heavy Metal" || this.activeGroove === "Pop Punk") {
       bodyFreq = 200; 
       bodyDecay = 0.25;
       noiseVol = 1.8; 
       noiseDecay = 0.3;
-    } else if (this.activeGroove === "EDM" || this.activeGroove === "Trance") {
+    } else if (this.activeGroove === "EDM" || this.activeGroove === "Trance" || this.activeGroove === "Jersey Club" || this.activeGroove === "House") {
       bodyFreq = 400; 
       bodyVol = 0.8;
       noiseFilterFreq = 2500; 
-      noiseDecay = 0.3; 
-      noiseVol = 2.0; // Synth Clap noise
+      noiseDecay = 0.25; 
+      noiseVol = 1.9; // Synth Clap noise
       // Add a secondary noise burst for the clap effect
       setTimeout(() => {
         if (!this.ctx) return;
@@ -413,6 +445,11 @@ export class AudioEngine {
         n.connect(f); f.connect(g); g.connect(this.masterOutput!);
         n.start();
       }, 20); // 20ms delay for the second clap layer
+    } else if (this.activeGroove === "Trap" || this.activeGroove === "Drill") {
+      bodyFreq = 320;
+      bodyDecay = 0.12;
+      noiseFilterFreq = 3000;
+      noiseVol = 2.0;
     }
 
     // Snare Body
@@ -456,7 +493,12 @@ export class AudioEngine {
   private playHiHat(time: number, closed: boolean) {
     if (!this.ctx) return;
 
-    if (["Salsa", "Bossa Nova", "Samba", "Rumba", "Cha-Cha", "Mambo", "Afrobeat"].includes(this.activeGroove)) {
+    const isLatin = [
+      "Salsa", "Bossa Nova", "Samba", "Rumba", "Cha-Cha", "Mambo", "Afrobeat",
+      "Reggaeton", "Baile Funk", "AmaPiano", "Soca", "Latin Pop", "Afro Swing"
+    ].includes(this.activeGroove);
+
+    if (isLatin) {
       // Maracas / Shaker sound
       const dur = closed ? 0.08 : 0.15;
       const bufferSize = this.ctx.sampleRate * dur;
@@ -486,10 +528,13 @@ export class AudioEngine {
     let dur = closed ? 0.1 : 0.4;
     let noiseFilterFreq = 7000;
     
-    if (this.activeGroove === "EDM" || this.activeGroove === "Trance") {
+    if (this.activeGroove === "EDM" || this.activeGroove === "Trance" || this.activeGroove === "House" || this.activeGroove === "Tech House") {
       dur = closed ? 0.05 : 0.25; 
       noiseFilterFreq = 9000; 
-    } else if (this.activeGroove === "Heavy Metal") {
+    } else if (this.activeGroove === "Trap" || this.activeGroove === "Drill" || this.activeGroove === "Future Bass") {
+      dur = closed ? 0.04 : 0.2; 
+      noiseFilterFreq = 8500;
+    } else if (this.activeGroove === "Heavy Metal" || this.activeGroove === "Pop Punk") {
       dur = closed ? 0.12 : 0.5; 
       noiseFilterFreq = 6000;
     } else if (this.activeGroove === "Soft Swing" || this.activeGroove === "Jazz Ballad") {
@@ -699,6 +744,48 @@ export class AudioEngine {
       if (!this.ctx) return;
       const now = this.ctx.currentTime;
       this.playChordPad(notes, now, 1.8);
+    }
+  }
+
+  // Play a single note for Scale demonstration
+  public playSingleScaleNote(note: string, duration = 0.4, octave = 4) {
+    this.initContext();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    let baseFreq = NOTE_BASE_FREQS[note] || 261.63;
+    if (octave === 5) baseFreq *= 2.0;
+    if (octave === 3) baseFreq *= 0.5;
+    this.playSingleSynthNote(baseFreq, now, duration);
+  }
+
+  // Play a sequence of scale notes (e.g. Ascending, Descending, Arpeggios)
+  public playScaleSequence(
+    notes: string[],
+    intervalMs = 300,
+    onStep?: (index: number, note: string) => void
+  ) {
+    this.stopScaleSequence();
+    this.initContext();
+    let currentIdx = 0;
+    const playNext = () => {
+      if (currentIdx >= notes.length) {
+        this.scalePlayTimer = null;
+        if (onStep) onStep(-1, "");
+        return;
+      }
+      const note = notes[currentIdx];
+      this.playSingleScaleNote(note, intervalMs / 1000 * 0.9, 4);
+      if (onStep) onStep(currentIdx, note);
+      currentIdx++;
+      this.scalePlayTimer = window.setTimeout(playNext, intervalMs);
+    };
+    playNext();
+  }
+
+  public stopScaleSequence() {
+    if (this.scalePlayTimer !== null) {
+      window.clearTimeout(this.scalePlayTimer);
+      this.scalePlayTimer = null;
     }
   }
 }

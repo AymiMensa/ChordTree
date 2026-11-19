@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { Play, Square, Settings2, Share2, Volume2, Waves, Repeat, RefreshCw, FolderTree, FileCode, CheckSquare, Settings, Compass, Activity, Layers, Sparkles, Search, Music } from "lucide-react";
+import { Play, Square, Settings2, Share2, Volume2, Waves, Repeat, RefreshCw, FolderTree, FileCode, CheckSquare, Settings, Compass, Activity, Layers, Sparkles, Search, Music, BookOpen } from "lucide-react";
 import { AudioEngine } from "./utils/audioEngine";
 import { ChordTreeNode, buildChordTree, buildChordTreeB, flattenTree, getChordSpelling, getChordMidiNotes, getChordDetails, getDominant } from "./chordsData";
-import { PlaybackState, ProgressionStep } from "./types";
+import { PlaybackState, ProgressionStep, AmbientSoundType } from "./types";
 import { CustomChord } from "./components/FreeModeEditor";
 import { ChordMindMap } from "./components/ChordMindMap";
 import { CustomProgressionFlow } from "./components/CustomProgressionFlow";
@@ -13,6 +13,7 @@ import { PianoVisualizer } from "./components/PianoVisualizer";
 import { PopQuiz } from "./components/PopQuiz";
 import { ChordMindMapB } from "./components/ChordMindMapB";
 import { Tooltip } from "./components/TooltipProvider";
+import { ScaleExplorer } from "./components/ScaleExplorer";
 
 // Generate a random path starting at a specified node
 function generateRandomProgression(
@@ -86,12 +87,17 @@ export default function App() {
 
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
   const [interactionMode, setInteractionMode] = useState<"play" | "fold">("play");
-  const [activeTab, setActiveTab] = useState<"controls" | "path" | "guide">("controls");
+  const [activeTab, setActiveTab] = useState<"controls" | "path" | "scale" | "guide">("controls");
   const [isFreeModeEditing, setIsFreeModeEditing] = useState(false);
   const [customProgressionList, setCustomProgressionList] = useState<CustomChord[]>([]);
   const [isCustomPlayback, setIsCustomPlayback] = useState(false);
   const [isPopQuizActive, setIsPopQuizActive] = useState(false);
   const [treeVariant, setTreeVariant] = useState<"A" | "B" | "CUSTOM">("A");
+
+  // Scale Explorer Integration State
+  const [highlightedScaleNotes, setHighlightedScaleNotes] = useState<string[]>([]);
+  const [highlightedScaleName, setHighlightedScaleName] = useState<string>("");
+  const [activeScaleNotePlaying, setActiveScaleNotePlaying] = useState<string | null>(null);
 
   const maxDepth = useMemo(() => {
     if (treeVariant === "B") return layers - 1;
@@ -133,6 +139,8 @@ export default function App() {
     soundMode: "pad",
     synthStyle: "pad",
     activeGroove: "None",
+    activeAmbient: "None",
+    ambientVolume: 0.5,
   });
 
   // Mutable reference state for Audio Engine synchronous access
@@ -365,12 +373,43 @@ export default function App() {
     setPlaybackState((prev) => ({ ...prev, bpm: clampedBpm }));
   };
 
-  const handleVolumeChange = (type: "synth" | "metronome", value: number) => {
-    setPlaybackState((prev) => ({
-      ...prev,
-      [type === "synth" ? "synthVolume" : "metronomeVolume"]: value,
-    }));
+  const handleVolumeChange = (type: "synth" | "metronome" | "ambient", value: number) => {
+    if (type === "ambient") {
+      setPlaybackState((prev) => ({ ...prev, ambientVolume: value }));
+      audioEngineRef.current.setAmbientVolume(value);
+    } else {
+      setPlaybackState((prev) => ({
+        ...prev,
+        [type === "synth" ? "synthVolume" : "metronomeVolume"]: value,
+      }));
+    }
   };
+
+  const handleAmbientChange = useCallback((ambient: AmbientSoundType) => {
+    setPlaybackState((prev) => ({ ...prev, activeAmbient: ambient }));
+    audioEngineRef.current.setAmbientSound(ambient);
+  }, []);
+
+  // Scale Explorer Playback handlers
+  const handlePlayScaleNotes = useCallback((notes: string[], mode?: "up" | "down" | "updown" | "chord") => {
+    if (mode === "chord") {
+      audioEngineRef.current.triggerChordDirectly(notes);
+    } else {
+      audioEngineRef.current.playScaleSequence(notes, 280, (_idx, note) => {
+        setActiveScaleNotePlaying(note || null);
+      });
+    }
+  }, []);
+
+  const handleStopScale = useCallback(() => {
+    audioEngineRef.current.stopScaleSequence();
+    setActiveScaleNotePlaying(null);
+  }, []);
+
+  const handleSelectScaleForPiano = useCallback((notes: string[], scaleName: string) => {
+    setHighlightedScaleNotes(notes);
+    setHighlightedScaleName(scaleName);
+  }, []);
 
   const handleSoundModeChange = (mode: "pad" | "arpeggio" | "silent") => {
     setPlaybackState((prev) => ({ ...prev, soundMode: mode }));
@@ -715,6 +754,21 @@ export default function App() {
                   </button>
                 </Tooltip>
 
+                <Tooltip content="探索中國五聲、雅樂/清樂/燕樂、教會調式與世界音階">
+                  <button
+                    onClick={() => setActiveTab("scale")}
+                    className={`flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1 rounded transition-colors text-[9px] sm:text-[11px] font-semibold whitespace-nowrap active:scale-95 shrink-0 ${
+                      activeTab === "scale"
+                        ? "bg-amber-500/25 border border-amber-400 text-amber-300 shadow-md shadow-amber-500/15"
+                        : "bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
+                    }`}
+                    title="切換至音階系統"
+                  >
+                    <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 hidden sm:block" />
+                    音階系統
+                  </button>
+                </Tooltip>
+
                 <Tooltip content="回到預設的 C 和弦節點">
                   <button
                     onClick={handleReset}
@@ -786,6 +840,18 @@ export default function App() {
                   控制面板
                 </button>
               </Tooltip>
+              <Tooltip content="探索中國五聲、雅樂/清樂/燕樂、教會調式與世界音階" className="flex-1 flex">
+                <button
+                  onClick={() => setActiveTab("scale")}
+                  className={`flex-1 py-1 sm:py-1.5 w-full text-[10px] sm:text-xs font-semibold rounded-lg transition-all ${activeTab === "scale"
+                      ? "bg-gradient-to-r from-amber-600 to-indigo-600 text-white shadow-lg shadow-amber-500/25"
+                      : "text-amber-400/80 hover:text-amber-300"
+                    }`}
+                  title="切換至音階系統"
+                >
+                  音階系統
+                </button>
+              </Tooltip>
               <Tooltip content="檢視目前的和弦進行軌跡" className="flex-1 flex">
                 <button
                   onClick={() => setActiveTab("path")}
@@ -827,6 +893,7 @@ export default function App() {
                       onSoundModeChange={handleSoundModeChange}
                       onSynthStyleChange={handleSynthStyleChange}
                       onGrooveChange={handleGrooveChange}
+                      onAmbientChange={handleAmbientChange}
                       activeChordLabel={currentStep ? currentStep.label : "C"}
                       activeChordNotes={
                         currentStep ? currentStep.notes : ["C", "E", "G"]
@@ -845,6 +912,17 @@ export default function App() {
                         }
                       }}
                       currentStep={currentStep}
+                    />
+                  </div>
+                )}
+
+                {activeTab === "scale" && (
+                  <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <ScaleExplorer
+                      onPlayScale={handlePlayScaleNotes}
+                      onStopScale={handleStopScale}
+                      onSelectScaleForPiano={handleSelectScaleForPiano}
+                      activePlayingNote={activeScaleNotePlaying}
                     />
                   </div>
                 )}
@@ -917,6 +995,8 @@ export default function App() {
                   activeChordNotes={currentStep ? currentStep.notes : ["C", "E", "G"]}
                   activeChordFormula={getChordDetails(currentStep ? currentStep.label : "C").formula}
                   activeChordFullName={getChordDetails(currentStep ? currentStep.label : "C").fullName}
+                  scaleNotes={highlightedScaleNotes}
+                  scaleName={highlightedScaleName}
                   onPlayChordDirectly={() => {
                     if (currentStep) {
                       audioEngineRef.current.triggerChordDirectly(currentStep.notes);

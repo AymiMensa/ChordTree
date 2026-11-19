@@ -31,11 +31,14 @@ graph TD
         H[chordsData.ts<br>和弦資料結構與進階推算]
         I[chordParser.ts<br>和弦公式解析]
         J[audioNotes.ts<br>頻率對應表]
-        K[drumGrooves.ts<br>22種爵士鼓點律動]
+        K[drumGrooves.ts<br>57種爵士/流行鼓點律動]
+        M[scaleData.ts<br>33種中國與世界音階庫]
+        N[ambientEngine.ts<br>30種程序化環境背景音]
     end
     
     F -->|讀取| J
     F -->|讀取| K
+    F -->|驅動| N
     F2 -->|讀取| J
     B -->|讀取| H
     C -->|讀取| I
@@ -47,7 +50,8 @@ graph TD
 ## 📂 專案結構
 
 ```text
-C:\USERS\USER\DESKTOP\ANTIGRAVITY\CHORD-TREE-METRONOME\
+ChordTree\
+│  App_Standalone.html
 │  index.html
 │  package.json
 │  vite.config.ts
@@ -70,13 +74,16 @@ C:\USERS\USER\DESKTOP\ANTIGRAVITY\CHORD-TREE-METRONOME\
     │      MetronomeControls.tsx
     │      PianoVisualizer.tsx
     │      PopQuiz.tsx
+    │      ScaleExplorer.tsx
     │      TooltipProvider.tsx
     │
     └─utils\
+            ambientEngine.ts
             audioEngine.ts
             audioNotes.ts
             chordParser.ts
             drumGrooves.ts
+            scaleData.ts
 ```
 
 ---
@@ -131,3 +138,7 @@ C:\USERS\USER\DESKTOP\ANTIGRAVITY\CHORD-TREE-METRONOME\
 - **2026-07-16**: 徹底修復「隨堂考試」手機橫式瀏覽中控制面板仍會截斷的問題，將面板等比例縮小為約一半大小，並移除主內容區隱藏溢出的限制，允許面板完美重疊至鍵盤可視化上方，保證所有內容皆完整顯露。
 - **2026-07-16**: 優化「和弦分支圖」主畫面的 UI：統一標題與 D3.js 解析版的字體大小並在各種裝置橫向模式下保持一致；移除多餘副標題將其移至互動指南；將右上角的變體切換按鈕統一向左對齊音樂 Logo；進一步微調「隨堂考試」手機橫向模式介面，將控制面板定錨於右下角完全貼近鍵盤，達到最佳滿版視覺效果。
 - **2026-07-16**: 依據使用者回饋，將「隨堂考試」手機橫式瀏覽時的控制面板 (開始/節奏/BPM/顯示鋼琴提示) 字體放大兩倍，同時取消絕對定位，改與和絃區並排並向下延伸至完全貼齊「當前和弦」與「鍵盤可視化」，徹底解決區塊過小及與和絃區重疊的問題。
+- **2026-11-20**: 全面升級樂理與聲音系統：
+  1. **全新「音階系統 (Scale System)」**（隨堂考試除外）：完整新增宮/商/角/徵/羽五聲音階、三大傳統七聲音階對照表（雅樂音階、清樂音階、燕樂音階之別名/偏音/簡譜/特點）、自然大調、西洋小調（自然、和聲、旋律、現代、拿坡里小調）、七大教會調式、藍調與爵士音階（經典六音藍調、大調藍調、咆嘯屬、變化、利第安屬）、世界民族音階（日本平調子、陰旋律、岩戶、印度拜拉夫、卡菲、吉普賽小調、拜占庭雙和聲）等共 33 種音階，支援 12 根音即時推算、單音/音階/主和弦試聽與鋼琴鍵盤高亮標記。
+  2. **補齊缺少的 23 款現代節奏器**：擴充至 5 大類 57 款 Drum Groove，補齊 Four-on-the-floor（House, Tech House, Future Bass, Dance Pop）、Backbeat（Rock & Roll, Alt Pop, Indie Pop, Pop Punk, Gospel Pop）、Shuffle（Half-time Shuffle, Modern Swing）、Syncopated（Trap, Drill, Boom Bap, Jersey Club, UK Garage, Breakbeat, Dancehall）與 Polyrhythm（Reggaeton, Baile Funk, AmaPiano, Soca, Latin Pop, Afro Swing）。
+  3. **擴充 30 種程序化生成背景環境層音色**：純 Web Audio API 合成自然生息（8種）、水流江海（8種）、天地宇宙（7種）、人文禪意（7種），支援即時切換與獨立環境音量控制。

@@ -1,36 +1,59 @@
-export interface ChordNode {
-  id: string;
-  label: string;
-  level: number; // 0 is center, 1, 2, 3, 4, 5 are outer rings
-  angle: number; // angle in degrees (0 to 360)
-  radius: number; // radius fraction (0.0 to 1.0)
-  notes: string[]; // spelling notes (e.g., ["C", "E", "G"])
-  type: "major" | "minor" | "seventh" | "diminished" | "other";
-  hasChildren?: boolean;
-}
-
-export interface ChordLink {
-  id: string;
-  from: string;
-  to: string;
-  label?: string;
-}
+// System Core Types
 
 export interface ProgressionStep {
   type: "node" | "transition";
-  id: string; // node ID or link ID
+  id: string;
   label: string;
   notes: string[];
 }
 
+export type ChordTreeNodeType = "tonic" | "subdominant" | "dominant" | "predominant" | "special";
+
+export interface ChordTreeNode {
+  id: string;
+  name: string;
+  depth: number;
+  type: ChordTreeNodeType;
+  children: ChordTreeNode[];
+  path: string[];
+  isDominantPrecursor?: boolean;
+}
+
+export type ScaleDifficulty = "beginner" | "intermediate" | "advanced";
+
 export type GrooveType = 
   | "None"
-  | "Samba" | "Rumba" | "Rock" | "Bossa Nova" | "Soul" | "Slow Soul" 
-  | "Swing" | "Blues" | "Cha-Cha" | "Hip-Hop" | "Ballad" | "Folk" 
-  | "Disco" | "EDM" | "Pop" | "R&B" | "Jazz" | "Shuffle Rock" 
-  | "Funk" | "Neo-Soul" | "Salsa" | "Afrobeat"
-  | "Heavy Metal" | "Trance" | "Country" | "Pop Ballad" | "Soft Swing" 
-  | "Mambo" | "Drum & Bass" | "Classic Rock" | "Jazz Ballad" | "Rap";
+  // Four-on-the-floor (四拍直踏)
+  | "Disco" | "EDM" | "Pop" | "Trance"
+  | "House" | "Tech House" | "Future Bass" | "Dance Pop"
+  // Backbeat Groove (後拍律動)
+  | "Rock" | "Ballad" | "R&B" | "Folk" | "Soul" | "Slow Soul" 
+  | "Heavy Metal" | "Country" | "Pop Ballad" | "Classic Rock"
+  | "Rock & Roll" | "Alt Pop" | "Indie Pop" | "Pop Punk" | "Gospel Pop"
+  // Shuffle / Swung (搖擺律動)
+  | "Blues" | "Jazz" | "Shuffle Rock" | "Swing" | "Soft Swing" | "Jazz Ballad"
+  | "Half-time Shuffle" | "Modern Swing"
+  // Syncopated (切分音 / 放克律動)
+  | "Funk" | "Hip-Hop" | "Neo-Soul" | "Drum & Bass" | "Rap"
+  | "Trap" | "Drill" | "Boom Bap" | "Jersey Club" | "UK Garage" | "Breakbeat" | "Dancehall"
+  // Polyrhythm (複節奏 / 拉丁律動)
+  | "Salsa" | "Bossa Nova" | "Afrobeat" | "Samba" | "Rumba" | "Cha-Cha" | "Mambo"
+  | "Reggaeton" | "Baile Funk" | "AmaPiano" | "Soca" | "Latin Pop" | "Afro Swing";
+
+export type AmbientSoundType =
+  | "None"
+  // 自然生息 (8種)
+  | "深夜森林" | "晨曦鳥鳴" | "竹林清風" | "松林松濤" 
+  | "荒野朔風" | "春雨綿綿" | "夏夜蟲鳴" | "林雪暴風"
+  // 水流江海 (8種)
+  | "深海鯨語" | "浩瀚海浪" | "空靈溶洞" | "林澗溪流" 
+  | "幽谷飛瀑" | "火山熔岩" | "雨打芭蕉" | "朝霧露滴"
+  // 天地宇宙 (7種)
+  | "星際共鳴" | "脈衝星芒" | "極光夜空" | "月光潮汐" 
+  | "太陽風暴" | "黑洞引力" | "深空漫遊"
+  // 人文禪意 (7種)
+  | "古剎梵鐘" | "西藏頌歌" | "竹筒風鈴" | "黑膠溫暖" 
+  | "深夜咖啡" | "遠方鐵道" | "古老壁爐";
 
 export interface PlaybackState {
   isPlaying: boolean;
@@ -47,4 +70,7 @@ export interface PlaybackState {
   soundMode: "pad" | "arpeggio" | "silent";
   synthStyle: "epiano" | "pad" | "strings";
   activeGroove: GrooveType;
+  // Ambient Soundscape
+  activeAmbient: AmbientSoundType;
+  ambientVolume: number; // 0 to 1
 }

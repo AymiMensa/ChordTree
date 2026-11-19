@@ -10,6 +10,8 @@ interface PianoVisualizerProps {
   activeChordFormula?: string;
   activeChordFullName?: string;
   onPlayChordDirectly?: () => void;
+  scaleNotes?: string[];
+  scaleName?: string;
 }
 
 const WHITE_KEYS = [
@@ -50,7 +52,9 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
   activeChordNotes,
   activeChordFormula,
   activeChordFullName,
-  onPlayChordDirectly
+  onPlayChordDirectly,
+  scaleNotes = [],
+  scaleName
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [displayMode, setDisplayMode] = useState<'keyboard' | 'staff'>('keyboard');
@@ -227,7 +231,14 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
           {displayMode === 'keyboard' ? '\u4e94\u7dda\u8b5c\u6a21\u5f0f' : '\u9375\u76e4\u53ef\u8996\u5316'}
         </button>
         <div className="text-[6px] md:text-[7px] font-mono text-slate-500 mb-2 flex flex-wrap items-center justify-between w-full gap-1" title="下方為鋼琴鍵盤可視化">
-          <span>鍵盤可視化</span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span>鍵盤可視化</span>
+            {scaleName && (
+              <span className="bg-pink-950/80 text-pink-300 border border-pink-700/60 px-1.5 py-0.5 rounded text-[5px] md:text-[6px] font-semibold">
+                🎼 標記音階: {scaleName}
+              </span>
+            )}
+          </div>
           <span className="bg-indigo-950 px-1 py-0.5 rounded text-indigo-400 border border-indigo-900 text-[5px] md:text-[6px]" title="顯示範圍">MIDI C3 - C5</span>
         </div>
 
@@ -244,40 +255,75 @@ export const PianoVisualizer: React.FC<PianoVisualizerProps> = ({
             {/* White Keys */}
             {WHITE_KEYS.map((key) => {
               const active = isNoteActive(key.midi);
+              const noteLetter = key.label.replace(/\d/, "");
+              const inScale = scaleNotes.length > 0 && scaleNotes.includes(noteLetter);
+
               return (
-                <rect
-                  key={key.midi}
-                  x={key.idx * keyWidth}
-                  y={0}
-                  width={keyWidth - 1}
-                  height={120}
-                  rx={3}
-                  className={`transition-all duration-150 cursor-default stroke-indigo-950 stroke-1 ${
-                    active 
-                      ? getHighlightColor() 
-                      : 'fill-slate-200'
-                  }`}
-                />
+                <g key={key.midi}>
+                  <rect
+                    x={key.idx * keyWidth}
+                    y={0}
+                    width={keyWidth - 1}
+                    height={120}
+                    rx={3}
+                    className={`transition-all duration-150 cursor-default stroke-indigo-950 stroke-1 ${
+                      active 
+                        ? getHighlightColor() 
+                        : inScale
+                          ? 'fill-indigo-100 stroke-pink-500/80'
+                          : 'fill-slate-200'
+                    }`}
+                  />
+                  {inScale && !active && (
+                    <circle
+                      cx={key.idx * keyWidth + keyWidth / 2 - 0.5}
+                      cy={105}
+                      r={3}
+                      className="fill-pink-500 shadow-sm"
+                    />
+                  )}
+                </g>
               );
             })}
 
             {/* Black Keys */}
             {BLACK_KEYS.map((key) => {
               const active = isNoteActive(key.midi);
+              const noteLetter = key.label.replace(/\d/, "");
+              const inScale = scaleNotes.length > 0 && (
+                scaleNotes.includes(noteLetter) || 
+                (noteLetter === "C#" && scaleNotes.includes("Db")) || 
+                (noteLetter === "D#" && scaleNotes.includes("Eb")) || 
+                (noteLetter === "F#" && scaleNotes.includes("Gb")) || 
+                (noteLetter === "G#" && scaleNotes.includes("Ab")) || 
+                (noteLetter === "A#" && scaleNotes.includes("Bb"))
+              );
+
               return (
-                <rect
-                  key={key.midi}
-                  x={key.x}
-                  y={0}
-                  width={14}
-                  height={75}
-                  rx={2}
-                  className={`transition-all duration-150 cursor-default stroke-indigo-950 stroke-1 ${
-                    active 
-                      ? getHighlightColor() 
-                      : 'fill-slate-800'
-                  }`}
-                />
+                <g key={key.midi}>
+                  <rect
+                    x={key.x}
+                    y={0}
+                    width={14}
+                    height={75}
+                    rx={2}
+                    className={`transition-all duration-150 cursor-default stroke-indigo-950 stroke-1 ${
+                      active 
+                        ? getHighlightColor() 
+                        : inScale
+                          ? 'fill-indigo-950 stroke-pink-400'
+                          : 'fill-slate-800'
+                    }`}
+                  />
+                  {inScale && !active && (
+                    <circle
+                      cx={key.x + 7}
+                      cy={62}
+                      r={2.5}
+                      className="fill-pink-400 shadow-sm"
+                    />
+                  )}
+                </g>
               );
             })}
           </svg>
